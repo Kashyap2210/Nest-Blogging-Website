@@ -1,13 +1,5 @@
-import { Column, CreateDateColumn, Entity, PrimaryGeneratedColumn, UpdateDateColumn } from "typeorm";
-
-export interface IBlogEntity {
-    id:number;
-    title:string;
-    author: string;
-    keywords: string;
-    content:string;
-    createdAt:string
-}
+import { Column, Entity, PrimaryGeneratedColumn } from "typeorm";
+import { IBlogEntity } from "./interfaces/blog.interfaces";
 
 @Entity('blogs')
 export class BlogEntity implements IBlogEntity {
@@ -18,7 +10,7 @@ export class BlogEntity implements IBlogEntity {
     @Column({ type: 'varchar', length: 255 }) 
     title: string;
 
-    @Column({ type: 'varchar', length: 500 }) 
+    @Column({ type: 'varchar', length: 500, nullable:true }) 
     keywords: string;
 
     @Column({ type: 'varchar', length: 10000 }) 

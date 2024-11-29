@@ -1,8 +1,9 @@
-import { Body, Controller, Delete, Get, Param, ParseIntPipe, Post } from '@nestjs/common';
+import { Body, Controller, Delete, Get, Param, ParseIntPipe, Patch, Post } from '@nestjs/common';
 import { ApiOkResponse, ApiOperation, ApiTags } from '@nestjs/swagger';
 import { BlogService } from './blog.service';
 import { CreateBlogDto } from './dtos/create.blog.dto';
 import { IBlogEntity, IBlogEntityArray, IBulkBlogCreateDto } from './interfaces/blog.interfaces';
+import { UpdateBlogDto } from './dtos/update.blog.dto';
 
 @ApiTags('blogs')
 @Controller('blog')
@@ -40,6 +41,14 @@ export class BlogController {
     async getBlog(@Param('id', ParseIntPipe) id:number): Promise<IBlogEntity>{
         const blogEntity = await this.blogService.getBlogById(id)
         return blogEntity;
+    }
+    
+    @ApiOperation({ summary: 'Edit a blog by id' })
+    @ApiOkResponse({ description: 'A blog with id & eidted details is returned with type IBlogEntity'})
+    @Patch(':id')
+    async updateBlog(@Param('id', ParseIntPipe) id:number, @Body() dto: UpdateBlogDto): Promise<IBlogEntity>{
+        const updatedBlogEntity : IBlogEntity = await this.blogService.updateBlogById(id, dto)
+        return updatedBlogEntity;
     }
     
     @ApiOperation({ summary: 'Delete a blog by id' })

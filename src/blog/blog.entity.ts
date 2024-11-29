@@ -25,6 +25,9 @@ export class BlogEntity implements IBlogEntity {
     @Column({ type: 'int', nullable: true }) 
     createdBy: number;
 
-    @Column({ type: 'int', nullable: true }) 
+    @Column({ type: 'int', nullable:true }) 
     updatedBy: number;
+
+    @Column({ type: 'varchar', nullable: true })
+    updatedAt: string
 }

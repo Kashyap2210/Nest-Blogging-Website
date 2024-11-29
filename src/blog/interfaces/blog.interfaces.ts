@@ -6,7 +6,10 @@ export interface IBlogEntity {
     author: string;
     keywords: string;
     content:string;
-    createdAt:string
+    createdAt: string;
+    updatedAt: string;
+    createdBy: number;
+    updatedBy: number;
 }
 
 export type IBlogEntityArray = IBlogEntity[]
@@ -19,4 +22,10 @@ export interface IBlogCreateDto {
     createdAt:string
 }
 
-export type IBulkBlogCreateDto = [CreateBlogDto]
+export type IBulkBlogCreateDto = [IBlogCreateDto]
+
+export interface IBlogUpdateDto {
+    title:string;
+    content: string;
+    keywords: string
+}

@@ -1,5 +1,5 @@
 import { Column, Entity, PrimaryGeneratedColumn } from "typeorm";
-import { IBlogEntity } from "./interfaces/blog.interfaces";
+import { IBlogEntity } from "../interfaces/blog.interfaces";
 
 @Entity('blogs')
 export class BlogEntity implements IBlogEntity {

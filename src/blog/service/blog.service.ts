@@ -1,8 +1,8 @@
 import { BadRequestException, Injectable } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
-import { BlogEntity } from './blog.entity';
-import { IBlogCreateDto, IBlogEntity, IBlogEntityArray, IBlogUpdateDto, IBulkBlogCreateDto } from './interfaces/blog.interfaces';
+import { BlogEntity } from '../entities/blog.entity';
+import { IBlogCreateDto, IBlogEntity, IBlogEntityArray, IBlogUpdateDto, IBulkBlogCreateDto } from '../interfaces/blog.interfaces';
 
 @Injectable()
 export class BlogService {

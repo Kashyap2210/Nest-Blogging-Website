@@ -1,9 +1,9 @@
 import { Body, Controller, Delete, Get, Param, ParseIntPipe, Patch, Post } from '@nestjs/common';
 import { ApiOkResponse, ApiOperation, ApiTags } from '@nestjs/swagger';
-import { BlogService } from './blog.service';
-import { CreateBlogDto } from './dtos/create.blog.dto';
-import { IBlogEntity, IBlogEntityArray, IBulkBlogCreateDto } from './interfaces/blog.interfaces';
-import { UpdateBlogDto } from './dtos/update.blog.dto';
+import { BlogService } from '../service/blog.service';
+import { CreateBlogDto } from '../dtos/create.blog.dto';
+import { IBlogEntity, IBlogEntityArray, IBulkBlogCreateDto } from '../interfaces/blog.interfaces';
+import { UpdateBlogDto } from '../dtos/update.blog.dto';
 
 @ApiTags('blogs')
 @Controller('blog')

@@ -1,18 +1,28 @@
 import {
-    Body,
-    Controller,
-    Delete,
-    Get,
-    Param,
-    ParseIntPipe,
-    Patch,
-    Post,
+  Body,
+  Controller,
+  Delete,
+  Get,
+  Param,
+  ParseIntPipe,
+  Patch,
+  Post,
+  UploadedFile,
+  UseInterceptors,
 } from '@nestjs/common';
-import { ApiOkResponse, ApiOperation } from '@nestjs/swagger';
+import {
+  ApiBody,
+  ApiConsumes,
+  ApiOkResponse,
+  ApiOperation,
+} from '@nestjs/swagger';
 import { IUserEntity, IUserEntityArray } from './entity.interface';
 import { BulkUserCreateDto, UserCreateDto } from './user.create.dto';
 import { userUpdateDto } from './user.update.dto';
 import { UsersService } from './users.service';
+import { FileInterceptor } from '@nestjs/platform-express';
+import { diskStorage } from 'multer';
+import { imageFileFilter, profilePictureEditor } from 'src/file.utils';
 
 @Controller('users')
 export class UsersController {
@@ -23,9 +33,51 @@ export class UsersController {
     description: 'A user created and returned with type IUserEntity',
   })
   @Post()
-  async createUser(@Body() dto: UserCreateDto): Promise<IUserEntity> {
+  @UseInterceptors(
+    FileInterceptor('profilePicture', {
+      storage: diskStorage({
+        filename: profilePictureEditor,
+        destination: './uploads',
+      }),
+      fileFilter: imageFileFilter,
+      limits: {
+        fieldSize: 1000 * 1000 * 10,
+      },
+    }),
+  )
+  @ApiConsumes('multipart/formdata')
+  @ApiBody({
+    description: 'Data required to create a single user',
+    schema: {
+      type: 'object',
+      properties: {
+        name: { type: 'string', example: 'John Doe' },
+        username: { type: 'string', example: 'johndoe123' },
+        password: { type: 'string', example: 'P@ssw0rd123' },
+        emailId: {
+          type: 'string',
+          example: 'john.doe@example.com',
+          format: 'email',
+        },
+        contactNo: { type: 'string', example: '1234567890' },
+        gender: {
+          type: 'string',
+          enum: ['MALE', 'FEMALE', 'OTHER'],
+          example: 'MALE',
+        },
+        profilePictureFile: { type: 'string', format: 'binary' },
+      },
+    },
+  })
+  async createUser(
+    @Body() dto: UserCreateDto,
+    @UploadedFile() file: Express.Multer.File,
+  ): Promise<IUserEntity> {
+    // console.log('file', file);
+    // console.log('filename : ', file.filename);
+    // console.log('file size : ', file.size);
+    dto.profilePictureUrl = file.filename;
     const createdUser = await this.usersService.createUser(dto);
-    console.log(createdUser);
     //exclude password from the response
     return createdUser;
   }

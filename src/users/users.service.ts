@@ -1,15 +1,15 @@
 import {
-    BadRequestException,
-    ConflictException,
-    Injectable,
-    NotFoundException,
+  BadRequestException,
+  ConflictException,
+  Injectable,
+  NotFoundException,
 } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
 import {
-    IUserCreateDto,
-    IUserEntity,
-    IUserEntityArray,
+  IUserCreateDto,
+  IUserEntity,
+  IUserEntityArray,
 } from './entity.interface';
 import { BulkUserCreateDto } from './user.create.dto';
 import { UserEntity } from './user.entity';
@@ -21,7 +21,9 @@ export class UsersService {
     private userRepository: Repository<IUserEntity>,
   ) {}
 
-  async createUser(dto: IUserCreateDto): Promise<IUserEntity> {
+  async createUser(
+    dto: IUserCreateDto, // : Promise<IUserEntity> {
+  ): Promise<any> {
     const userByEmailId = await this.userRepository.findOne({
       where: { emailId: dto.emailId },
     });
@@ -50,7 +52,9 @@ export class UsersService {
       });
     }
     const user = this.userRepository.create(dto);
-    user.createdAt = new Date().toString();
+    console.log('this is the dto from service:', dto);
+    user.profilePictureUrl = dto.profilePictureUrl;
+    user.createdAt = user.updatedAt = new Date().toString();
     return this.userRepository.save(user);
   }
 
@@ -124,14 +128,14 @@ export class UsersService {
       password: dto.password,
       emailId: dto.emailId,
       contactNo: dto.contactNo,
-      profilePicture: dto.profilePicture,
+      profilePicture: dto.profilePictureUrl,
       gender: existingUserById[0].gender,
       createdAt: existingUserById[0].createdAt,
       updatedAt: new Date().toString(),
     };
     const updatedUserEntity = await this.userRepository.save(updatedUser);
-      console.log('this is the updatedUserEntity :', updatedUserEntity);
-      return updatedUserEntity;
+    console.log('this is the updatedUserEntity :', updatedUserEntity);
+    return updatedUserEntity;
   }
 
   async deleteUserById(id: number): Promise<IUserEntity[]> {

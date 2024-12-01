@@ -1,17 +1,16 @@
 import { IsArray, IsOptional, IsString, ValidateNested } from "@nestjs/class-validator";
 import { ApiProperty } from "@nestjs/swagger";
-import { Type } from "class-transformer";
-import { IsEmail } from "class-validator";
-import { IBulkUserCreateDto, IUserCreateDto } from "./entity.interface";
-import { UserGender } from "./gender.enum";
+import { Exclude, Type } from 'class-transformer';
+import { IsEmail } from 'class-validator';
+import { IBulkUserCreateDto, IUserCreateDto } from './entity.interface';
+import { UserGender } from './gender.enum';
 
 export class UserCreateDto implements IUserCreateDto {
-  
   @IsString()
   @ApiProperty({
     description: 'Full name of the user',
     example: 'John Doe',
-    required: true
+    required: true,
   })
   name: string;
 
@@ -19,7 +18,7 @@ export class UserCreateDto implements IUserCreateDto {
   @ApiProperty({
     description: 'Unique username for the user',
     example: 'johndoe123',
-    required: true
+    required: true,
   })
   username: string;
 
@@ -27,7 +26,7 @@ export class UserCreateDto implements IUserCreateDto {
   @ApiProperty({
     description: 'Password for the user account',
     example: 'P@ssw0rd123',
-    required: true
+    required: true,
   })
   password: string;
 
@@ -35,7 +34,7 @@ export class UserCreateDto implements IUserCreateDto {
   @ApiProperty({
     description: 'Email address of the user',
     example: 'john.doe@example.com',
-    required: true
+    required: true,
   })
   emailId: string;
 
@@ -43,25 +42,29 @@ export class UserCreateDto implements IUserCreateDto {
   @ApiProperty({
     description: 'Contact number of the user',
     example: '1234567890',
-    required: true
+    required: true,
   })
   contactNo: string;
 
   @IsString()
   @IsOptional()
+  profilePictureUrl: string;
+
+  @IsOptional()
   @ApiProperty({
-    description: 'URL of the user’s profile picture',
-    example: 'https://example.com/profile.jpg',
-    required: false
+    description: 'profile.jpg',
+    type: 'string',
+    format: 'binary',
+    required: false,
   })
-  profilePicture: string;
+  profilePictureFile: Express.Multer.File;
 
   @IsString()
   @ApiProperty({
     description: 'Gender of the user',
     example: UserGender.MALE, // or 'MALE', 'FEMALE', 'OTHER'
     required: true,
-    enum: UserGender
+    enum: UserGender,
   })
   gender: UserGender;
 }

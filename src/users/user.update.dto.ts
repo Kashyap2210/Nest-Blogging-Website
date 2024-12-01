@@ -46,7 +46,9 @@ export class userUpdateDto implements Partial<IUserCreateDto> {
   @IsString()
   @IsOptional()
   @ApiProperty({
-    description: 'URL of the user’s profile picture',
+    description: 'User’s profile picture',
+    type: 'string',
+    format: 'binary',
     example: 'https://example.com/profile.jpg',
     required: false,
   })

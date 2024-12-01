@@ -1,16 +1,16 @@
 import { UserGender } from "./gender.enum";
 
-export interface IUserEntity{
-    id: number;
-    name: string;
-    username: string;
-    password: string;
-    emailId: string;
-    contactNo: string;
-    profilePicture: string;
-    gender: UserGender;
-    createdAt: string;
-    updatedAt: string;
+export interface IUserEntity {
+  id: number;
+  name: string;
+  username: string;
+  password: string;
+  emailId: string;
+  contactNo: string;
+  profilePictureUrl: string;
+  gender: UserGender;
+  createdAt: string;
+  updatedAt: string;
 }
 
 export type IUserEntityArray = IUserEntity[]

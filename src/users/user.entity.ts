@@ -41,11 +41,12 @@ export class UserEntity implements IUserEntity {
     emailId: string;
 
     @Column({
-        type: 'int',
+        type: 'varchar',
+        length: '128',
         name: 'contact_no',
         nullable:true,
     })
-    contactNo: number;
+    contactNo: string;
 
     @Column({
         type: 'varchar',
@@ -66,12 +67,14 @@ export class UserEntity implements IUserEntity {
     @Column({
         type: 'varchar',
         name: 'created_at',
+        length: '256',
     })
     createdAt: string;
 
     @Column({
         type: 'varchar',
-        name: 'updated_at'
+        name: 'updated_at',
+        length: '256',
     })
     updatedAt: string
 

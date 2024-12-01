@@ -6,7 +6,7 @@ export interface IUserEntity{
     username: string;
     password: string;
     emailId: string;
-    contactNo: number;
+    contactNo: string;
     profilePicture: string;
     gender: UserGender;
     createdAt: string;
@@ -17,4 +17,6 @@ export type IUserEntityArray = IUserEntity[]
 
 export interface IUserCreateDto extends Partial<IUserEntity> { }
 
-export type IUserBulkCreateDto = [IUserCreateDto]
+export interface IBulkUserCreateDto {
+  users: IUserCreateDto[];
+}

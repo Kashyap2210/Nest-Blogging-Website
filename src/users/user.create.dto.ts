@@ -1,9 +1,9 @@
-import { IsOptional, IsString } from "@nestjs/class-validator";
-import { IUserCreateDto } from "./entity.interface";
-import { UserGender } from "./gender.enum";
-import { IsEmail, IsNumber } from "class-validator";
+import { IsArray, IsOptional, IsString, ValidateNested } from "@nestjs/class-validator";
 import { ApiProperty } from "@nestjs/swagger";
-import { Exclude } from "@nestjs/class-transformer";
+import { Type } from "class-transformer";
+import { IsEmail } from "class-validator";
+import { IBulkUserCreateDto, IUserCreateDto } from "./entity.interface";
+import { UserGender } from "./gender.enum";
 
 export class UserCreateDto implements IUserCreateDto {
   
@@ -39,13 +39,13 @@ export class UserCreateDto implements IUserCreateDto {
   })
   emailId: string;
 
-  @IsNumber()
+  @IsString()
   @ApiProperty({
     description: 'Contact number of the user',
     example: '1234567890',
     required: true
   })
-  contactNo: number;
+  contactNo: string;
 
   @IsString()
   @IsOptional()
@@ -64,4 +64,16 @@ export class UserCreateDto implements IUserCreateDto {
     enum: UserGender
   })
   gender: UserGender;
+}
+
+export class BulkUserCreateDto implements IBulkUserCreateDto {
+  @IsArray()
+  @ValidateNested({each:true})
+  @Type(() => UserCreateDto)
+  @ApiProperty({
+    description: 'Array of users to be created',
+    type: [UserCreateDto],
+    required:true,
+  })
+  users: UserCreateDto[];
 }

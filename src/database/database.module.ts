@@ -13,13 +13,12 @@ import { UserEntity } from 'src/users/user.entity';
       username: 'root',
       password: 'sweetlordV12!',
       database: 'blog_developement',
-        entities: [BlogEntity, UserEntity],
-        synchronize: true,
-          logging: true, // Add this line to enable logging
-
+      entities: [BlogEntity, UserEntity],
+      synchronize: true,
+      // logging: true, // Add this line to enable logging
     }),
-        TypeOrmModule.forFeature([BlogEntity, UserEntity]),
-    ],
-    exports: [TypeOrmModule],
+    TypeOrmModule.forFeature([BlogEntity, UserEntity]),
+  ],
+  exports: [TypeOrmModule],
 })
 export class DatabaseModule {}

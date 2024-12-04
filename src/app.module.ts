@@ -1,8 +1,9 @@
 import { Module } from '@nestjs/common';
+import { MulterModule } from '@nestjs/platform-express';
+import { AuthModule } from './auth/auth.module';
 import { BlogModule } from './blog/blog.module';
 import { DatabaseModule } from './database/database.module';
-import { UserModule } from './users/users.module';
-import { MulterModule } from '@nestjs/platform-express';
+import { UsersModule } from './users/users.module';
 
 @Module({
   imports: [
@@ -14,7 +15,8 @@ import { MulterModule } from '@nestjs/platform-express';
     }),
     DatabaseModule,
     BlogModule,
-    UserModule,
+    UsersModule,
+    AuthModule,
   ],
 })
 export class AppModule {}

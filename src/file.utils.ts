@@ -16,20 +16,6 @@ export const profilePictureEditor = (
   callback(null, newFilename);
 };
 
-// export const imageFileFilter = (
-//   req: Request,
-//   file: Express.Multer.File,
-//   callback: (error: Error | null, valid: boolean) => void,
-// ) => {
-//   console.log('this is the file from imageFileFilter', file);
-//   if (!file.originalname.match(/\.(jpg|jpeg|png|gif|svg|webp)$/i)) {
-//     return callback(
-//       new BadRequestException('File must be of type jpg|jpeg|png|gif|svg|webp'),
-//       false,
-//     );
-//   }
-//   callback(null, true); // File is valid
-// };
 
 export const imageFileFilter = (
   req: Request,

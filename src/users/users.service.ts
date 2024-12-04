@@ -62,6 +62,10 @@ export class UsersService {
     return this.userRepository.find();
   }
 
+  async findUserByUserName(name: string): Promise<IUserEntity> {
+    return this.userRepository.findOne({ where: { username: name } });
+  }
+
   async getUserById(id: number): Promise<IUserEntityArray> {
     const userById = await this.userRepository.findBy({ id });
     if (userById.length === 0) {

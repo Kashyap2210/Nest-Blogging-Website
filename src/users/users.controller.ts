@@ -73,9 +73,6 @@ export class UsersController {
     @Body() dto: UserCreateDto,
     @UploadedFile() file: Express.Multer.File,
   ): Promise<IUserEntity> {
-    // console.log('file', file);
-    // console.log('filename : ', file.filename);
-    // console.log('file size : ', file.size);
     dto.profilePictureUrl = file.filename;
     const createdUser = await this.usersService.createUser(dto);
     //exclude password from the response

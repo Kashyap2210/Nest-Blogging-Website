@@ -26,6 +26,8 @@ import {
 import { UpdateBlogDto } from '../dtos/update.blog.dto';
 import { AuthGuard } from 'src/auth/auth.guard';
 import { CustomRequest } from 'src/helpers/custom-request.interface';
+import { CurrentUser } from 'src/decorators/current_user.decorator';
+import { IUserEntity } from 'src/users/entity.interface';
 
 @ApiTags('blogs')
 @Controller('blog')
@@ -41,11 +43,8 @@ export class BlogController {
   @UseGuards(AuthGuard)
   async createBlog(
     @Body() dto: CreateBlogDto,
-    @Req() req: CustomRequest,
-    //   ): Promise<IBlogEntity> {
-  ): Promise<any> {
-    const currentUser = req.user;
-    console.log('this is the user from the request', req.user);
+    @CurrentUser() currentUser: IUserEntity,
+  ): Promise<IBlogEntity> {
     return this.blogService.createBlog(dto, currentUser);
   }
 
@@ -57,6 +56,7 @@ export class BlogController {
   @Post('bulk')
   async createBlogBulk(
     @Body() dto: IBulkBlogCreateDto,
+    // @CurrentUser() currentUser: IUserEntity,
   ): Promise<IBlogEntityArray> {
     const bulkBlogs = await this.blogService.createBulkBlog(dto);
     console.log('these are all the bulk blogs:', bulkBlogs);

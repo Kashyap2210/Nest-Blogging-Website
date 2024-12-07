@@ -1,5 +1,4 @@
 import { IAuditColumnEntity } from 'src/helpers/audit.column.entity.interface';
-import { CreateBlogDto } from '../dtos/create.blog.dto';
 
 export interface IBlogEntity extends IAuditColumnEntity {
   id: number;
@@ -13,7 +12,6 @@ export type IBlogEntityArray = IBlogEntity[];
 
 export interface IBlogCreateDto {
   title: string;
-  author: string;
   keywords: string;
   content: string;
   createdAt: string;

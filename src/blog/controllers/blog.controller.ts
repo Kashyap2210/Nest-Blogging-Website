@@ -6,9 +6,7 @@ import {
   Param,
   ParseIntPipe,
   Patch,
-  Post,
-  Req,
-  UseGuards,
+  Post, UseGuards
 } from '@nestjs/common';
 import {
   ApiBearerAuth,
@@ -16,18 +14,17 @@ import {
   ApiOperation,
   ApiTags,
 } from '@nestjs/swagger';
-import { BlogService } from '../service/blog.service';
+import { AuthGuard } from 'src/auth/auth.guard';
+import { CurrentUser } from 'src/decorators/current_user.decorator';
+import { IUserEntity } from 'src/users/entity.interface';
 import { CreateBlogDto } from '../dtos/create.blog.dto';
+import { UpdateBlogDto } from '../dtos/update.blog.dto';
 import {
   IBlogEntity,
   IBlogEntityArray,
   IBulkBlogCreateDto,
 } from '../interfaces/blog.interfaces';
-import { UpdateBlogDto } from '../dtos/update.blog.dto';
-import { AuthGuard } from 'src/auth/auth.guard';
-import { CustomRequest } from 'src/helpers/custom-request.interface';
-import { CurrentUser } from 'src/decorators/current_user.decorator';
-import { IUserEntity } from 'src/users/entity.interface';
+import { BlogService } from '../service/blog.service';
 
 @ApiTags('blogs')
 @Controller('blog')

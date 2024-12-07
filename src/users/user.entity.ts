@@ -2,9 +2,10 @@
 import { Column, Entity, PrimaryGeneratedColumn } from "typeorm";
 import { IUserEntity } from "./entity.interface";
 import { UserGender } from "./gender.enum";
+import { AuditColumnEntity } from "src/helpers/audti.column.entity";
 
 @Entity('users')
-export class UserEntity implements IUserEntity {
+export class UserEntity extends AuditColumnEntity implements IUserEntity {
   @PrimaryGeneratedColumn({
     type: 'int',
     name: 'id',

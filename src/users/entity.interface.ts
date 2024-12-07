@@ -1,6 +1,7 @@
-import { UserGender } from "./gender.enum";
+import { IAuditColumnEntity } from 'src/helpers/audit.column.entity.interface';
+import { UserGender } from './gender.enum';
 
-export interface IUserEntity {
+export interface IUserEntity extends IAuditColumnEntity {
   id: number;
   name: string;
   username: string;
@@ -9,13 +10,11 @@ export interface IUserEntity {
   contactNo: string;
   profilePictureUrl: string;
   gender: UserGender;
-  createdAt: string;
-  updatedAt: string;
 }
 
-export type IUserEntityArray = IUserEntity[]
+export type IUserEntityArray = IUserEntity[];
 
-export interface IUserCreateDto extends Partial<IUserEntity> { }
+export interface IUserCreateDto extends Partial<IUserEntity> {}
 
 export interface IBulkUserCreateDto {
   users: IUserCreateDto[];

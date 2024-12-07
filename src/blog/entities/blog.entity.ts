@@ -1,8 +1,9 @@
 import { Column, Entity, PrimaryGeneratedColumn } from "typeorm";
 import { IBlogEntity } from "../interfaces/blog.interfaces";
+import { AuditColumnEntity } from 'src/helpers/audti.column.entity';
 
 @Entity('blogs')
-export class BlogEntity implements IBlogEntity {
+export class BlogEntity extends AuditColumnEntity implements IBlogEntity {
   @PrimaryGeneratedColumn()
   id: number;
 
@@ -17,16 +18,4 @@ export class BlogEntity implements IBlogEntity {
 
   @Column()
   author: string;
-
-  @Column()
-  createdAt: string;
-
-  @Column({ type: 'int', nullable: true })
-  createdBy: number;
-
-  @Column({ type: 'int', nullable: true })
-  updatedBy: number;
-
-  @Column({ type: 'varchar', nullable: true })
-  updatedAt: string;
 }

@@ -1,31 +1,28 @@
-import { CreateBlogDto } from "../dtos/create.blog.dto";
+import { IAuditColumnEntity } from 'src/helpers/audit.column.entity.interface';
+import { CreateBlogDto } from '../dtos/create.blog.dto';
 
-export interface IBlogEntity {
+export interface IBlogEntity extends IAuditColumnEntity {
   id: number;
   title: string;
   author: string;
   keywords: string;
   content: string;
-  createdAt: string;
-  updatedAt: string;
-  createdBy: number;
-  updatedBy: number;
 }
 
-export type IBlogEntityArray = IBlogEntity[]
+export type IBlogEntityArray = IBlogEntity[];
 
 export interface IBlogCreateDto {
-    title:string;
-    author: string;
-    keywords: string;
-    content: string;
-    createdAt:string
+  title: string;
+  author: string;
+  keywords: string;
+  content: string;
+  createdAt: string;
 }
 
-export type IBulkBlogCreateDto = [IBlogCreateDto]
+export type IBulkBlogCreateDto = [IBlogCreateDto];
 
 export interface IBlogUpdateDto {
-    title:string;
-    content: string;
-    keywords: string
+  title: string;
+  content: string;
+  keywords: string;
 }

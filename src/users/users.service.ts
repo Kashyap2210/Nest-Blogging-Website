@@ -54,7 +54,6 @@ export class UsersService {
     const user = this.userRepository.create(dto);
     console.log('this is the dto from service:', dto);
     user.profilePictureUrl = dto.profilePictureUrl;
-    user.createdAt = user.updatedAt = new Date().toString();
     return this.userRepository.save(user);
   }
 
@@ -134,8 +133,6 @@ export class UsersService {
       contactNo: dto.contactNo,
       profilePicture: dto.profilePictureUrl,
       gender: existingUserById[0].gender,
-      createdAt: existingUserById[0].createdAt,
-      updatedAt: new Date().toString(),
     };
     const updatedUserEntity = await this.userRepository.save(updatedUser);
     console.log('this is the updatedUserEntity :', updatedUserEntity);

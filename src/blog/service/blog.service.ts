@@ -19,8 +19,6 @@ export class BlogService {
     console.log('tis is the current user from the service :', currentUser);
     const blog = this.blogRepository.create(dto);
     blog.createdBy = blog.updatedBy = currentUser[0].id;
-    const currentDate = new Date();
-    blog.createdAt = blog.updatedAt = currentDate.toString();
     console.log('this is the blog from the service: ', blog);
     return this.blogRepository.save(blog);
   }
@@ -29,9 +27,6 @@ export class BlogService {
     const bulkBlogs: IBlogEntityArray = [];
     for (const blog of dto) {
       const bulkBlog = await this.blogRepository.save(blog);
-      bulkBlog.createdBy = bulkBlog.updatedBy = 2;
-      const currentDate = new Date();
-      bulkBlog.createdAt = bulkBlog.updatedAt = currentDate.toString();
       bulkBlogs.push(bulkBlog);
     }
     return bulkBlogs;
@@ -46,7 +41,6 @@ export class BlogService {
   }
 
   async updateBlogById(id: number, dto: IBlogUpdateDto): Promise<IBlogEntity> {
-    //change return type
     const blogEntityById = await this.getBlogById(id);
     if (!blogEntityById) {
       throw new BadRequestException({
@@ -63,13 +57,10 @@ export class BlogService {
         message: 'Blog with this title already exists',
       });
     }
-    const currentDate = new Date();
     (blogEntityById.title = dto.title),
       (blogEntityById.content = dto.content),
       (blogEntityById.updatedBy = blogEntityById.createdBy),
-      (blogEntityById.updatedAt = currentDate.toString()),
-      (blogEntityById.keywords = dto.keywords),
-      (blogEntityById.createdBy = blogEntityById.updatedBy = 2);
+      (blogEntityById.keywords = dto.keywords);
 
     const updatedBlog: IBlogEntity =
       await this.blogRepository.save(blogEntityById);

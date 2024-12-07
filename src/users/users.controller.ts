@@ -1,4 +1,5 @@
 import {
+  BadRequestException,
   Body,
   Controller,
   Delete,
@@ -7,6 +8,7 @@ import {
   ParseIntPipe,
   Patch,
   Post,
+  Req,
   UploadedFile,
   UseInterceptors,
 } from '@nestjs/common';
@@ -16,35 +18,36 @@ import {
   ApiOkResponse,
   ApiOperation,
 } from '@nestjs/swagger';
-import { IUserEntity, IUserEntityArray } from './entity.interface';
+import {
+  IUserCreateDto,
+  IUserEntity,
+  IUserEntityArray,
+} from './entity.interface';
 import { BulkUserCreateDto, UserCreateDto } from './user.create.dto';
 import { userUpdateDto } from './user.update.dto';
 import { UsersService } from './users.service';
 import { FileInterceptor } from '@nestjs/platform-express';
 import { diskStorage } from 'multer';
 import { imageFileFilter, profilePictureEditor } from 'src/file.utils';
+import { format } from 'path';
+import { extname } from 'path';
+
+function fileEditor(req, file, callback) {
+  const uniqueSuffix = Date.now() + '-' + Math.round(Math.random() * 1e9);
+  const fileExt = extname(file.originalname);
+  const newFilename = `${file.fieldname}-${uniqueSuffix}${fileExt}`;
+  callback(null, newFilename);
+}
 
 @Controller('users')
 export class UsersController {
   constructor(private readonly usersService: UsersService) {}
 
-  @ApiOperation({ summary: 'Create a user' })
   @ApiOkResponse({
     description: 'A user created and returned with type IUserEntity',
   })
   @Post()
-  @UseInterceptors(
-    FileInterceptor('profilePicture', {
-      storage: diskStorage({
-        filename: profilePictureEditor,
-        destination: './uploads',
-      }),
-      fileFilter: imageFileFilter,
-      limits: {
-        fieldSize: 1000 * 1000 * 10,
-      },
-    }),
-  )
+  @ApiOperation({ summary: 'Create a user' })
   @ApiConsumes('multipart/formdata')
   @ApiBody({
     description: 'Data required to create a single user',
@@ -65,18 +68,82 @@ export class UsersController {
           enum: ['MALE', 'FEMALE', 'OTHER'],
           example: 'MALE',
         },
-        profilePictureFile: { type: 'string', format: 'binary' },
+        file: {
+          type: 'string',
+          format: 'binary',
+          description: 'upload an image',
+        },
       },
+      required: ['file'],
     },
   })
+  @UseInterceptors(
+    FileInterceptor('file', {
+      storage: diskStorage({
+        filename: fileEditor,
+        destination: './uploads',
+      }),
+      // fileFilter: imageFileFilter,
+      limits: {
+        fieldSize: 1000 * 1000 * 10,
+      },
+    }),
+  )
   async createUser(
-    @Body() dto: UserCreateDto,
+    @Req() request,
     @UploadedFile() file: Express.Multer.File,
   ): Promise<IUserEntity> {
-    dto.profilePictureUrl = file.filename;
+    console.log('Uploaded file:', file);
+    const { name, username, password, emailId, contactNo, gender } =
+      request.body; // Extract other fields manually
+
+    const dto: IUserCreateDto = {
+      name,
+      username,
+      password,
+      emailId,
+      contactNo,
+      gender,
+      profilePictureUrl: file.filename,
+    };
     const createdUser = await this.usersService.createUser(dto);
     //exclude password from the response
     return createdUser;
+  }
+
+  // A utility to generate a unique filename for each uploaded file
+
+  @Post('profile-picture')
+  @ApiOperation({ summary: 'Upload a profile picture' })
+  @ApiConsumes('multipart/form-data')
+  @ApiBody({
+    description: 'Upload a profile picture',
+    schema: {
+      type: 'object',
+      properties: {
+        file: {
+          type: 'string',
+          format: 'binary',
+          description: 'Upload an image',
+        },
+      },
+      required: ['file'],
+    },
+  })
+  @UseInterceptors(
+    FileInterceptor('file', {
+      storage: diskStorage({
+        destination: './uploads', // Directory to store the uploaded file
+        filename: fileEditor, // Custom filename generation logic
+      }),
+      limits: {
+        fileSize: 10 * 1024 * 1024, // Set a file limit of 10MB
+      },
+    }),
+  )
+  async uploadProfilePic(@UploadedFile() file: Express.Multer.File) {
+    console.log('Uploaded file:', file);
+    return { message: 'File uploaded successfully', file };
   }
 
   @ApiOperation({ summary: 'Create users in bulk' })

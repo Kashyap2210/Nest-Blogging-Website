@@ -53,6 +53,7 @@ export class UsersService {
     const user = this.userRepository.create(dto);
     console.log('this is the dto from service:', dto);
     user.profilePictureUrl = dto.profilePictureUrl;
+    user.createdBy = user.updatedBy = '1';
     return this.userRepository.save(user);
   }
 

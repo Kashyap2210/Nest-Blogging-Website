@@ -13,7 +13,6 @@ import {
 } from './entity.interface';
 import { BulkUserCreateDto } from './user.create.dto';
 import { UserEntity } from './user.entity';
-import { UserEntityRepository } from './user.repository';
 
 @Injectable()
 export class UsersService {

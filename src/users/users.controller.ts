@@ -83,7 +83,7 @@ export class UsersController {
         filename: fileEditor,
         destination: './uploads',
       }),
-      // fileFilter: imageFileFilter,
+      fileFilter: imageFileFilter,
       limits: {
         fieldSize: 1000 * 1000 * 10,
       },

@@ -4,6 +4,8 @@ import { AuthModule } from './auth/auth.module';
 import { BlogModule } from './blog/blog.module';
 import { DatabaseModule } from './database/database.module';
 import { UsersModule } from './users/users.module';
+import { TypeOrmModule } from '@nestjs/typeorm';
+import { typeOrmConfigAsync } from './config/typeorm.config';
 
 @Module({
   imports: [
@@ -14,6 +16,7 @@ import { UsersModule } from './users/users.module';
       },
     }),
     DatabaseModule,
+    // TypeOrmModule.forRootAsync(typeOrmConfigAsync),
     BlogModule,
     UsersModule,
     AuthModule,

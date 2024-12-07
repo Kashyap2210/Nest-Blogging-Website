@@ -13,14 +13,14 @@ import {
 } from './entity.interface';
 import { BulkUserCreateDto } from './user.create.dto';
 import { UserEntity } from './user.entity';
+import { UserEntityRepository } from './user.repository';
 
 @Injectable()
 export class UsersService {
   constructor(
     @InjectRepository(UserEntity)
-    private userRepository: Repository<IUserEntity>,
+    private readonly userRepository: Repository<UserEntity>, // Inject Repository directly
   ) {}
-
   async createUser(
     dto: IUserCreateDto, // : Promise<IUserEntity> {
   ): Promise<any> {

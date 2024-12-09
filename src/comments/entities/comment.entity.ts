@@ -31,7 +31,4 @@ export class CommentEntity extends AuditColumnEntity implements ICommentEntity {
     name: 'blog_id',
   })
   blogId: number;
-
-  @Column({ type: 'varchar', length: 255, name: 'blog_title' })
-  blogTitle: string;
 }

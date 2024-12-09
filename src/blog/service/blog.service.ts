@@ -19,7 +19,7 @@ export class BlogService {
     console.log('tis is the current user from the service :', currentUser);
     const blog = this.blogRepository.create(dto);
     blog.createdBy = blog.updatedBy = currentUser[0].id;
-    blog.author = currentUser.name;
+    blog.author = currentUser[0].name;
     console.log('this is the blog from the service: ', blog);
     return this.blogRepository.save(blog);
   }

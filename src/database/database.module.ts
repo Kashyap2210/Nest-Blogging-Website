@@ -18,7 +18,7 @@ import { CommentEntity } from 'src/comments/entities/comment.entity';
         database: configService.get<string>('DBNAME'),
         entities: [BlogEntity, UserEntity, CommentEntity],
         synchronize: true,
-        logging: true,
+        // logging: true,
       }),
       inject: [ConfigService],
     }),

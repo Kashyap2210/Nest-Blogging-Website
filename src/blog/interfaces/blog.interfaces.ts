@@ -15,6 +15,7 @@ export interface IBlogCreateDto {
   keywords: string;
   content: string;
   createdAt: string;
+  author: string;
 }
 
 export type IBulkBlogCreateDto = [IBlogCreateDto];

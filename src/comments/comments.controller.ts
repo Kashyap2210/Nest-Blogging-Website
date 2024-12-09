@@ -6,20 +6,38 @@ import {
   Patch,
   Param,
   Delete,
+  UseGuards,
 } from '@nestjs/common';
 import { CommentsService } from './comments.service';
 import { CreateCommentDto } from './dto/create-comment.dto';
 import { UpdateCommentDto } from './dto/update-comment.dto';
-import { ApiTags } from '@nestjs/swagger';
+import {
+  ApiBearerAuth,
+  ApiOkResponse,
+  ApiOperation,
+  ApiTags,
+} from '@nestjs/swagger';
+import { AuthGuard } from 'src/auth/auth.guard';
+import { CurrentUser } from 'src/decorators/current_user.decorator';
+import { IUserEntity } from 'src/users/interfaces/entity.interface';
 
 @ApiTags('comments')
 @Controller('comments')
 export class CommentsController {
   constructor(private readonly commentsService: CommentsService) {}
 
-  @Post()
-  create(@Body() createCommentDto: CreateCommentDto) {
-    return this.commentsService.create(createCommentDto);
+  @ApiBearerAuth('access-token')
+  @ApiOperation({ summary: 'Create a comment on blog' })
+  @ApiOkResponse({
+    description: 'Create a comment on the blog',
+  })
+  @Post('')
+  @UseGuards(AuthGuard)
+  async createBlog(
+    @Body() createCommentDto: CreateCommentDto,
+    @CurrentUser() currentUser: IUserEntity,
+  ) {
+    return this.commentsService.create(createCommentDto, currentUser);
   }
 
   @Get()

@@ -19,9 +19,10 @@ export class AuthService {
 
   async logIn(signInDto: UserSignInDto) {
     const { username, password } = signInDto;
-
+    console.log('this is the signDto from the auth service', signInDto);
     // Validate the user
     const user = await this.usersService.findUserByUserName(username);
+    console.log("this is the user", user)
     if (!user) {
       throw new UnauthorizedException('Invalid username or password');
     }
@@ -31,9 +32,12 @@ export class AuthService {
         username: user.username,
         userId: user.id,
       };
+      console.log('this is the payload', payload);
       delete user['password'];
+      const thisAccessToken = this.jwtService.sign(payload);
+      console.log('this is the access token', thisAccessToken);
       return {
-        accessToken: this.jwtService.sign(payload),
+        accessToken: thisAccessToken,
         user,
       };
     }

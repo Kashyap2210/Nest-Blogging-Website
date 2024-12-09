@@ -142,9 +142,7 @@ export class UsersController {
     description: 'User returned with specific id & type IUserEntityArray',
   })
   @Get(':id')
-  async getUser(
-    @Param('id', ParseIntPipe) id: number,
-  ): Promise<IUserEntityArray> {
+  async getUser(@Param('id', ParseIntPipe) id: number): Promise<IUserEntity> {
     //exclude password from the response
     return this.usersService.getUserById(id);
   }

@@ -16,6 +16,6 @@ export class BlogEntity extends AuditColumnEntity implements IBlogEntity {
   @Column({ type: 'varchar', length: 10000 })
   content: string;
 
-  @Column()
+  @Column({ type: 'varchar', length: 256 })
   author: string;
 }

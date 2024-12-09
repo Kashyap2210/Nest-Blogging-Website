@@ -5,5 +5,4 @@ export interface ICommentEntity extends IAuditColumnEntity {
   text: string;
   author: string;
   blogId: number;
-  blogTitle: string;
 }

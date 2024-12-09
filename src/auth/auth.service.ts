@@ -1,10 +1,14 @@
-import {
-  BadRequestException,
-  Injectable,
-  NotFoundException,
-} from '@nestjs/common';
+import { Injectable, UnauthorizedException } from '@nestjs/common';
 import { JwtService } from '@nestjs/jwt';
+import { IUserEntity } from 'src/users/entity.interface';
 import { UsersService } from 'src/users/users.service';
+import { UserSignInDto } from './dto/user.signIn.dto';
+import * as bcrypt from 'bcrypt';
+
+export interface IJwtPayload {
+  username: string;
+  userId: number;
+}
 
 @Injectable()
 export class AuthService {
@@ -13,17 +17,25 @@ export class AuthService {
     private jwtService: JwtService,
   ) {}
 
-  async signIn(username: string, pass: string): Promise<any> {
+  async logIn(signInDto: UserSignInDto) {
+    const { username, password } = signInDto;
+
+    // Validate the user
     const user = await this.usersService.findUserByUserName(username);
     if (!user) {
-      throw new NotFoundException('User not found');
+      throw new UnauthorizedException('Invalid username or password');
     }
-    if (user?.password !== pass) {
-      throw new BadRequestException('Incorrect Password');
+    const isMatch = await bcrypt.compare(password, user.password);
+    if (isMatch) {
+      const payload: IJwtPayload = {
+        username: user.username,
+        userId: user.id,
+      };
+      delete user['password'];
+      return {
+        accessToken: this.jwtService.sign(payload),
+        user,
+      };
     }
-    const payload = { sub: user.id, username: user.username };
-    return {
-      access_token: await this.jwtService.signAsync(payload),
-    };
   }
 }

@@ -13,16 +13,15 @@ import {
 } from './entity.interface';
 import { BulkUserCreateDto } from './user.create.dto';
 import { UserEntity } from './user.entity';
+import * as bcrypt from 'bcrypt';
 
 @Injectable()
 export class UsersService {
   constructor(
     @InjectRepository(UserEntity)
-    private readonly userRepository: Repository<UserEntity>, // Inject Repository directly
+    private readonly userRepository: Repository<UserEntity>,
   ) {}
-  async createUser(
-    dto: IUserCreateDto, // : Promise<IUserEntity> {
-  ): Promise<any> {
+  async createUser(dto: IUserCreateDto): Promise<IUserEntity> {
     const userByEmailId = await this.userRepository.findOne({
       where: { emailId: dto.emailId },
     });
@@ -50,8 +49,10 @@ export class UsersService {
         message: `No user found with contact number: ${dto.contactNo}`,
       });
     }
-    const user = this.userRepository.create(dto);
+    const hashedPassword = await bcrypt.hash(dto.password, 10);
+    dto['password'] = hashedPassword;
     console.log('this is the dto from service:', dto);
+    const user = this.userRepository.create(dto);
     user.profilePictureUrl = dto.profilePictureUrl;
     user.createdBy = user.updatedBy = '1';
     return this.userRepository.save(user);

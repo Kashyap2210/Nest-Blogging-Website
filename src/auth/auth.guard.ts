@@ -34,7 +34,7 @@ export class AuthGuard implements CanActivate {
       const user = await this.userService.getUserById(payload.sub);
       if (!user) throw new BadRequestException('User Does Not Exists');
       // we assign payload to the request object here so that we can use it further
-      //   delete user[0].password;
+        delete user[0].password;
       request['user'] = user;
     } catch {
       throw new UnauthorizedException('Unauthorised');

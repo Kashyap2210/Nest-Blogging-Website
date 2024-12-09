@@ -1,11 +1,11 @@
 import { Global, Module } from '@nestjs/common';
 import { TypeOrmModule } from '@nestjs/typeorm';
-import { BlogEntity } from '../blog/entities/blog.entity'; // Adjust the path accordingly
+import { BlogEntity } from '../blog/entities/blog.entity';
 import { UserEntity } from 'src/users/entities/user.entity';
 import { ConfigService } from '@nestjs/config';
 import { CommentEntity } from 'src/comments/entities/comment.entity';
 
-@Global() // Makes the module available globally
+@Global()
 @Module({
   imports: [
     TypeOrmModule.forRootAsync({
@@ -18,7 +18,7 @@ import { CommentEntity } from 'src/comments/entities/comment.entity';
         database: configService.get<string>('DBNAME'),
         entities: [BlogEntity, UserEntity, CommentEntity],
         synchronize: true,
-        logging: true, // Add this line to enable logging
+        logging: true,
       }),
       inject: [ConfigService],
     }),

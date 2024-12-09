@@ -24,10 +24,10 @@ import {
   IUserCreateDto,
   IUserEntity,
   IUserEntityArray,
-} from './entity.interface';
-import { BulkUserCreateDto } from './user.create.dto';
-import { userUpdateDto } from './user.update.dto';
-import { UsersService } from './users.service';
+} from '../interfaces/entity.interface';
+import { BulkUserCreateDto } from '../dtos/user.create.dto';
+import { userUpdateDto } from '../dtos/user.update.dto';
+import { UsersService } from '../services/users.service';
 
 @Controller('users')
 export class UsersController {

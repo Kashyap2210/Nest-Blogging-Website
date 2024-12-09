@@ -1,7 +1,7 @@
 import { Global, Module } from '@nestjs/common';
 import { TypeOrmModule } from '@nestjs/typeorm';
 import { BlogEntity } from '../blog/entities/blog.entity'; // Adjust the path accordingly
-import { UserEntity } from 'src/users/user.entity';
+import { UserEntity } from 'src/users/entities/user.entity';
 import { ConfigService } from '@nestjs/config';
 
 @Global() // Makes the module available globally

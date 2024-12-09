@@ -1,5 +1,5 @@
 import { IAuditColumnEntity } from 'src/helpers/audit.column.entity.interface';
-import { UserGender } from './gender.enum';
+import { UserGender } from '../enums/gender.enum';
 
 export interface IUserEntity extends IAuditColumnEntity {
   id: number;

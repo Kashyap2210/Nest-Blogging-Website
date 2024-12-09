@@ -1,8 +1,7 @@
-
-import { Column, Entity, PrimaryGeneratedColumn } from "typeorm";
-import { IUserEntity } from "./entity.interface";
-import { UserGender } from "./gender.enum";
-import { AuditColumnEntity } from "src/helpers/audti.column.entity";
+import { Column, Entity, PrimaryGeneratedColumn } from 'typeorm';
+import { IUserEntity } from '../interfaces/entity.interface';
+import { UserGender } from '../enums/gender.enum';
+import { AuditColumnEntity } from 'src/helpers/audti.column.entity';
 
 @Entity('users')
 export class UserEntity extends AuditColumnEntity implements IUserEntity {

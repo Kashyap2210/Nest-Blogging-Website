@@ -1,6 +1,6 @@
 import { ApiProperty } from '@nestjs/swagger';
 import { IsEmail, IsOptional, IsString } from 'class-validator';
-import { IUserCreateDto } from './entity.interface';
+import { IUserCreateDto } from '../interfaces/entity.interface';
 
 export class userUpdateDto implements Partial<IUserCreateDto> {
   @IsString()

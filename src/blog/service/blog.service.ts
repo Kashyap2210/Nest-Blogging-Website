@@ -3,7 +3,7 @@ import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
 import { BlogEntity } from '../entities/blog.entity';
 import { IBlogCreateDto, IBlogEntity, IBlogEntityArray, IBlogUpdateDto, IBulkBlogCreateDto } from '../interfaces/blog.interfaces';
-import { IUserEntity } from 'src/users/entity.interface';
+import { IUserEntity } from 'src/users/interfaces/entity.interface';
 
 @Injectable()
 export class BlogService {

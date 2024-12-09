@@ -10,9 +10,9 @@ import {
   IUserCreateDto,
   IUserEntity,
   IUserEntityArray,
-} from './entity.interface';
-import { BulkUserCreateDto } from './user.create.dto';
-import { UserEntity } from './user.entity';
+} from '../interfaces/entity.interface';
+import { BulkUserCreateDto } from '../dtos/user.create.dto';
+import { UserEntity } from '../entities/user.entity';
 import * as bcrypt from 'bcrypt';
 
 @Injectable()

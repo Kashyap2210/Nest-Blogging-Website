@@ -3,6 +3,7 @@ import { TypeOrmModule } from '@nestjs/typeorm';
 import { BlogEntity } from '../blog/entities/blog.entity'; // Adjust the path accordingly
 import { UserEntity } from 'src/users/entities/user.entity';
 import { ConfigService } from '@nestjs/config';
+import { CommentEntity } from 'src/comments/entities/comment.entity';
 
 @Global() // Makes the module available globally
 @Module({
@@ -15,13 +16,13 @@ import { ConfigService } from '@nestjs/config';
         username: configService.get<string>('DBUSERNAME'),
         password: configService.get<string>('DBPASSWORD'),
         database: configService.get<string>('DBNAME'),
-        entities: [BlogEntity, UserEntity],
+        entities: [BlogEntity, UserEntity, CommentEntity],
         synchronize: true,
+        logging: true, // Add this line to enable logging
       }),
       inject: [ConfigService],
-      // logging: true, // Add this line to enable logging
     }),
-    TypeOrmModule.forFeature([BlogEntity, UserEntity]),
+    TypeOrmModule.forFeature([BlogEntity, UserEntity, CommentEntity]),
   ],
   exports: [TypeOrmModule],
 })

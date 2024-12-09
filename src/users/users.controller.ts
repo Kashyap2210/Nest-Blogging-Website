@@ -1,5 +1,4 @@
 import {
-  BadRequestException,
   Body,
   Controller,
   Delete,
@@ -12,32 +11,23 @@ import {
   UploadedFile,
   UseInterceptors,
 } from '@nestjs/common';
+import { FileInterceptor } from '@nestjs/platform-express';
 import {
   ApiBody,
   ApiConsumes,
   ApiOkResponse,
   ApiOperation,
 } from '@nestjs/swagger';
+import { diskStorage } from 'multer';
+import { imageFileFilter, profilePictureEditor } from 'src/file.utils';
 import {
   IUserCreateDto,
   IUserEntity,
   IUserEntityArray,
 } from './entity.interface';
-import { BulkUserCreateDto, UserCreateDto } from './user.create.dto';
+import { BulkUserCreateDto } from './user.create.dto';
 import { userUpdateDto } from './user.update.dto';
 import { UsersService } from './users.service';
-import { FileInterceptor } from '@nestjs/platform-express';
-import { diskStorage } from 'multer';
-import { imageFileFilter, profilePictureEditor } from 'src/file.utils';
-import { format } from 'path';
-import { extname } from 'path';
-
-function fileEditor(req, file, callback) {
-  const uniqueSuffix = Date.now() + '-' + Math.round(Math.random() * 1e9);
-  const fileExt = extname(file.originalname);
-  const newFilename = `${file.fieldname}-${uniqueSuffix}${fileExt}`;
-  callback(null, newFilename);
-}
 
 @Controller('users')
 export class UsersController {
@@ -80,7 +70,7 @@ export class UsersController {
   @UseInterceptors(
     FileInterceptor('file', {
       storage: diskStorage({
-        filename: fileEditor,
+        filename: profilePictureEditor,
         destination: './uploads',
       }),
       fileFilter: imageFileFilter,
@@ -109,41 +99,6 @@ export class UsersController {
     const createdUser = await this.usersService.createUser(dto);
     //exclude password from the response
     return createdUser;
-  }
-
-  // A utility to generate a unique filename for each uploaded file
-
-  @Post('profile-picture')
-  @ApiOperation({ summary: 'Upload a profile picture' })
-  @ApiConsumes('multipart/form-data')
-  @ApiBody({
-    description: 'Upload a profile picture',
-    schema: {
-      type: 'object',
-      properties: {
-        file: {
-          type: 'string',
-          format: 'binary',
-          description: 'Upload an image',
-        },
-      },
-      required: ['file'],
-    },
-  })
-  @UseInterceptors(
-    FileInterceptor('file', {
-      storage: diskStorage({
-        destination: './uploads', // Directory to store the uploaded file
-        filename: fileEditor, // Custom filename generation logic
-      }),
-      limits: {
-        fileSize: 10 * 1024 * 1024, // Set a file limit of 10MB
-      },
-    }),
-  )
-  async uploadProfilePic(@UploadedFile() file: Express.Multer.File) {
-    console.log('Uploaded file:', file);
-    return { message: 'File uploaded successfully', file };
   }
 
   @ApiOperation({ summary: 'Create users in bulk' })

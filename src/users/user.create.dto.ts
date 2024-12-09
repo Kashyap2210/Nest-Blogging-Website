@@ -53,10 +53,11 @@ export class UserCreateDto implements IUserCreateDto {
   @IsOptional()
   @ApiProperty({
     description: 'profile.jpg',
+    type: 'string',
     format: 'binary',
     required: false,
   })
-  profilePicture: Express.Multer.File;
+  profilePicture?: Express.Multer.File;
 
   @IsString()
   @ApiProperty({

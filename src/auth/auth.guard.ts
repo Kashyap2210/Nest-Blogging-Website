@@ -1,14 +1,13 @@
 import {
-  BadRequestException,
   CanActivate,
   ExecutionContext,
   Injectable,
   UnauthorizedException,
 } from '@nestjs/common';
 import { JwtService } from '@nestjs/jwt';
-import { Request } from 'express';
 import { UsersService } from 'src/users/services/users.service';
 import { jwtConstants } from './constants';
+import { Request } from 'express'; // Import Express Request
 
 @Injectable()
 export class AuthGuard implements CanActivate {
@@ -18,7 +17,9 @@ export class AuthGuard implements CanActivate {
   ) {}
 
   async canActivate(context: ExecutionContext): Promise<boolean> {
-    const request = context.switchToHttp().getRequest();
+    const request = context.switchToHttp().getRequest<Request>();
+    console.log('Authorization Header:', request.headers.authorization);
+
     const token = this.extractTokenFromHeader(request);
 
     if (!token) {
@@ -29,24 +30,25 @@ export class AuthGuard implements CanActivate {
       const payload = await this.jwtService.verifyAsync(token, {
         secret: jwtConstants.secret,
       });
+
       const user = await this.usersService.getUserById(payload.userId);
       if (!user) {
-        throw new BadRequestException('User does not exist');
+        throw new UnauthorizedException('User not found');
       }
-      delete user.password;
-      request['user'] = user;
+
+      request.user = user; // Attach user to the request object
       return true;
     } catch (error) {
-      throw new UnauthorizedException('Invalid token');
+      throw new UnauthorizedException('Invalid or expired token');
     }
   }
 
   private extractTokenFromHeader(request: Request): string | undefined {
-    const authorizationHeader = request.headers.authorization;
-    if (!authorizationHeader) {
+    const authHeader = request.headers['authorization'];
+    if (!authHeader) {
       return undefined;
     }
-    const [scheme, token] = authorizationHeader.split(' ');
-    return scheme === 'Bearer' ? token : undefined;
+    const [type, token] = authHeader.split(' ');
+    return type === 'Bearer' ? token : undefined;
   }
 }

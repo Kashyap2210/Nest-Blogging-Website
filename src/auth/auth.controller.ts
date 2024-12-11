@@ -16,9 +16,8 @@ export class AuthController {
   })
   @Post('login')
   async loginUser(@Body() signInDto: UserSignInDto) {
-    console.log(signInDto);
     const loggedInUser = await this.authService.logIn(signInDto);
-    console.log('this is the loggedInUser', loggedInUser);
+    console.log('this is the loggedInUser', loggedInUser.user);
     return loggedInUser;
   }
 }

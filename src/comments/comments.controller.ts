@@ -7,6 +7,7 @@ import {
   Param,
   Delete,
   UseGuards,
+  ParseIntPipe,
 } from '@nestjs/common';
 import { CommentsService } from './comments.service';
 import { CreateCommentDto } from './dto/create-comment.dto';
@@ -22,17 +23,17 @@ import { CurrentUser } from 'src/decorators/current_user.decorator';
 import { IUserEntity } from 'src/users/interfaces/entity.interface';
 
 @ApiTags('comments')
+@ApiBearerAuth('access-token')
+@UseGuards(AuthGuard)
 @Controller('comments')
 export class CommentsController {
   constructor(private readonly commentsService: CommentsService) {}
 
-  @ApiBearerAuth('access-token')
   @ApiOperation({ summary: 'Create a comment on blog' })
   @ApiOkResponse({
     description: 'Create a comment on the blog',
   })
   @Post('')
-  @UseGuards(AuthGuard)
   async createBlog(
     @Body() createCommentDto: CreateCommentDto,
     @CurrentUser() currentUser: IUserEntity,
@@ -55,8 +56,16 @@ export class CommentsController {
     return this.commentsService.update(+id, updateCommentDto);
   }
 
+  @ApiOperation({ summary: 'Delete a comment' })
+  @ApiOkResponse({
+    description: 'A comment will be deleted for the given id',
+  })
   @Delete(':id')
-  remove(@Param('id') id: string) {
-    return this.commentsService.remove(+id);
+  async remove(
+    @Param('id', ParseIntPipe) id: number,
+    @CurrentUser() currentUser: IUserEntity,
+  ) {
+    console.log('this is the user from controller', currentUser);
+    return this.commentsService.removeComment(id, currentUser);
   }
 }

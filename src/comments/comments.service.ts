@@ -1,4 +1,8 @@
-import { Injectable } from '@nestjs/common';
+import {
+  BadRequestException,
+  Injectable,
+  UnauthorizedException,
+} from '@nestjs/common';
 import { CreateCommentDto } from './dto/create-comment.dto';
 import { UpdateCommentDto } from './dto/update-comment.dto';
 import { IUserEntity } from 'src/users/interfaces/entity.interface';
@@ -25,11 +29,11 @@ export class CommentsService {
   ): Promise<ICommentEntity> {
     const newComment = {
       text: createCommentDto.text,
-      author: currentUser.name,
+      authorId: currentUser.id,
       blogId: createCommentDto.blogId,
     };
     const comment = this.commentRepository.create(newComment);
-    console.log("this is the current user",currentUser);
+    console.log('this is the current user', currentUser);
     comment.createdBy = comment.updatedBy = currentUser.name;
     return this, this.commentRepository.save(comment);
   }
@@ -46,7 +50,29 @@ export class CommentsService {
     return `This action updates a #${id} comment`;
   }
 
-  remove(id: number) {
-    return `This action removes a #${id} comment`;
+  async removeComment(id: number, currentUser: IUserEntity): Promise<void> {
+    if (!currentUser) {
+      throw new BadRequestException({
+        key: 'currentUser',
+        message: 'current user is not logged in',
+      });
+    }
+    console.log('this is the id of the comment to be deleted: ', id);
+    const [commentToDelete] = await this.commentRepository.findBy({ id });
+    if (!commentToDelete) {
+      throw new BadRequestException({
+        key: 'commentId',
+        message: `Comment with ${id} not found`,
+      });
+    }
+    console.log('this is the comment to be deleted :', commentToDelete);
+    console.log('this is the user in service', currentUser);
+    if (currentUser.id !== commentToDelete.id) {
+      throw new BadRequestException({
+        key: 'userId',
+        message: 'You are not authorized to delete this comment',
+      });
+    }
+    await this.commentRepository.delete(id);
   }
 }

@@ -18,12 +18,11 @@ export class CommentEntity extends AuditColumnEntity implements ICommentEntity {
   text: string;
 
   @Column({
-    type: 'varchar',
-    length: 1028,
+    type: 'int',
     nullable: false,
-    name: 'author',
+    name: 'author_id',
   })
-  author: string;
+  authorId: number;
 
   @Column({
     type: 'int',

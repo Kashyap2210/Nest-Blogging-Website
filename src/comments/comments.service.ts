@@ -57,17 +57,15 @@ export class CommentsService {
         message: 'current user is not logged in',
       });
     }
-    console.log('this is the id of the comment to be deleted: ', id);
     const [commentToDelete] = await this.commentRepository.findBy({ id });
+    console.log('this is the comment to delete', commentToDelete);
     if (!commentToDelete) {
       throw new BadRequestException({
         key: 'commentId',
         message: `Comment with ${id} not found`,
       });
     }
-    console.log('this is the comment to be deleted :', commentToDelete);
-    console.log('this is the user in service', currentUser);
-    if (currentUser.id !== commentToDelete.id) {
+    if (currentUser.id !== commentToDelete.authorId) {
       throw new BadRequestException({
         key: 'userId',
         message: 'You are not authorized to delete this comment',

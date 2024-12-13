@@ -31,7 +31,7 @@ export class AuthService {
         userId: user.id,
       };
 
-      // delete user['password'];
+      delete user['password'];
       const thisAccessToken = this.jwtService.sign(payload);
       console.log('this is the access token', thisAccessToken);
       return {

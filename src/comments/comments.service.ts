@@ -1,53 +1,91 @@
 import {
   BadRequestException,
+  forwardRef,
+  Inject,
   Injectable,
-  UnauthorizedException,
 } from '@nestjs/common';
-import { CreateCommentDto } from './dto/create-comment.dto';
-import { UpdateCommentDto } from './dto/update-comment.dto';
-import { IUserEntity } from 'src/users/interfaces/entity.interface';
 import { InjectRepository } from '@nestjs/typeorm';
-import { CommentEntity } from './entities/comment.entity';
+import { IUserEntity } from 'src/users/interfaces/entity.interface';
 import { Repository } from 'typeorm';
+import { CreateCommentDto } from './dto/create-comment.dto';
+import { ICommentUpdateDto } from './dto/update-comment.dto';
+import { CommentEntity } from './entities/comment.entity';
 import { ICommentEntity } from './interfaces/comment.entity.interface';
+import { BlogService } from 'src/blog/service/blog.service';
 
 @Injectable()
 export class CommentsService {
-  // constructor(
-  //   @InjectRepository(BlogEntity)
-  //   private blogRepository: Repository<BlogEntity>,
-  // ) {}
-
   constructor(
     @InjectRepository(CommentEntity)
     private commentRepository: Repository<CommentEntity>,
+    @Inject(forwardRef(() => BlogService))
+    private blogService: BlogService,
   ) {}
 
-  create(
+  async create(
     createCommentDto: CreateCommentDto,
     currentUser: IUserEntity,
   ): Promise<ICommentEntity> {
+    if (!currentUser) {
+      throw new BadRequestException({
+        key: 'currentUser',
+        message: 'current user is not logged in',
+      });
+    }
+    const blogExists = await this.blogService.getBlogById(
+      createCommentDto.blogId,
+      currentUser,
+    );
+    console.log(blogExists);
+    if (!blogExists) {
+      throw new BadRequestException({
+        key: 'blogId',
+        message: `Blog with id: ${createCommentDto.blogId} does not exists`,
+      });
+    }
     const newComment = {
       text: createCommentDto.text,
       authorId: currentUser.id,
       blogId: createCommentDto.blogId,
     };
     const comment = this.commentRepository.create(newComment);
-    console.log('this is the current user', currentUser);
     comment.createdBy = comment.updatedBy = currentUser.name;
     return this, this.commentRepository.save(comment);
   }
 
-  findAll() {
-    return `This action returns all comments`;
-  }
-
-  findOne(id: number) {
-    return `This action returns a #${id} comment`;
-  }
-
-  update(id: number, updateCommentDto: UpdateCommentDto) {
-    return `This action updates a #${id} comment`;
+  async updateCommentById(
+    id: number,
+    dto: ICommentUpdateDto,
+    currentUser: IUserEntity,
+  ): Promise<ICommentEntity> {
+    if (!currentUser) {
+      throw new BadRequestException({
+        key: 'currentUser',
+        message: 'current user is not logged in',
+      });
+    }
+    const commentToUpdate = await this.commentRepository.findOneBy({ id });
+    if (!commentToUpdate) {
+      throw new BadRequestException({
+        key: 'id',
+        message: 'comment does not exists',
+      });
+    }
+    if (commentToUpdate.authorId !== currentUser.id) {
+      throw new BadRequestException({
+        key: 'userId',
+        message: 'comment does not belong to current user',
+      });
+    }
+    const updatedComment = {
+      ...commentToUpdate,
+      text: dto.text,
+      updatedBy: currentUser.name,
+      updatedOn: new Date(),
+      authorId: currentUser.id,
+    };
+    console.log(updatedComment);
+    return this.commentRepository.save(updatedComment);
   }
 
   async removeComment(id: number, currentUser: IUserEntity): Promise<void> {
@@ -58,7 +96,6 @@ export class CommentsService {
       });
     }
     const [commentToDelete] = await this.commentRepository.findBy({ id });
-    console.log('this is the comment to delete', commentToDelete);
     if (!commentToDelete) {
       throw new BadRequestException({
         key: 'commentId',
@@ -72,5 +109,10 @@ export class CommentsService {
       });
     }
     await this.commentRepository.delete(id);
+  }
+
+  async findCommentsByBlogId(blogId: number): Promise<ICommentEntity[]> {
+    const blogComments = await this.commentRepository.findBy({ blogId });
+    return blogComments;
   }
 }

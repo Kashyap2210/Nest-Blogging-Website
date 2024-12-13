@@ -1,17 +1,12 @@
 import {
-  Controller,
-  Get,
-  Post,
   Body,
-  Patch,
-  Param,
-  Delete,
-  UseGuards,
+  Controller,
+  Delete, Param,
   ParseIntPipe,
+  Patch,
+  Post,
+  UseGuards
 } from '@nestjs/common';
-import { CommentsService } from './comments.service';
-import { CreateCommentDto } from './dto/create-comment.dto';
-import { UpdateCommentDto } from './dto/update-comment.dto';
 import {
   ApiBearerAuth,
   ApiOkResponse,
@@ -21,6 +16,9 @@ import {
 import { AuthGuard } from 'src/auth/auth.guard';
 import { CurrentUser } from 'src/decorators/current_user.decorator';
 import { IUserEntity } from 'src/users/interfaces/entity.interface';
+import { CommentsService } from './comments.service';
+import { CreateCommentDto } from './dto/create-comment.dto';
+import { UpdateCommentDto } from './dto/update-comment.dto';
 
 @ApiTags('comments')
 @ApiBearerAuth('access-token')
@@ -41,19 +39,21 @@ export class CommentsController {
     return this.commentsService.create(createCommentDto, currentUser);
   }
 
-  @Get()
-  findAll() {
-    return this.commentsService.findAll();
-  }
-
-  @Get(':id')
-  findOne(@Param('id') id: string) {
-    return this.commentsService.findOne(+id);
-  }
-
+  @ApiOperation({ summary: 'Update a comment' })
+  @ApiOkResponse({
+    description: 'A comment will be updated for the given id',
+  })
   @Patch(':id')
-  update(@Param('id') id: string, @Body() updateCommentDto: UpdateCommentDto) {
-    return this.commentsService.update(+id, updateCommentDto);
+  update(
+    @Param('id') id: string,
+    @Body() updateCommentDto: UpdateCommentDto,
+    @CurrentUser() currentUser: IUserEntity,
+  ) {
+    return this.commentsService.updateCommentById(
+      +id,
+      updateCommentDto,
+      currentUser,
+    );
   }
 
   @ApiOperation({ summary: 'Delete a comment' })

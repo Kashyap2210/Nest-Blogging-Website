@@ -1,3 +1,4 @@
+import { ICommentEntity } from 'src/comments/interfaces/comment.entity.interface';
 import { IAuditColumnEntity } from 'src/helpers/audit.column.entity.interface';
 
 export interface IBlogEntity extends IAuditColumnEntity {
@@ -25,3 +26,8 @@ export interface IBlogUpdateDto {
   content: string;
   keywords: string;
 }
+
+export type IBlogResponse = {
+  blog: IBlogEntity;
+  comments: ICommentEntity[];
+};

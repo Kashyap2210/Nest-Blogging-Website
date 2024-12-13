@@ -22,16 +22,18 @@ import { UpdateBlogDto } from '../dtos/update.blog.dto';
 import {
   IBlogEntity,
   IBlogEntityArray,
+  IBlogResponse,
   IBulkBlogCreateDto,
 } from '../interfaces/blog.interfaces';
 import { BlogService } from '../service/blog.service';
 
 @ApiTags('blogs')
 @Controller('blog')
+@ApiBearerAuth('access-token')
+@UseGuards(AuthGuard)
 export class BlogController {
   constructor(private readonly blogService: BlogService) {}
 
-  @ApiBearerAuth('access-token')
   @ApiOperation({ summary: 'Create a blog' })
   @ApiOkResponse({
     description: 'A blog created and returned with type IBlogEntity',
@@ -53,9 +55,9 @@ export class BlogController {
   @Post('bulk')
   async createBlogBulk(
     @Body() dto: IBulkBlogCreateDto,
-    // @CurrentUser() currentUser: IUserEntity,
+    @CurrentUser() currentUser: IUserEntity,
   ): Promise<IBlogEntityArray> {
-    const bulkBlogs = await this.blogService.createBulkBlog(dto);
+    const bulkBlogs = await this.blogService.createBulkBlog(dto, currentUser);
     console.log('these are all the bulk blogs:', bulkBlogs);
     return bulkBlogs;
   }
@@ -65,8 +67,10 @@ export class BlogController {
     description: 'All blogs returned with type IBlogEntityArray',
   })
   @Get('')
-  async getAllBlog(): Promise<IBlogEntityArray> {
-    const blogEntity = await this.blogService.getAllBlogs();
+  async getAllBlog(
+    @CurrentUser() currentUser: IUserEntity,
+  ): Promise<IBlogEntityArray> {
+    const blogEntity = await this.blogService.getAllBlogs(currentUser);
     return blogEntity;
   }
 
@@ -75,8 +79,11 @@ export class BlogController {
     description: 'A blog with specific id is returned with type IBlogEntity',
   })
   @Get(':id')
-  async getBlog(@Param('id', ParseIntPipe) id: number): Promise<IBlogEntity> {
-    const blogEntity = await this.blogService.getBlogById(id);
+  async getBlog(
+    @Param('id', ParseIntPipe) id: number,
+    @CurrentUser() currentUser: IUserEntity,
+  ): Promise<IBlogResponse> {
+    const blogEntity = await this.blogService.getBlogById(id, currentUser);
     return blogEntity;
   }
 
@@ -89,9 +96,10 @@ export class BlogController {
   async updateBlog(
     @Param('id', ParseIntPipe) id: number,
     @Body() dto: UpdateBlogDto,
+    @CurrentUser() currentUser: IUserEntity,
   ): Promise<IBlogEntity> {
     const updatedBlogEntity: IBlogEntity =
-      await this.blogService.updateBlogById(id, dto);
+      await this.blogService.updateBlogById(id, dto, currentUser);
     return updatedBlogEntity;
   }
 
@@ -100,8 +108,11 @@ export class BlogController {
     description: 'Delete a blog with specific id & return IBlogEntity',
   })
   @Delete(':id')
-  async deleteBlog(@Param('id', ParseIntPipe) id: number): Promise<string> {
-    await this.blogService.deleteBlogById(id);
+  async deleteBlog(
+    @Param('id', ParseIntPipe) id: number,
+    @CurrentUser() currentUser: IUserEntity,
+  ): Promise<string> {
+    await this.blogService.deleteBlogById(id, currentUser);
     return 'Blog Deleted';
   }
 }

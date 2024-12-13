@@ -1,30 +1,58 @@
-import { BadRequestException, Injectable } from '@nestjs/common';
+import {
+  BadRequestException,
+  forwardRef,
+  Inject,
+  Injectable,
+} from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
 import { BlogEntity } from '../entities/blog.entity';
-import { IBlogCreateDto, IBlogEntity, IBlogEntityArray, IBlogUpdateDto, IBulkBlogCreateDto } from '../interfaces/blog.interfaces';
+import {
+  IBlogCreateDto,
+  IBlogEntity,
+  IBlogEntityArray,
+  IBlogResponse,
+  IBlogUpdateDto,
+  IBulkBlogCreateDto,
+} from '../interfaces/blog.interfaces';
 import { IUserEntity } from 'src/users/interfaces/entity.interface';
+import { CommentsService } from 'src/comments/comments.service';
 
 @Injectable()
 export class BlogService {
   constructor(
     @InjectRepository(BlogEntity)
     private blogRepository: Repository<BlogEntity>,
+    @Inject(forwardRef(() => CommentsService))
+    private readonly commentsService: CommentsService,
   ) {}
 
   async createBlog(
     dto: IBlogCreateDto,
     currentUser: IUserEntity,
   ): Promise<IBlogEntity> {
-    console.log('tis is the current user from the service :', currentUser);
+    if (!currentUser) {
+      throw new BadRequestException({
+        key: 'currentUser',
+        message: 'current user is not logged in',
+      });
+    }
     const blog = this.blogRepository.create(dto);
     blog.createdBy = blog.updatedBy = currentUser[0].id;
     blog.author = currentUser[0].name;
-    console.log('this is the blog from the service: ', blog);
     return this.blogRepository.save(blog);
   }
 
-  async createBulkBlog(dto: IBulkBlogCreateDto): Promise<IBlogEntityArray> {
+  async createBulkBlog(
+    dto: IBulkBlogCreateDto,
+    currentUser: IUserEntity,
+  ): Promise<IBlogEntityArray> {
+    if (!currentUser) {
+      throw new BadRequestException({
+        key: 'currentUser',
+        message: 'current user is not logged in',
+      });
+    }
     const bulkBlogs: IBlogEntityArray = [];
     for (const blog of dto) {
       const bulkBlog = await this.blogRepository.save(blog);
@@ -33,16 +61,47 @@ export class BlogService {
     return bulkBlogs;
   }
 
-  async getAllBlogs(): Promise<IBlogEntityArray> {
+  async getAllBlogs(currentUser: IUserEntity): Promise<IBlogEntityArray> {
+    if (!currentUser) {
+      throw new BadRequestException({
+        key: 'currentUser',
+        message: 'current user is not logged in',
+      });
+    }
     return this.blogRepository.find();
   }
 
-  async getBlogById(id: number): Promise<IBlogEntity> {
-    return this.blogRepository.findOneBy({ id });
+  async getBlogById(
+    id: number,
+    currentUser: IUserEntity,
+  ): Promise<IBlogResponse> {
+    if (!currentUser) {
+      throw new BadRequestException({
+        key: 'currentUser',
+        message: 'current user is not logged in',
+      });
+    }
+    const blogComments = await this.commentsService.findCommentsByBlogId(id);
+    const blogById = await this.blogRepository.findOneBy({ id });
+
+    return {
+      blog: blogById,
+      comments: blogComments,
+    };
   }
 
-  async updateBlogById(id: number, dto: IBlogUpdateDto): Promise<IBlogEntity> {
-    const blogEntityById = await this.getBlogById(id);
+  async updateBlogById(
+    id: number,
+    dto: IBlogUpdateDto,
+    currentUser: IUserEntity,
+  ): Promise<IBlogEntity> {
+    if (!currentUser) {
+      throw new BadRequestException({
+        key: 'currentUser',
+        message: 'current user is not logged in',
+      });
+    }
+    const blogEntityById = await this.blogRepository.findOneBy({ id });
     if (!blogEntityById) {
       throw new BadRequestException({
         key: 'Not Found',
@@ -69,9 +128,14 @@ export class BlogService {
     return updatedBlog;
   }
 
-  async deleteBlogById(id: number): Promise<void> {
-    const blogToBeDeleted = await this.getBlogById(id);
+  async deleteBlogById(id: number, currentUser: IUserEntity): Promise<void> {
+    if (!currentUser) {
+      throw new BadRequestException({
+        key: 'currentUser',
+        message: 'current user is not logged in',
+      });
+    }
+    const blogToBeDeleted = await this.blogRepository.findOneBy({ id });
     this.blogRepository.delete(blogToBeDeleted);
   }
 }
-

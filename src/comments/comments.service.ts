@@ -5,13 +5,13 @@ import {
   Injectable,
 } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
+import { BlogService } from 'src/blog/service/blog.service';
 import { IUserEntity } from 'src/users/interfaces/entity.interface';
 import { Repository } from 'typeorm';
 import { CreateCommentDto } from './dto/create-comment.dto';
 import { ICommentUpdateDto } from './dto/update-comment.dto';
 import { CommentEntity } from './entities/comment.entity';
 import { ICommentEntity } from './interfaces/comment.entity.interface';
-import { BlogService } from 'src/blog/service/blog.service';
 
 @Injectable()
 export class CommentsService {
@@ -32,27 +32,85 @@ export class CommentsService {
         message: 'current user is not logged in',
       });
     }
+
     const blogExists = await this.blogService.getBlogById(
       createCommentDto.blogId,
       currentUser,
     );
-    console.log(blogExists);
     if (!blogExists) {
       throw new BadRequestException({
         key: 'blogId',
         message: `Blog with id: ${createCommentDto.blogId} does not exists`,
       });
     }
+
+    if (createCommentDto.isReplyComment) {
+      if (!createCommentDto.replyCommentId) {
+        throw new BadRequestException({
+          key: 'replyCommentId',
+          message: 'reply comment id must be present',
+        });
+      }
+
+      const parentComment = await this.commentRepository.findOneBy({
+        id: createCommentDto.replyCommentId,
+      });
+
+      if (!parentComment) {
+        throw new BadRequestException({
+          key: 'replyCommentId',
+          message: `Comment with id: ${createCommentDto.replyCommentId} does not exists`,
+        });
+      }
+    }
+
     const newComment = {
       text: createCommentDto.text,
       authorId: currentUser.id,
       blogId: createCommentDto.blogId,
+      isReplyComment: createCommentDto.isReplyComment ?? false,
+      replyCommentId: createCommentDto.replyCommentId ?? null,
     };
     const comment = this.commentRepository.create(newComment);
     comment.createdBy = comment.updatedBy = currentUser.name;
-    return this, this.commentRepository.save(comment);
+
+    return this.commentRepository.save(comment);
   }
 
+  /*
+  async createRepeatComment(
+    dto: ICommentCreateDto,
+    currentUser: IUserEntity,
+  ): Promise<any> {
+    if (!currentUser) {
+      throw new BadRequestException({
+        key: 'currentUser',
+        message: 'current user is not logged in',
+      });
+    }
+    const blogExists = await this.blogService.getBlogById(
+      dto.blogId,
+      currentUser,
+    );
+    console.log(blogExists);
+    if (!blogExists) {
+      throw new BadRequestException({
+        key: 'blogId',
+        message: `Blog with id: ${dto.blogId} does not exists`,
+      });
+    }
+    const newReplyComment = {
+      text: dto.text,
+      authorId: currentUser.id,
+      blogId: dto.blogId,
+      isReplyComment: dto.isRepeatComment,
+      replyCommentId: dto.repeatCommentId,
+    };
+    const replyComment = this.commentRepository.create(newReplyComment);
+    replyComment.createdBy = replyComment.updatedBy = currentUser.name;
+    return this, this.commentRepository.save(replyComment);
+  }
+*/
   async updateCommentById(
     id: number,
     dto: ICommentUpdateDto,

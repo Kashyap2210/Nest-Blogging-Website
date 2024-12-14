@@ -5,4 +5,6 @@ export interface ICommentEntity extends IAuditColumnEntity {
   text: string;
   authorId: number;
   blogId: number;
+  isReplyComment: boolean;
+  replyCommentId: number;
 }

@@ -27,12 +27,12 @@ import { UpdateCommentDto } from './dto/update-comment.dto';
 export class CommentsController {
   constructor(private readonly commentsService: CommentsService) {}
 
-  @ApiOperation({ summary: 'Create a comment on blog' })
+  @ApiOperation({ summary: 'Create a comment on blog or another comment' })
   @ApiOkResponse({
-    description: 'Create a comment on the blog',
+    description: 'Create a comment on the blog or another comment',
   })
   @Post('')
-  async createBlog(
+  async createComment(
     @Body() createCommentDto: CreateCommentDto,
     @CurrentUser() currentUser: IUserEntity,
   ) {

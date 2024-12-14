@@ -30,4 +30,18 @@ export class CommentEntity extends AuditColumnEntity implements ICommentEntity {
     name: 'blog_id',
   })
   blogId: number;
+
+  @Column({
+    type: 'boolean',
+    nullable: true,
+    name: 'is_reply_comment',
+  })
+  isReplyComment: boolean;
+
+  @Column({
+    type: 'int',
+    nullable: true,
+    name: 'reply_comment_id',
+  })
+  replyCommentId: number;
 }

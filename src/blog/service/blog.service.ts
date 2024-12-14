@@ -124,7 +124,6 @@ export class BlogService {
 
     const updatedBlog: IBlogEntity =
       await this.blogRepository.save(blogEntityById);
-    console.log(updatedBlog);
     return updatedBlog;
   }
 

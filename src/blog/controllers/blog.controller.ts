@@ -58,7 +58,6 @@ export class BlogController {
     @CurrentUser() currentUser: IUserEntity,
   ): Promise<IBlogEntityArray> {
     const bulkBlogs = await this.blogService.createBulkBlog(dto, currentUser);
-    console.log('these are all the bulk blogs:', bulkBlogs);
     return bulkBlogs;
   }
 

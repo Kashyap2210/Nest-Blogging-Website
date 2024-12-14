@@ -14,7 +14,6 @@ import { CommentsService } from 'src/comments/comments.service';
     UsersModule,
     forwardRef(() => CommentsModule),
   ],
-  // providers: [BlogService, UsersService, CommentsService],
   providers: [BlogService, UsersService],
   controllers: [BlogController],
   exports: [BlogService],

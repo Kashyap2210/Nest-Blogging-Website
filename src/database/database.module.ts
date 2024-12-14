@@ -4,6 +4,7 @@ import { BlogEntity } from '../blog/entities/blog.entity';
 import { UserEntity } from 'src/users/entities/user.entity';
 import { ConfigService } from '@nestjs/config';
 import { CommentEntity } from 'src/comments/entities/comment.entity';
+import { BlogLikesCounterEntity } from 'src/likes-counter-blogs/entities/likes-counter-blog.entity';
 
 @Global()
 @Module({
@@ -16,13 +17,13 @@ import { CommentEntity } from 'src/comments/entities/comment.entity';
         username: configService.get<string>('DBUSERNAME'),
         password: configService.get<string>('DBPASSWORD'),
         database: configService.get<string>('DBNAME'),
-        entities: [BlogEntity, UserEntity, CommentEntity],
+        entities: [BlogEntity, UserEntity, CommentEntity, BlogLikesCounterEntity],
         synchronize: true,
         // logging: true,
       }),
       inject: [ConfigService],
     }),
-    TypeOrmModule.forFeature([BlogEntity, UserEntity, CommentEntity]),
+    TypeOrmModule.forFeature([BlogEntity, UserEntity, CommentEntity, BlogLikesCounterEntity]),
   ],
   exports: [TypeOrmModule],
 })

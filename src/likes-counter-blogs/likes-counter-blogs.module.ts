@@ -1,0 +1,18 @@
+import { forwardRef, Module } from '@nestjs/common';
+import { LikesCounterBlogsService } from './likes-counter-blogs.service';
+import { LikesCounterBlogsController } from './likes-counter-blogs.controller';
+import { UsersModule } from 'src/users/users.module';
+import { BlogModule } from 'src/blog/blog.module';
+import { BlogService } from 'src/blog/service/blog.service';
+import { CommentsModule } from 'src/comments/comments.module';
+
+@Module({
+  imports: [
+    UsersModule,
+    forwardRef(() => BlogModule),
+    CommentsModule, //Comments module is imported here as the blogmodule has a dependency on it
+  ],
+  controllers: [LikesCounterBlogsController],
+  providers: [LikesCounterBlogsService, BlogService],
+})
+export class LikesCounterBlogsModule {}

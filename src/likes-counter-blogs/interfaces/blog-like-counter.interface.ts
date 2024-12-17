@@ -1,7 +1,7 @@
 import { IAuditColumnEntity } from 'src/helpers/audit.column.entity.interface';
 import { LikeStatus } from '../enums/like.status.enum';
 
-export interface IBlogLikesCounter extends IAuditColumnEntity {
+export interface IBlogLikesCounterEntity extends IAuditColumnEntity {
   id: number;
   blogId: number;
   likedStatus: LikeStatus;

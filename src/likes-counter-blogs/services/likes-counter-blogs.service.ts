@@ -49,10 +49,7 @@ export class LikesCounterBlogsService {
           ? { likedBy: currentUser.id }
           : { disLikedBy: currentUser.id }),
       });
-    console.log(
-      'this is the existing like or dislike user',
-      existingLikeOrDislikeByUser,
-    );
+
     if (!existingLikeOrDislikeByUser) {
       const newLikeDislikeEntity = await this.likesCounterBlogRepository.create(
         {
@@ -65,11 +62,13 @@ export class LikesCounterBlogsService {
           updatedBy: currentUser.name,
         },
       );
+
       const newLikedOrDisLikedEntity =
         await this.likesCounterBlogRepository.save(newLikeDislikeEntity);
 
       return newLikedOrDisLikedEntity;
     }
+
     if (existingLikeOrDislikeByUser) {
       if (existingLikeOrDislikeByUser.likedStatus === dto.likedStatus) {
         throw new BadRequestException({

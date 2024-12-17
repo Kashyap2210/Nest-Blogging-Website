@@ -4,12 +4,12 @@ import {
   Inject,
   Injectable,
 } from '@nestjs/common';
-import { CreateLikesCounterBlogDto } from './dto/create-blog-likes.dto';
-import { UpdateLikesCounterBlogDto } from './dto/update-likes-counter-blog.dto';
+import { CreateLikesCounterBlogDto } from '../dto/create-blog-likes.dto';
+import { UpdateLikesCounterBlogDto } from '../dto/update-likes-counter-blog.dto';
 import { IUserEntity } from 'src/users/interfaces/entity.interface';
-import { LikeStatus } from './enums/like.status.enum';
+import { LikeStatus } from '../enums/like.status.enum';
 import { InjectRepository } from '@nestjs/typeorm';
-import { BlogLikesCounterEntity } from './entities/likes-counter-blog.entity';
+import { BlogLikesCounterEntity } from '../entities/likes-counter-blog.entity';
 import { Repository } from 'typeorm';
 import { BlogService } from 'src/blog/service/blog.service';
 

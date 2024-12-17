@@ -1,6 +1,6 @@
 import { forwardRef, Module } from '@nestjs/common';
-import { LikesCounterBlogsService } from './likes-counter-blogs.service';
-import { LikesCounterBlogsController } from './likes-counter-blogs.controller';
+import { LikesCounterBlogsService } from './services/likes-counter-blogs.service';
+import { LikesCounterBlogsController } from './controllers/likes-counter-blogs.controller';
 import { UsersModule } from 'src/users/users.module';
 import { BlogModule } from 'src/blog/blog.module';
 import { BlogService } from 'src/blog/service/blog.service';

@@ -8,9 +8,9 @@ import {
   Delete,
   UseGuards,
 } from '@nestjs/common';
-import { LikesCounterBlogsService } from './likes-counter-blogs.service';
-import { CreateLikesCounterBlogDto } from './dto/create-blog-likes.dto';
-import { UpdateLikesCounterBlogDto } from './dto/update-likes-counter-blog.dto';
+import { LikesCounterBlogsService } from '../services/likes-counter-blogs.service';
+import { CreateLikesCounterBlogDto } from '../dto/create-blog-likes.dto';
+import { UpdateLikesCounterBlogDto } from '../dto/update-likes-counter-blog.dto';
 import { ApiBearerAuth, ApiTags } from '@nestjs/swagger';
 import { AuthGuard } from 'src/auth/auth.guard';
 import { CurrentUser } from 'src/decorators/current_user.decorator';

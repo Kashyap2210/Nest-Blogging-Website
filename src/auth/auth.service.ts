@@ -19,7 +19,7 @@ export class AuthService {
   async logIn(signInDto: UserSignInDto) {
     const { username, password } = signInDto;
     const user = await this.usersService.findUserByUserName(username);
-    console.log('this is the user', user);
+    // console.log('this is the user', user);
     if (!user) {
       throw new UnauthorizedException('Invalid username or password');
     }

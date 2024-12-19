@@ -16,7 +16,7 @@ import {
   IBulkBlogCreateDto,
 } from '../interfaces/blog.interfaces';
 import { IUserEntity } from 'src/users/interfaces/entity.interface';
-import { CommentsService } from 'src/comments/comments.service';
+import { CommentsService } from 'src/comments/services/comments.service';
 
 @Injectable()
 export class BlogService {
@@ -82,7 +82,7 @@ export class BlogService {
       });
     }
     const blogComments = await this.commentsService.findCommentsByBlogId(id);
-    const blogById = await this.blogRepository.findOneBy({ id });
+    const blogById = await this.validatePresence(id);
 
     return {
       blog: blogById,
@@ -101,13 +101,7 @@ export class BlogService {
         message: 'current user is not logged in',
       });
     }
-    const blogEntityById = await this.blogRepository.findOneBy({ id });
-    if (!blogEntityById) {
-      throw new BadRequestException({
-        key: 'Not Found',
-        message: 'Blog with this title does not exist',
-      });
-    }
+    const blogEntityById = await this.validatePresence(id);
     const blogFromDtoTitle = await this.blogRepository.findBy({
       title: dto.title,
     });
@@ -134,7 +128,18 @@ export class BlogService {
         message: 'current user is not logged in',
       });
     }
-    const blogToBeDeleted = await this.blogRepository.findOneBy({ id });
+    const blogToBeDeleted = await this.validatePresence(id);
     this.blogRepository.delete(blogToBeDeleted);
+  }
+
+  async validatePresence(id: number): Promise<IBlogEntity> {
+    const blog = await this.blogRepository.findBy({ id });
+    if (blog.length === 0) {
+      throw new BadRequestException({
+        key: 'id',
+        message: `Blog with id: ${id} not found`,
+      });
+    }
+    return blog[0];
   }
 }

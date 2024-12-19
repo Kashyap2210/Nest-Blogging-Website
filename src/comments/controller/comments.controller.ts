@@ -1,11 +1,12 @@
 import {
   Body,
   Controller,
-  Delete, Param,
+  Delete,
+  Param,
   ParseIntPipe,
   Patch,
   Post,
-  UseGuards
+  UseGuards,
 } from '@nestjs/common';
 import {
   ApiBearerAuth,
@@ -16,9 +17,9 @@ import {
 import { AuthGuard } from 'src/auth/auth.guard';
 import { CurrentUser } from 'src/decorators/current_user.decorator';
 import { IUserEntity } from 'src/users/interfaces/entity.interface';
-import { CommentsService } from './comments.service';
-import { CreateCommentDto } from './dto/create-comment.dto';
-import { UpdateCommentDto } from './dto/update-comment.dto';
+import { CommentsService } from '../services/comments.service';
+import { CreateCommentDto } from '../dto/create-comment.dto';
+import { UpdateCommentDto } from '../dto/update-comment.dto';
 
 @ApiTags('comments')
 @ApiBearerAuth('access-token')
@@ -65,7 +66,6 @@ export class CommentsController {
     @Param('id', ParseIntPipe) id: number,
     @CurrentUser() currentUser: IUserEntity,
   ) {
-    console.log('this is the user from controller', currentUser);
     return this.commentsService.removeComment(id, currentUser);
   }
 }

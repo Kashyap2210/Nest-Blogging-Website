@@ -32,16 +32,8 @@ export class LikesCounterBlogsService {
         message: 'current user is not logged in',
       });
     }
-    const blogExists = await this.blogService.getBlogById(
-      dto.blogId,
-      currentUser,
-    );
-    if (!blogExists) {
-      throw new BadRequestException({
-        key: 'blogId',
-        message: `Blog with id: ${dto.blogId} does not exists`,
-      });
-    }
+    await this.blogService.validatePresence(dto.blogId);
+    
     const existingLikeOrDislikeByUser =
       await this.likesCounterBlogRepository.findOneBy({
         blogId: dto.blogId,
@@ -83,32 +75,19 @@ export class LikesCounterBlogsService {
     blogId: number,
     currentUser: IUserEntity,
   ): Promise<IBlogLikesCounterEntity> {
-    console.log('this is the blog Id from service', blogId);
-    console.log('this is the current user from service', currentUser);
-
     if (!currentUser) {
       throw new BadRequestException({
         key: 'currentUser',
         message: 'current user is not logged in',
       });
     }
-    const blogExists = await this.blogService.getBlogById(blogId, currentUser);
-    console.log('this is the blog exist entity', blogExists);
-    if (!blogExists) {
-      throw new BadRequestException({
-        key: 'blogId',
-        message: `Blog with id: ${blogId} does not exists`,
-      });
-    }
+    const blogExists = await this.blogService.validatePresence(blogId);
+
     const existingLikeOrDislikeByUser: IBlogLikesCounterEntity =
       await this.likesCounterBlogRepository.findOneBy({
         blogId: blogId,
       });
     const deleteId = existingLikeOrDislikeByUser.id;
-    console.log(
-      'this is the existing like or dislike entity',
-      existingLikeOrDislikeByUser,
-    );
     if (existingLikeOrDislikeByUser) {
       this.likesCounterBlogRepository.delete({
         id: existingLikeOrDislikeByUser.id,

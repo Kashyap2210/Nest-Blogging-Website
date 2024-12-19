@@ -2,7 +2,9 @@ import { ApiProperty } from '@nestjs/swagger';
 import { IsEmail, IsOptional, IsString } from 'class-validator';
 import { IUserCreateDto } from '../interfaces/entity.interface';
 
-export class userUpdateDto implements Partial<IUserCreateDto> {
+export interface IUserUpdateDto extends Partial<IUserCreateDto>{}
+
+export class UserUpdateDto implements IUserUpdateDto {
   @IsString()
   @ApiProperty({
     description: 'Unique username for the user',

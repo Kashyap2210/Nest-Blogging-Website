@@ -1,12 +1,12 @@
-import { Column, Entity, PrimaryGeneratedColumn } from 'typeorm';
-import { IBlogLikesCounter } from '../interfaces/blog-like-counter.interface';
 import { AuditColumnEntity } from 'src/helpers/audti.column.entity';
+import { Column, Entity, PrimaryGeneratedColumn } from 'typeorm';
 import { LikeStatus } from '../enums/like.status.enum';
+import { IBlogLikesCounterEntity } from '../interfaces/blog-like-counter.interface';
 
 @Entity('blogs_likes_counter')
 export class BlogLikesCounterEntity
   extends AuditColumnEntity
-  implements IBlogLikesCounter
+  implements IBlogLikesCounterEntity
 {
   @PrimaryGeneratedColumn()
   id: number;

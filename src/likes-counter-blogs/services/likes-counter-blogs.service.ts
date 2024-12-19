@@ -4,14 +4,14 @@ import {
   Inject,
   Injectable,
 } from '@nestjs/common';
-import { CreateLikesCounterBlogDto } from '../dto/create-blog-likes.dto';
-import { UpdateLikesCounterBlogDto } from '../dto/update-likes-counter-blog.dto';
-import { IUserEntity } from 'src/users/interfaces/entity.interface';
-import { LikeStatus } from '../enums/like.status.enum';
 import { InjectRepository } from '@nestjs/typeorm';
-import { BlogLikesCounterEntity } from '../entities/likes-counter-blog.entity';
-import { Repository } from 'typeorm';
 import { BlogService } from 'src/blog/service/blog.service';
+import { IUserEntity } from 'src/users/interfaces/entity.interface';
+import { Repository } from 'typeorm';
+import { CreateLikesCounterBlogDto } from '../dto/create-blog-likes.dto';
+import { BlogLikesCounterEntity } from '../entities/likes-counter-blog.entity';
+import { LikeStatus } from '../enums/like.status.enum';
+import { IBlogLikesCounterEntity } from '../interfaces/blog-like-counter.interface';
 
 @Injectable()
 export class LikesCounterBlogsService {
@@ -25,11 +25,21 @@ export class LikesCounterBlogsService {
   async createLikeDislikeEntity(
     dto: CreateLikesCounterBlogDto,
     currentUser: IUserEntity,
-  ): Promise<any> {
+  ): Promise<IBlogLikesCounterEntity> {
     if (!currentUser) {
       throw new BadRequestException({
         key: 'currentUser',
         message: 'current user is not logged in',
+      });
+    }
+    const blogExists = await this.blogService.getBlogById(
+      dto.blogId,
+      currentUser,
+    );
+    if (!blogExists) {
+      throw new BadRequestException({
+        key: 'blogId',
+        message: `Blog with id: ${dto.blogId} does not exists`,
       });
     }
     const existingLikeOrDislikeByUser =
@@ -39,6 +49,7 @@ export class LikesCounterBlogsService {
           ? { likedBy: currentUser.id }
           : { disLikedBy: currentUser.id }),
       });
+
     if (!existingLikeOrDislikeByUser) {
       const newLikeDislikeEntity = await this.likesCounterBlogRepository.create(
         {
@@ -51,11 +62,13 @@ export class LikesCounterBlogsService {
           updatedBy: currentUser.name,
         },
       );
+
       const newLikedOrDisLikedEntity =
         await this.likesCounterBlogRepository.save(newLikeDislikeEntity);
 
       return newLikedOrDisLikedEntity;
     }
+
     if (existingLikeOrDislikeByUser) {
       if (existingLikeOrDislikeByUser.likedStatus === dto.likedStatus) {
         throw new BadRequestException({
@@ -66,19 +79,44 @@ export class LikesCounterBlogsService {
     }
   }
 
-  findAll() {
-    return `This action returns all likesCounterBlogs`;
-  }
+  async changeLikeStatusOfBlogById(
+    blogId: number,
+    currentUser: IUserEntity,
+  ): Promise<IBlogLikesCounterEntity> {
+    console.log('this is the blog Id from service', blogId);
+    console.log('this is the current user from service', currentUser);
 
-  findOne(id: number) {
-    return `This action returns a #${id} likesCounterBlog`;
-  }
-
-  update(id: number, updateLikesCounterBlogDto: UpdateLikesCounterBlogDto) {
-    return `This action updates a #${id} likesCounterBlog`;
-  }
-
-  remove(id: number) {
-    return `This action removes a #${id} likesCounterBlog`;
+    if (!currentUser) {
+      throw new BadRequestException({
+        key: 'currentUser',
+        message: 'current user is not logged in',
+      });
+    }
+    const blogExists = await this.blogService.getBlogById(blogId, currentUser);
+    console.log('this is the blog exist entity', blogExists);
+    if (!blogExists) {
+      throw new BadRequestException({
+        key: 'blogId',
+        message: `Blog with id: ${blogId} does not exists`,
+      });
+    }
+    const existingLikeOrDislikeByUser: IBlogLikesCounterEntity =
+      await this.likesCounterBlogRepository.findOneBy({
+        blogId: blogId,
+      });
+    const deleteId = existingLikeOrDislikeByUser.id;
+    console.log(
+      'this is the existing like or dislike entity',
+      existingLikeOrDislikeByUser,
+    );
+    if (existingLikeOrDislikeByUser) {
+      this.likesCounterBlogRepository.delete({
+        id: existingLikeOrDislikeByUser.id,
+      });
+    }
+    const likeDislikeEntity = await this.likesCounterBlogRepository.findOneBy({
+      id: deleteId,
+    });
+    return likeDislikeEntity;
   }
 }

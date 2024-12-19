@@ -1,9 +1,8 @@
 import { Injectable, UnauthorizedException } from '@nestjs/common';
 import { JwtService } from '@nestjs/jwt';
-import { IUserEntity } from 'src/users/interfaces/entity.interface';
+import * as bcrypt from 'bcrypt';
 import { UsersService } from 'src/users/services/users.service';
 import { UserSignInDto } from './dto/user.signIn.dto';
-import * as bcrypt from 'bcrypt';
 
 export interface IJwtPayload {
   username: string;
@@ -33,7 +32,7 @@ export class AuthService {
 
       delete user['password'];
       const thisAccessToken = this.jwtService.sign(payload);
-      console.log('this is the access token', thisAccessToken);
+      // console.log('this is the access token', thisAccessToken);
       return {
         accessToken: thisAccessToken,
         user,

@@ -8,10 +8,10 @@ import { InjectRepository } from '@nestjs/typeorm';
 import { BlogService } from 'src/blog/service/blog.service';
 import { IUserEntity } from 'src/users/interfaces/entity.interface';
 import { Repository } from 'typeorm';
-import { CreateCommentDto } from './dto/create-comment.dto';
-import { ICommentUpdateDto } from './dto/update-comment.dto';
-import { CommentEntity } from './entities/comment.entity';
-import { ICommentEntity } from './interfaces/comment.entity.interface';
+import { CreateCommentDto } from '../dto/create-comment.dto';
+import { ICommentUpdateDto } from '../dto/update-comment.dto';
+import { CommentEntity } from '../entities/comment.entity';
+import { ICommentEntity } from '../interfaces/comment.entity.interface';
 
 @Injectable()
 export class CommentsService {
@@ -142,7 +142,6 @@ export class CommentsService {
       updatedOn: new Date(),
       authorId: currentUser.id,
     };
-    console.log(updatedComment);
     return this.commentRepository.save(updatedComment);
   }
 

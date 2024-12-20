@@ -101,19 +101,7 @@ export class UsersController {
     return createdUser;
   }
 
-  @ApiOperation({ summary: 'Create users in bulk' })
-  @ApiOkResponse({
-    description: 'A list of bulk users created with tyep IUserEntityArray',
-  })
-  @Post('bulk')
-  async createUsersInBulk(
-    @Body() dto: BulkUserCreateDto,
-  ): Promise<IUserEntityArray> {
-    const createdUsers = await this.usersService.createUsersInBulk(dto);
-    console.log('this are the created users from the controller', createdUsers);
-    return createdUsers;
-  }
-
+  
   @ApiOperation({ summary: 'Get all users' })
   @ApiOkResponse({
     description: 'A list of users returned with type IUserEntityArray',

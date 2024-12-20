@@ -51,7 +51,6 @@ export class UsersService {
     }
     const hashedPassword = await bcrypt.hash(dto.password, 10);
     dto['password'] = hashedPassword;
-    console.log('this is the dto from service:', dto);
     const user = this.userRepository.create(dto);
     user.profilePictureUrl = dto.profilePictureUrl;
     user.createdBy = user.updatedBy = '1';
@@ -71,22 +70,6 @@ export class UsersService {
       where: { id: userId },
     });
     return userById;
-  }
-
-  async createUsersInBulk(dto: BulkUserCreateDto): Promise<IUserEntityArray> {
-    let createdUsers: IUserEntityArray = [];
-    for (const user of dto.users) {
-      try {
-        const createdUser = await this.createUser(user);
-        createdUsers.push(createdUser);
-      } catch (error) {
-        throw new BadRequestException({
-          key: 'Unable To CreateUser',
-          message: 'Failed to create user',
-        });
-      }
-    }
-    return createdUsers;
   }
 
   async updateUserById(id: number, dto: Partial<IUserCreateDto>): Promise<any> {
@@ -132,7 +115,6 @@ export class UsersService {
       gender: existingUserById[0].gender,
     };
     const updatedUserEntity = await this.userRepository.save(updatedUser);
-    console.log('this is the updatedUserEntity :', updatedUserEntity);
     return updatedUserEntity;
   }
 

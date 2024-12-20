@@ -20,13 +20,12 @@ import {
 } from '@nestjs/swagger';
 import { diskStorage } from 'multer';
 import { imageFileFilter, profilePictureEditor } from 'src/file.utils';
+import { userUpdateDto } from '../dtos/user.update.dto';
 import {
   IUserCreateDto,
   IUserEntity,
   IUserEntityArray,
 } from '../interfaces/entity.interface';
-import { BulkUserCreateDto } from '../dtos/user.create.dto';
-import { userUpdateDto } from '../dtos/user.update.dto';
 import { UsersService } from '../services/users.service';
 
 @Controller('users')

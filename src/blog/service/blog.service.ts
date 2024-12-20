@@ -5,6 +5,8 @@ import {
   Injectable,
 } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
+import { CommentsService } from 'src/comments/service/comments.service';
+import { IUserEntity } from 'src/users/interfaces/entity.interface';
 import { Repository } from 'typeorm';
 import { BlogEntity } from '../entities/blog.entity';
 import {
@@ -12,11 +14,8 @@ import {
   IBlogEntity,
   IBlogEntityArray,
   IBlogResponse,
-  IBlogUpdateDto,
-  IBulkBlogCreateDto,
+  IBlogUpdateDto
 } from '../interfaces/blog.interfaces';
-import { IUserEntity } from 'src/users/interfaces/entity.interface';
-import { CommentsService } from 'src/comments/service/comments.service';
 
 @Injectable()
 export class BlogService {

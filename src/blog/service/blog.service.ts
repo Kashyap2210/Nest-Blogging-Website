@@ -5,6 +5,8 @@ import {
   Injectable,
 } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
+import { CommentsService } from 'src/comments/service/comments.service';
+import { IUserEntity } from 'src/users/interfaces/entity.interface';
 import { Repository } from 'typeorm';
 import { BlogEntity } from '../entities/blog.entity';
 import {
@@ -12,11 +14,11 @@ import {
   IBlogEntity,
   IBlogEntityArray,
   IBlogResponse,
-  IBlogUpdateDto,
-  IBulkBlogCreateDto,
+  IBlogUpdateDto
 } from '../interfaces/blog.interfaces';
 import { IUserEntity } from 'src/users/interfaces/entity.interface';
 import { CommentsService } from 'src/comments/services/comments.service';
+
 
 @Injectable()
 export class BlogService {
@@ -43,24 +45,6 @@ export class BlogService {
     return this.blogRepository.save(blog);
   }
 
-  async createBulkBlog(
-    dto: IBulkBlogCreateDto,
-    currentUser: IUserEntity,
-  ): Promise<IBlogEntityArray> {
-    if (!currentUser) {
-      throw new BadRequestException({
-        key: 'currentUser',
-        message: 'current user is not logged in',
-      });
-    }
-    const bulkBlogs: IBlogEntityArray = [];
-    for (const blog of dto) {
-      const bulkBlog = await this.blogRepository.save(blog);
-      bulkBlogs.push(bulkBlog);
-    }
-    return bulkBlogs;
-  }
-
   async getAllBlogs(currentUser: IUserEntity): Promise<IBlogEntityArray> {
     if (!currentUser) {
       throw new BadRequestException({
@@ -82,7 +66,8 @@ export class BlogService {
       });
     }
     const blogComments = await this.commentsService.findCommentsByBlogId(id);
-    const blogById = await this.validatePresence(id);
+    const [blogById] = await this.validatePresence(id);
+
 
     return {
       blog: blogById,
@@ -101,7 +86,7 @@ export class BlogService {
         message: 'current user is not logged in',
       });
     }
-    const blogEntityById = await this.validatePresence(id);
+    const [blogEntityById] = await this.validatePresence(id);
     const blogFromDtoTitle = await this.blogRepository.findBy({
       title: dto.title,
     });
@@ -128,18 +113,20 @@ export class BlogService {
         message: 'current user is not logged in',
       });
     }
-    const blogToBeDeleted = await this.validatePresence(id);
+    const [blogToBeDeleted] = await this.validatePresence(id);
     this.blogRepository.delete(blogToBeDeleted);
   }
 
-  async validatePresence(id: number): Promise<IBlogEntity> {
-    const blog = await this.blogRepository.findBy({ id });
-    if (blog.length === 0) {
+  async validatePresence(id: number): Promise<IBlogEntity[]> {
+    const blogExists = await this.blogRepository.findBy({ id });
+    if (blogExists.length === 0) {
       throw new BadRequestException({
         key: 'id',
-        message: `Blog with id: ${id} not found`,
+        message: `Blog with id:${id} does not exists.`,
       });
     }
-    return blog[0];
-  }
+    return blogExists;
+    const blogToBeDeleted = await this.validatePresence(id);
+    this.blogRepository.delete(blogToBeDeleted);
+    }
 }

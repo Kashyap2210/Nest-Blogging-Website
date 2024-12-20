@@ -1,8 +1,7 @@
 import {
-  BadRequestException,
   ConflictException,
   Injectable,
-  NotFoundException,
+  NotFoundException
 } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import * as bcrypt from 'bcrypt';
@@ -71,22 +70,6 @@ export class UsersService {
     const [userById] = await this.validatePresence(userId);
     delete userById['password'];
     return userById;
-  }
-
-  async createUsersInBulk(dto: BulkUserCreateDto): Promise<IUserEntityArray> {
-    let createdUsers: IUserEntityArray = [];
-    for (const user of dto.users) {
-      try {
-        const createdUser = await this.createUser(user);
-        createdUsers.push(createdUser);
-      } catch (error) {
-        throw new BadRequestException({
-          key: 'Unable To CreateUser',
-          message: 'Failed to create user',
-        });
-      }
-    }
-    return createdUsers;
   }
 
   async updateUserById(id: number, dto: IUserUpdateDto): Promise<any> {

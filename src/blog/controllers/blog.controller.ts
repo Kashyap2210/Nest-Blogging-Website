@@ -47,20 +47,6 @@ export class BlogController {
     return this.blogService.createBlog(dto, currentUser);
   }
 
-  @ApiOperation({ summary: 'Create bulk blog' })
-  @ApiOkResponse({
-    description:
-      'Blogs are created in bulk returned with type IBlogEntityArray',
-  })
-  @Post('bulk')
-  async createBlogBulk(
-    @Body() dto: IBulkBlogCreateDto,
-    @CurrentUser() currentUser: IUserEntity,
-  ): Promise<IBlogEntityArray> {
-    const bulkBlogs = await this.blogService.createBulkBlog(dto, currentUser);
-    return bulkBlogs;
-  }
-
   @ApiOperation({ summary: 'Get all blog' })
   @ApiOkResponse({
     description: 'All blogs returned with type IBlogEntityArray',

@@ -20,6 +20,7 @@ import {
 } from '@nestjs/swagger';
 import { diskStorage } from 'multer';
 import { imageFileFilter, profilePictureEditor } from 'src/file.utils';
+
 import { BulkUserCreateDto } from '../dtos/user.create.dto';
 import { UserUpdateDto } from '../dtos/user.update.dto';
 import {
@@ -96,18 +97,6 @@ export class UsersController {
     };
     const createdUser = await this.usersService.createUser(dto);
     return createdUser;
-  }
-
-  @ApiOperation({ summary: 'Create users in bulk' })
-  @ApiOkResponse({
-    description: 'A list of bulk users created with tyep IUserEntityArray',
-  })
-  @Post('bulk')
-  async createUsersInBulk(
-    @Body() dto: BulkUserCreateDto,
-  ): Promise<IUserEntityArray> {
-    const createdUsers = await this.usersService.createUsersInBulk(dto);
-    return createdUsers;
   }
 
   @ApiOperation({ summary: 'Get all users' })

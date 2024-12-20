@@ -1,5 +1,6 @@
 import { forwardRef, Module } from '@nestjs/common';
-import { CommentsService } from './service/comments.service';
+
+import { CommentsService } from './services/comments.service';
 import { CommentsController } from './controller/comments.controller';
 import { TypeOrmModule } from '@nestjs/typeorm';
 import { CommentEntity } from './entities/comment.entity';

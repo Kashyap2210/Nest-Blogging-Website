@@ -6,6 +6,8 @@ import {
 import { InjectRepository } from '@nestjs/typeorm';
 import * as bcrypt from 'bcrypt';
 import { Repository } from 'typeorm';
+import { BulkUserCreateDto } from '../dtos/user.create.dto';
+import { IUserUpdateDto } from '../dtos/user.update.dto';
 import { UserEntity } from '../entities/user.entity';
 import {
   IUserCreateDto,
@@ -52,6 +54,7 @@ export class UsersService {
     const user = this.userRepository.create(dto);
     user.profilePictureUrl = dto.profilePictureUrl;
     user.createdBy = user.updatedBy = '1';
+    delete user['password'];
     return this.userRepository.save(user);
   }
 
@@ -64,20 +67,13 @@ export class UsersService {
   }
 
   async getUserById(userId: number): Promise<IUserEntity> {
-    const userById = await this.userRepository.findOne({
-      where: { id: userId },
-    });
+    const [userById] = await this.validatePresence(userId);
+    delete userById['password'];
     return userById;
   }
 
-  async updateUserById(id: number, dto: Partial<IUserCreateDto>): Promise<any> {
-    const existingUserById = await this.getUserById(id);
-    if (!existingUserById) {
-      throw new NotFoundException({
-        key: 'UserNotFound',
-        message: `No user found with id: ${id}`,
-      });
-    }
+  async updateUserById(id: number, dto: IUserUpdateDto): Promise<any> {
+    const existingUserById = await this.validatePresence(id);
     const [userByEmailId, userByUsername, userByContactNo] = await Promise.all([
       this.userRepository.findOne({ where: { emailId: dto.emailId } }),
       this.userRepository.findOne({ where: { username: dto.username } }),
@@ -117,14 +113,19 @@ export class UsersService {
   }
 
   async deleteUserById(id: number): Promise<IUserEntity[]> {
+    let user = await this.validatePresence(id);
+    this.userRepository.delete(id);
+    return user;
+  }
+
+  async validatePresence(id: number): Promise<IUserEntity[]> {
     let user = await this.userRepository.findBy({ id });
-    if (!user) {
-      throw new NotFoundException({
-        key: 'User not found',
-        message: `No user found with id: ${id}`,
+    if (user.length === 0) {
+      throw new BadRequestException({
+        key: 'id',
+        message: `User with id:${id} not found. Message from validate presence`,
       });
     }
-    this.userRepository.delete(id);
     return user;
   }
 }

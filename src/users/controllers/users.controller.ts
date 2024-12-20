@@ -20,7 +20,9 @@ import {
 } from '@nestjs/swagger';
 import { diskStorage } from 'multer';
 import { imageFileFilter, profilePictureEditor } from 'src/file.utils';
-import { userUpdateDto } from '../dtos/user.update.dto';
+
+import { BulkUserCreateDto } from '../dtos/user.create.dto';
+import { UserUpdateDto } from '../dtos/user.update.dto';
 import {
   IUserCreateDto,
   IUserEntity,
@@ -82,10 +84,8 @@ export class UsersController {
     @Req() request,
     @UploadedFile() file: Express.Multer.File,
   ): Promise<IUserEntity> {
-    console.log('Uploaded file:', file);
     const { name, username, password, emailId, contactNo, gender } =
-      request.body; // Extract other fields manually
-
+      request.body;
     const dto: IUserCreateDto = {
       name,
       username,
@@ -96,22 +96,59 @@ export class UsersController {
       profilePictureUrl: file.filename,
     };
     const createdUser = await this.usersService.createUser(dto);
-    //exclude password from the response
     return createdUser;
   }
 
-  
   @ApiOperation({ summary: 'Get all users' })
   @ApiOkResponse({
     description: 'A list of users returned with type IUserEntityArray',
   })
   @Patch(':id')
+  @ApiBody({
+    description: 'Data required to update a single user',
+    schema: {
+      type: 'object',
+      properties: {
+        name: { type: 'string', example: 'John Doe' },
+        username: { type: 'string', example: 'johndoe123' },
+        password: { type: 'string', example: 'P@ssw0rd123' },
+        emailId: {
+          type: 'string',
+          example: 'john.doe@example.com',
+          format: 'email',
+        },
+        contactNo: { type: 'string', example: '1234567890' },
+        gender: {
+          type: 'string',
+          enum: ['MALE', 'FEMALE', 'OTHER'],
+          example: 'MALE',
+        },
+        file: {
+          type: 'string',
+          format: 'binary',
+          description: 'upload an image',
+        },
+      },
+      required: ['file'],
+    },
+  })
+  @UseInterceptors(
+    FileInterceptor('file', {
+      storage: diskStorage({
+        filename: profilePictureEditor,
+        destination: './uploads',
+      }),
+      fileFilter: imageFileFilter,
+      limits: {
+        fieldSize: 1000 * 1000 * 10,
+      },
+    }),
+  )
   async updateUser(
-    @Body() dto: userUpdateDto,
+    @Body() dto: UserUpdateDto,
     @Param('id', ParseIntPipe) id: number,
   ): Promise<IUserEntity> {
-    const updatedUser = await this.usersService.updateUserById(id, dto);
-    return updatedUser;
+    return await this.usersService.updateUserById(id, dto);
   }
 
   @ApiOperation({ summary: 'Get all users' })
@@ -124,13 +161,13 @@ export class UsersController {
     return this.usersService.getAllUsers();
   }
 
-  @ApiOperation({ summary: 'Get a users' })
+  @ApiOperation({ summary: 'Get a user' })
   @ApiOkResponse({
-    description: 'User returned with specific id & type IUserEntityArray',
+    description:
+      'User returned with specific id & type IUserEntity. Use this API to decorate the profile page.',
   })
   @Get(':id')
   async getUser(@Param('id', ParseIntPipe) id: number): Promise<IUserEntity> {
-    //exclude password from the response
     return this.usersService.getUserById(id);
   }
 

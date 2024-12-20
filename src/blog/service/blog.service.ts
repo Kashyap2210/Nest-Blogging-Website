@@ -16,6 +16,9 @@ import {
   IBlogResponse,
   IBlogUpdateDto
 } from '../interfaces/blog.interfaces';
+import { IUserEntity } from 'src/users/interfaces/entity.interface';
+import { CommentsService } from 'src/comments/services/comments.service';
+
 
 @Injectable()
 export class BlogService {
@@ -64,6 +67,7 @@ export class BlogService {
     }
     const blogComments = await this.commentsService.findCommentsByBlogId(id);
     const [blogById] = await this.validatePresence(id);
+
 
     return {
       blog: blogById,
@@ -122,5 +126,7 @@ export class BlogService {
       });
     }
     return blogExists;
-  }
+    const blogToBeDeleted = await this.validatePresence(id);
+    this.blogRepository.delete(blogToBeDeleted);
+    }
 }

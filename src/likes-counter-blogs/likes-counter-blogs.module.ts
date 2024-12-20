@@ -13,6 +13,6 @@ import { CommentsModule } from 'src/comments/comments.module';
     CommentsModule, //Comments module is imported here as the blogmodule has a dependency on it
   ],
   controllers: [LikesCounterBlogsController],
-  providers: [LikesCounterBlogsService, BlogService],
+  providers: [LikesCounterBlogsService],
 })
 export class LikesCounterBlogsModule {}

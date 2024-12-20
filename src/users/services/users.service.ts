@@ -1,4 +1,5 @@
 import {
+  BadRequestException,
   ConflictException,
   Injectable,
   NotFoundException
@@ -6,7 +7,6 @@ import {
 import { InjectRepository } from '@nestjs/typeorm';
 import * as bcrypt from 'bcrypt';
 import { Repository } from 'typeorm';
-import { BulkUserCreateDto } from '../dtos/user.create.dto';
 import { IUserUpdateDto } from '../dtos/user.update.dto';
 import { UserEntity } from '../entities/user.entity';
 import {

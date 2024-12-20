@@ -6,6 +6,7 @@ import { UsersModule } from 'src/users/users.module';
 import { BlogController } from './controllers/blog.controller';
 import { BlogEntity } from './entities/blog.entity';
 import { BlogService } from './service/blog.service';
+import { CommentsService } from 'src/comments/service/comments.service';
 
 
 @Module({

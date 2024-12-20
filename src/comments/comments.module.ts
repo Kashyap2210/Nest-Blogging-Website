@@ -1,13 +1,10 @@
 import { forwardRef, Module } from '@nestjs/common';
-
-import { CommentsService } from './services/comments.service';
-import { CommentsController } from './controller/comments.controller';
 import { TypeOrmModule } from '@nestjs/typeorm';
-import { CommentEntity } from './entities/comment.entity';
-import { UsersModule } from 'src/users/users.module';
-import { UsersService } from 'src/users/services/users.service';
 import { BlogModule } from 'src/blog/blog.module';
-import { BlogService } from 'src/blog/service/blog.service';
+import { UsersModule } from 'src/users/users.module';
+import { CommentsController } from './controller/comments.controller';
+import { CommentEntity } from './entities/comment.entity';
+import { CommentsService } from './service/comments.service';
 
 @Module({
   imports: [

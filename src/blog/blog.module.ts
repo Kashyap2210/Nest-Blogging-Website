@@ -6,7 +6,7 @@ import { UsersService } from 'src/users/services/users.service';
 import { TypeOrmModule } from '@nestjs/typeorm';
 import { BlogEntity } from './entities/blog.entity';
 import { CommentsModule } from 'src/comments/comments.module';
-import { CommentsService } from 'src/comments/comments.service';
+import { CommentsService } from 'src/comments/service/comments.service';
 
 @Module({
   imports: [

@@ -21,40 +21,52 @@ export class UsersService {
     @InjectRepository(UserEntity)
     private readonly userRepository: Repository<UserEntity>,
   ) {}
-  async createUser(dto: IUserCreateDto): Promise<IUserEntity> {
+
+  async checkUserExists(
+    emailId: string,
+    username: string,
+    contactNo: string,
+    id?: number,
+  ): Promise<any> {
     const userByEmailId = await this.userRepository.findOne({
-      where: { emailId: dto.emailId },
+      where: { emailId: emailId },
     });
-    if (userByEmailId) {
+    if (userByEmailId && userByEmailId.id !== id) {
       throw new NotFoundException({
         key: 'User found with same email id',
-        message: `No user found with emailId: ${dto.emailId}`,
+        message: `User found with emailId: ${emailId}`,
       });
     }
     const userByUsername = await this.userRepository.findOne({
-      where: { username: dto.username },
+      where: { username: username },
     });
-    if (userByUsername) {
+    if (userByUsername && userByUsername.id !== id) {
       throw new NotFoundException({
         key: 'User found with same username',
-        message: `No user found with username: ${dto.username}`,
+        message: `User found with username: ${username}`,
       });
     }
     const userByContactNo = await this.userRepository.findOne({
-      where: { contactNo: dto.contactNo },
+      where: { contactNo: contactNo },
     });
-    if (userByContactNo) {
+    if (userByContactNo && userByContactNo.id !== id) {
       throw new NotFoundException({
         key: 'User found with same contact number',
-        message: `No user found with contact number: ${dto.contactNo}`,
+        message: `User found with contact number: ${contactNo}`,
       });
     }
+  }
+  async createUser(dto: IUserCreateDto): Promise<IUserEntity> {
+    const existingUser = await this.checkUserExists(
+      dto.emailId,
+      dto.username,
+      dto.contactNo,
+    );
     const hashedPassword = await bcrypt.hash(dto.password, 10);
     dto['password'] = hashedPassword;
     const user = this.userRepository.create(dto);
     user.profilePictureUrl = dto.profilePictureUrl;
     user.createdBy = user.updatedBy = '1';
-    delete user['password'];
     return this.userRepository.save(user);
   }
 
@@ -74,30 +86,31 @@ export class UsersService {
 
   async updateUserById(id: number, dto: IUserUpdateDto): Promise<any> {
     const existingUserById = await this.validatePresence(id);
-    const [userByEmailId, userByUsername, userByContactNo] = await Promise.all([
-      this.userRepository.findOne({ where: { emailId: dto.emailId } }),
-      this.userRepository.findOne({ where: { username: dto.username } }),
-      this.userRepository.findOne({ where: { contactNo: dto.contactNo } }),
-    ]);
-    if (userByEmailId && userByEmailId.id !== id) {
-      throw new ConflictException({
-        key: 'EmailAlreadyExists',
-        message: `A user with emailId ${dto.emailId} already exists.`,
-      });
-    }
+    const existingUser = await this.checkUserExists(
+      dto.emailId,
+      dto.username,
+      dto.contactNo,
+      id,
+    );
+    // if (userByEmailId && userByEmailId.id !== id) {
+    //   throw new ConflictException({
+    //     key: 'EmailAlreadyExists',
+    //     message: `A user with emailId ${dto.emailId} already exists.`,
+    //   });
+    // }
 
-    if (userByUsername && userByUsername.id !== id) {
-      throw new ConflictException({
-        key: 'UsernameAlreadyExists',
-        message: `A user with username ${dto.username} already exists.`,
-      });
-    }
-    if (userByContactNo && userByContactNo.id !== id) {
-      throw new ConflictException({
-        key: 'ContactNoAlreadyExists',
-        message: `A user with contact number ${dto.contactNo} already exists.`,
-      });
-    }
+    // if (userByUsername && userByUsername.id !== id) {
+    //   throw new ConflictException({
+    //     key: 'UsernameAlreadyExists',
+    //     message: `A user with username ${dto.username} already exists.`,
+    //   });
+    // }
+    // if (userByContactNo && userByContactNo.id !== id) {
+    //   throw new ConflictException({
+    //     key: 'ContactNoAlreadyExists',
+    //     message: `A user with contact number ${dto.contactNo} already exists.`,
+    //   });
+    // }
     const updatedUser = {
       id: id,
       name: dto.name,

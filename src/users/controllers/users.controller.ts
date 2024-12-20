@@ -1,4 +1,5 @@
 import {
+  BadRequestException,
   Body,
   Controller,
   Delete,
@@ -84,6 +85,12 @@ export class UsersController {
     @Req() request,
     @UploadedFile() file: Express.Multer.File,
   ): Promise<IUserEntity> {
+     console.log('Request body:', request.body); // Check request body
+     console.log('Uploaded file:', file); // Check uploaded file object
+
+     if (!file) {
+       throw new BadRequestException('File upload is required.');
+     }
     const { name, username, password, emailId, contactNo, gender } =
       request.body;
     const dto: IUserCreateDto = {

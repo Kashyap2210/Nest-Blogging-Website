@@ -50,8 +50,8 @@ export class LikesCounterBlogsService {
           likedBy: dto.likedStatus === LikeStatus.LIKED ? currentUser.id : null,
           disLikedBy:
             dto.likedStatus === LikeStatus.DISLIKED ? currentUser.id : null,
-          createdBy: currentUser.name,
-          updatedBy: currentUser.name,
+          createdBy: currentUser.id,
+          updatedBy: currentUser.id,
         },
       );
 
@@ -81,7 +81,7 @@ export class LikesCounterBlogsService {
         message: 'current user is not logged in',
       });
     }
-    const blogExists = await this.blogService.validatePresence(blogId);
+     await this.blogService.validatePresence(blogId);
 
     const existingLikeOrDislikeByUser: IBlogLikesCounterEntity =
       await this.likesCounterBlogRepository.findOneBy({

@@ -72,7 +72,7 @@ export class CommentsService {
       replyCommentId: createCommentDto.replyCommentId ?? null,
     };
     const comment = this.commentRepository.create(newComment);
-    comment.createdBy = comment.updatedBy = currentUser.name;
+    comment.createdBy = comment.updatedBy = currentUser.id;
 
     return this.commentRepository.save(comment);
   }
@@ -138,7 +138,7 @@ export class CommentsService {
     const updatedComment = {
       ...commentToUpdate,
       text: dto.text,
-      updatedBy: currentUser.name,
+      updatedBy: currentUser.id,
       updatedOn: new Date(),
       authorId: currentUser.id,
     };
@@ -169,7 +169,6 @@ export class CommentsService {
   }
 
   async findCommentsByBlogId(blogId: number): Promise<ICommentEntity[]> {
-    const blogComments = await this.commentRepository.findBy({ blogId });
-    return blogComments;
+    return await this.commentRepository.findBy({ blogId });
   }
 }

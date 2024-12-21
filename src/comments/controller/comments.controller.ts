@@ -17,10 +17,10 @@ import {
 import { AuthGuard } from 'src/auth/auth.guard';
 import { CurrentUser } from 'src/decorators/current_user.decorator';
 import { IUserEntity } from 'src/users/interfaces/entity.interface';
-import { CommentsService } from '../service/comments.service';
 
 import { CreateCommentDto } from '../dto/create-comment.dto';
 import { UpdateCommentDto } from '../dto/update-comment.dto';
+import { CommentsService } from '../service/comments.service';
 
 @ApiTags('comments')
 @ApiBearerAuth('access-token')

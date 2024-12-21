@@ -15,7 +15,6 @@ export interface IBlogCreateDto {
   title: string;
   keywords: string;
   content: string;
-  createdAt: string;
   author: string;
 }
 

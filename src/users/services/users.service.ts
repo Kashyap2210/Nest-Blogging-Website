@@ -66,7 +66,7 @@ export class UsersService {
     dto['password'] = hashedPassword;
     const user = this.userRepository.create(dto);
     user.profilePictureUrl = dto.profilePictureUrl;
-    user.createdBy = user.updatedBy = '1';
+    user.createdBy = user.updatedBy = user.id;
     return this.userRepository.save(user);
   }
 

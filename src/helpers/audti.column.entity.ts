@@ -16,15 +16,15 @@ export class AuditColumnEntity implements IAuditColumnEntity {
 
   @Column({
     name: 'created_by',
-    type: 'varchar',
+    type: 'int',
     nullable: false,
   })
-  createdBy: string;
+  createdBy: number;
 
   @Column({
     name: 'updated_by',
-    type: 'varchar',
+    type: 'int',
     nullable: false,
   })
-  updatedBy: string;
+  updatedBy: number;
 }

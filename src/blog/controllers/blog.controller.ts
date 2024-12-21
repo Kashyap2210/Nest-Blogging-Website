@@ -22,8 +22,7 @@ import { UpdateBlogDto } from '../dtos/update.blog.dto';
 import {
   IBlogEntity,
   IBlogEntityArray,
-  IBlogResponse,
-  IBulkBlogCreateDto,
+  IBlogResponse
 } from '../interfaces/blog.interfaces';
 import { BlogService } from '../service/blog.service';
 

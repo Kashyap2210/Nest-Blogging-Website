@@ -38,7 +38,6 @@ export class BlogController {
     description: 'A blog created and returned with type IBlogEntity',
   })
   @Post('')
-  @UseGuards(AuthGuard)
   async createBlog(
     @Body() dto: CreateBlogDto,
     @CurrentUser() currentUser: IUserEntity,

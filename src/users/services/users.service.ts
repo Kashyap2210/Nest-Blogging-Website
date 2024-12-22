@@ -1,8 +1,7 @@
 import {
   BadRequestException,
-  ConflictException,
   Injectable,
-  NotFoundException
+  NotFoundException,
 } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import * as bcrypt from 'bcrypt';
@@ -56,7 +55,11 @@ export class UsersService {
       });
     }
   }
-  async createUser(dto: IUserCreateDto): Promise<IUserEntity> {
+
+  async createUser(
+    dto: IUserCreateDto,
+    // currentUser: IUserEntity,
+  ): Promise<IUserEntity> {
     const existingUser = await this.checkUserExists(
       dto.emailId,
       dto.username,
@@ -66,11 +69,23 @@ export class UsersService {
     dto['password'] = hashedPassword;
     const user = this.userRepository.create(dto);
     user.profilePictureUrl = dto.profilePictureUrl;
-    user.createdBy = user.updatedBy = user.id;
+    user.createdBy = user.updatedBy = 1;
     return this.userRepository.save(user);
   }
 
-  async getAllUsers(): Promise<IUserEntityArray> {
+  async getAllUsers(currentUser: IUserEntity): Promise<IUserEntityArray> {
+    if (!currentUser) {
+      throw new BadRequestException({
+        key: 'currentUser',
+        message: 'current user is not logged in',
+      });
+    }
+    if (currentUser.role !== 'TOAA') {
+      throw new BadRequestException({
+        key: 'currentUser',
+        message: 'current user is not allowed to access this route',
+      });
+    }
     return this.userRepository.find();
   }
 
@@ -78,14 +93,48 @@ export class UsersService {
     return this.userRepository.findOne({ where: { username: name } });
   }
 
-  async getUserById(userId: number): Promise<IUserEntity> {
+  async getUserByIdAuth(userId: number): Promise<IUserEntity> {
     const [userById] = await this.validatePresence(userId);
     delete userById['password'];
     return userById;
   }
 
-  async updateUserById(id: number, dto: IUserUpdateDto): Promise<any> {
+  async getUserById(
+    userId: number,
+    currentUser: IUserEntity,
+  ): Promise<IUserEntity> {
+    if (!currentUser) {
+      throw new BadRequestException({
+        key: 'currentUser',
+        message: 'current user is not logged in',
+      });
+    }
+    const [userById] = await this.validatePresence(userId);
+    delete userById['password'];
+    return userById;
+  }
+
+  async updateUserById(
+    id: number,
+    dto: IUserUpdateDto,
+    currentUser: IUserEntity,
+  ): Promise<IUserEntity> {
+    if (!currentUser) {
+      throw new BadRequestException({
+        key: 'currentUser',
+        message: 'current user is not logged in',
+      });
+    }
     const existingUserById = await this.validatePresence(id);
+    if (
+      existingUserById[0].id === currentUser.id ||
+      existingUserById[0].role !== 'TOAA'
+    ) {
+      throw new BadRequestException({
+        key: 'id',
+        message: `Current User Cannot Edit This Blog As He Did Not Create It`,
+      });
+    }
     const existingUser = await this.checkUserExists(
       dto.emailId,
       dto.username,
@@ -125,9 +174,20 @@ export class UsersService {
     return updatedUserEntity;
   }
 
-  async deleteUserById(id: number): Promise<IUserEntity[]> {
-    let user = await this.validatePresence(id);
-    this.userRepository.delete(id);
+  async deleteUserById(
+    id: number,
+    currentUser: IUserEntity,
+  ): Promise<IUserEntity> {
+    if (!currentUser) {
+      throw new BadRequestException({
+        key: 'currentUser',
+        message: 'current user is not logged in',
+      });
+    }
+    let [user] = await this.validatePresence(id);
+    if (user.id === currentUser.id || user.role === 'TOAA') {
+      this.userRepository.delete(id);
+    }
     return user;
   }
 

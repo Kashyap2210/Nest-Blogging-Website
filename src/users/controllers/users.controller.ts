@@ -21,8 +21,7 @@ import {
 } from '@nestjs/swagger';
 import { diskStorage } from 'multer';
 import { imageFileFilter, profilePictureEditor } from 'src/file.utils';
-
-import { BulkUserCreateDto } from '../dtos/user.create.dto';
+import { CurrentUser } from 'src/decorators/current_user.decorator';
 import { UserUpdateDto } from '../dtos/user.update.dto';
 import {
   IUserCreateDto,
@@ -84,13 +83,14 @@ export class UsersController {
   async createUser(
     @Req() request,
     @UploadedFile() file: Express.Multer.File,
+    // @CurrentUser() currentUser: IUserEntity,
   ): Promise<IUserEntity> {
-     console.log('Request body:', request.body); // Check request body
-     console.log('Uploaded file:', file); // Check uploaded file object
+    console.log('Request body:', request.body); // Check request body
+    console.log('Uploaded file:', file); // Check uploaded file object
 
-     if (!file) {
-       throw new BadRequestException('File upload is required.');
-     }
+    if (!file) {
+      throw new BadRequestException('File upload is required.');
+    }
     const { name, username, password, emailId, contactNo, gender } =
       request.body;
     const dto: IUserCreateDto = {
@@ -106,9 +106,9 @@ export class UsersController {
     return createdUser;
   }
 
-  @ApiOperation({ summary: 'Get all users' })
+  @ApiOperation({ summary: 'Edit User Details' })
   @ApiOkResponse({
-    description: 'A list of users returned with type IUserEntityArray',
+    description: 'User with id will be edited',
   })
   @Patch(':id')
   @ApiBody({
@@ -154,8 +154,9 @@ export class UsersController {
   async updateUser(
     @Body() dto: UserUpdateDto,
     @Param('id', ParseIntPipe) id: number,
+    @CurrentUser() currentUser: IUserEntity,
   ): Promise<IUserEntity> {
-    return await this.usersService.updateUserById(id, dto);
+    return await this.usersService.updateUserById(id, dto, currentUser);
   }
 
   @ApiOperation({ summary: 'Get all users' })
@@ -163,9 +164,11 @@ export class UsersController {
     description: 'A list of users returned with type IUserEntityArray',
   })
   @Get()
-  async getAllUsers(): Promise<IUserEntityArray> {
+  async getAllUsers(
+    @CurrentUser() currentUser: IUserEntity,
+  ): Promise<IUserEntityArray> {
     //exclude password from the response
-    return this.usersService.getAllUsers();
+    return this.usersService.getAllUsers(currentUser);
   }
 
   @ApiOperation({ summary: 'Get a user' })
@@ -174,8 +177,11 @@ export class UsersController {
       'User returned with specific id & type IUserEntity. Use this API to decorate the profile page.',
   })
   @Get(':id')
-  async getUser(@Param('id', ParseIntPipe) id: number): Promise<IUserEntity> {
-    return this.usersService.getUserById(id);
+  async getUser(
+    @Param('id', ParseIntPipe) id: number,
+    @CurrentUser() currentUser: IUserEntity,
+  ): Promise<IUserEntity> {
+    return this.usersService.getUserById(id, currentUser);
   }
 
   @ApiOperation({ summary: 'Delete a user' })
@@ -183,7 +189,8 @@ export class UsersController {
   @Delete(':id')
   async deleteUser(
     @Param('id', ParseIntPipe) id: number,
-  ): Promise<IUserEntity[]> {
-    return this.usersService.deleteUserById(id);
+    @CurrentUser() currentUser: IUserEntity,
+  ): Promise<IUserEntity> {
+    return this.usersService.deleteUserById(id, currentUser);
   }
 }

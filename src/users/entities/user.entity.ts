@@ -62,4 +62,11 @@ export class UserEntity extends AuditColumnEntity implements IUserEntity {
     default: UserGender.PREFER_NOT_TO_SAY,
   })
   gender: UserGender;
+
+  @Column({
+    type: 'varchar',
+    name: 'role',
+    nullable: true,
+  })
+  role: string;
 }

@@ -5,7 +5,7 @@ import {
   ValidateNested,
 } from '@nestjs/class-validator';
 import { ApiProperty } from '@nestjs/swagger';
-import { Exclude, Type } from 'class-transformer';
+import { Type } from 'class-transformer';
 import { IsEmail } from 'class-validator';
 import {
   IBulkUserCreateDto,

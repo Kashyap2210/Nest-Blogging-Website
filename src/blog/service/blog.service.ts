@@ -37,8 +37,8 @@ export class BlogService {
       });
     }
     const blog = this.blogRepository.create(dto);
-    blog.createdBy = blog.updatedBy = currentUser[0].id;
-    blog.author = currentUser[0].name;
+    blog.createdBy = blog.updatedBy = currentUser.id;
+    blog.author = currentUser.name;
     return this.blogRepository.save(blog);
   }
 
@@ -92,6 +92,17 @@ export class BlogService {
         message: 'Blog with this title already exists',
       });
     }
+
+    if (
+      blogEntityById.createdBy !== currentUser.id &&
+      currentUser.role !== 'TOAA'
+    ) {
+      throw new BadRequestException({
+        key: 'userId',
+        message: `Current User with id ${currentUser.id} is not allowed to update this blog or he is not superAdmin`,
+      });
+    }
+
     (blogEntityById.title = dto.title),
       (blogEntityById.content = dto.content),
       (blogEntityById.updatedBy = blogEntityById.createdBy),
@@ -110,7 +121,18 @@ export class BlogService {
       });
     }
     const [blogToBeDeleted] = await this.validatePresence(id);
-    this.blogRepository.delete(blogToBeDeleted);
+
+    if (
+      blogToBeDeleted.createdBy !== currentUser.id &&
+      currentUser.role !== 'TOAA'
+    ) {
+      throw new BadRequestException({
+        key: 'userId',
+        message: `User with ID ${currentUser.id} is not authorized to delete this blog.`,
+      });
+    }
+
+    await this.blogRepository.delete(id);
   }
 
   async validatePresence(id: number): Promise<IBlogEntity[]> {

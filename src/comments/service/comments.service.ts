@@ -33,16 +33,8 @@ export class CommentsService {
       });
     }
 
-    const blogExists = await this.blogService.getBlogById(
-      createCommentDto.blogId,
-      currentUser,
-    );
-    if (!blogExists) {
-      throw new BadRequestException({
-        key: 'blogId',
-        message: `Blog with id: ${createCommentDto.blogId} does not exists`,
-      });
-    }
+    // check to if blog exists, if yes then code proceeds
+    await this.blogService.validatePresence(createCommentDto.blogId);
 
     if (createCommentDto.isReplyComment) {
       if (!createCommentDto.replyCommentId) {
@@ -52,16 +44,10 @@ export class CommentsService {
         });
       }
 
-      const parentComment = await this.commentRepository.findOneBy({
-        id: createCommentDto.replyCommentId,
+      // Check to see if parent comment exists
+      await this.validateCommentPresence({
+        parentCommentId: createCommentDto.replyCommentId,
       });
-
-      if (!parentComment) {
-        throw new BadRequestException({
-          key: 'replyCommentId',
-          message: `Comment with id: ${createCommentDto.replyCommentId} does not exists`,
-        });
-      }
     }
 
     const newComment = {
@@ -122,14 +108,11 @@ export class CommentsService {
         message: 'current user is not logged in',
       });
     }
-    const commentToUpdate = await this.commentRepository.findOneBy({ id });
-    if (!commentToUpdate) {
-      throw new BadRequestException({
-        key: 'id',
-        message: 'comment does not exists',
-      });
-    }
-    if (commentToUpdate.authorId !== currentUser.id) {
+    const [commentToUpdate] = await this.validateCommentPresence({ id: id });
+    if (
+      commentToUpdate.authorId !== currentUser.id &&
+      currentUser.role !== 'TOAA'
+    ) {
       throw new BadRequestException({
         key: 'userId',
         message: 'comment does not belong to current user',
@@ -152,14 +135,11 @@ export class CommentsService {
         message: 'current user is not logged in',
       });
     }
-    const [commentToDelete] = await this.commentRepository.findBy({ id });
-    if (!commentToDelete) {
-      throw new BadRequestException({
-        key: 'commentId',
-        message: `Comment with ${id} not found`,
-      });
-    }
-    if (currentUser.id !== commentToDelete.authorId) {
+    const [commentToDelete] = await this.validateCommentPresence({ id: id });
+    if (
+      currentUser.id !== commentToDelete.authorId &&
+      currentUser.role !== 'TOAA'
+    ) {
       throw new BadRequestException({
         key: 'userId',
         message: 'You are not authorized to delete this comment',
@@ -169,6 +149,40 @@ export class CommentsService {
   }
 
   async findCommentsByBlogId(blogId: number): Promise<ICommentEntity[]> {
-    return await this.commentRepository.findBy({ blogId });
+    return await this.validateCommentPresence({ blogId: blogId });
+  }
+
+  async validateCommentPresence(params: {
+    id?: number;
+    blogId?: number;
+    parentCommentId?: number;
+  }): Promise<ICommentEntity[]> {
+    const { id, blogId, parentCommentId } = params;
+
+    if (!id && !blogId && !parentCommentId) {
+      throw new BadRequestException({
+        key: 'missingParameters',
+        message:
+          'At least one identifier (id, blogId, or parentCommentId) must be provided.',
+      });
+    }
+
+    const filter = id ? { id } : blogId ? { blogId } : { parentCommentId };
+    const commentToFind = await this.commentRepository.findBy(filter);
+
+    if (commentToFind.length === 0) {
+      const errorKey = id ? 'commentId' : blogId ? 'blogId' : 'replyCommentId';
+      const errorMessage = id
+        ? `Comment with id ${id} not found.`
+        : blogId
+          ? `No comments found for blog with id ${blogId}.`
+          : `Comment with id ${parentCommentId} does not exist.`;
+
+      throw new BadRequestException({
+        key: errorKey,
+        message: errorMessage,
+      });
+    }
+    return commentToFind;
   }
 }

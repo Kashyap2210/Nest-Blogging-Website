@@ -1,7 +1,6 @@
 import { IsString } from "@nestjs/class-validator";
 import { ApiProperty } from "@nestjs/swagger";
 import { IBlogCreateDto } from "../interfaces/blog.interfaces";
-import { IsNumber } from 'class-validator';
 
 export class CreateBlogDto implements IBlogCreateDto {
   @IsString()
@@ -36,11 +35,11 @@ export class CreateBlogDto implements IBlogCreateDto {
     })
     author: string;
 
-  @IsString()
-  @ApiProperty({
-    description: 'Date of blog creation',
-    example: '2022-01-01',
-    required: true,
-  })
-  createdAt: string;
+  // @IsString()
+  // @ApiProperty({
+  //   description: 'Date of blog creation',
+  //   example: '2022-01-01',
+  //   required: true,
+  // })
+  // createdAt: string;
 }

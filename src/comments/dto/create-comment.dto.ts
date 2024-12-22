@@ -23,6 +23,7 @@ export class CreateCommentDto implements ICommentCreateDto {
   blogId: number;
 
   @IsPositive()
+  @IsOptional()
   @ApiProperty({
     name: 'replyCommentId',
     description: 'id of the blog',
@@ -32,6 +33,7 @@ export class CreateCommentDto implements ICommentCreateDto {
   replyCommentId: number;
 
   @IsBoolean()
+  @IsOptional()
   @ApiProperty({
     name: 'isReplyComment',
     description: 'is this a repeated comment',

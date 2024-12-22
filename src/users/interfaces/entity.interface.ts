@@ -10,6 +10,7 @@ export interface IUserEntity extends IAuditColumnEntity {
   contactNo: string;
   profilePictureUrl: string;
   gender: UserGender;
+  role: string;
 }
 
 export type IUserEntityArray = IUserEntity[];

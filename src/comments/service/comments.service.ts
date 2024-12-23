@@ -7,7 +7,7 @@ import {
 import { InjectRepository } from '@nestjs/typeorm';
 import { BlogService } from 'src/blog/service/blog.service';
 import { IUserEntity } from 'src/users/interfaces/entity.interface';
-import { Repository } from 'typeorm';
+import { EntityManager, Repository } from 'typeorm';
 import { CreateCommentDto } from '../dto/create-comment.dto';
 import { ICommentUpdateDto } from '../dto/update-comment.dto';
 import { CommentEntity } from '../entities/comment.entity';
@@ -186,9 +186,13 @@ export class CommentsService {
     return commentToFind;
   }
 
-  async cascadeCommentDelete(blogId: number) {
+  async cascadeCommentDelete(blogId: number, entityManager: EntityManager) {
     const comments = await this.validateCommentPresence({ blogId: blogId });
     const commentIdsToDelete = comments.map((comment) => comment.id);
-    return this.commentRepository.delete(commentIdsToDelete);
+
+    const result = await entityManager
+      .getRepository(this.commentRepository.target)
+      .delete(commentIdsToDelete);
+    return result.affected || 0;
   }
 }

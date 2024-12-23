@@ -7,7 +7,7 @@ import {
 import { InjectRepository } from '@nestjs/typeorm';
 import { BlogService } from 'src/blog/service/blog.service';
 import { IUserEntity } from 'src/users/interfaces/entity.interface';
-import { Repository } from 'typeorm';
+import { EntityManager, Repository } from 'typeorm';
 import { CreateLikesCounterBlogDto } from '../dto/create-blog-likes.dto';
 import { BlogLikesCounterEntity } from '../entities/likes-counter-blog.entity';
 import { LikeStatus } from '../enums/like.status.enum';
@@ -99,10 +99,16 @@ export class LikesCounterBlogsService {
     return likeDislikeEntity;
   }
 
-  async cascadeDelete(blogId: number) {
+  async cascadeDelete(blogId: number, entityManager: EntityManager) {
     const likeDislikeEntitiesToDelete =
       await this.likesCounterBlogRepository.findBy({ blogId });
-    const likeDislikeEntitiesToDeleteIds = likeDislikeEntitiesToDelete.map((entity)=>entity.id)
-    await this.likesCounterBlogRepository.delete(likeDislikeEntitiesToDeleteIds)
+    const likeDislikeEntitiesToDeleteIds = likeDislikeEntitiesToDelete.map(
+      (entity) => entity.id,
+    );
+
+    const result = await entityManager
+      .getRepository(this.likesCounterBlogRepository.target)
+      .delete(likeDislikeEntitiesToDeleteIds);
+    return result.affected || 0;
   }
 }

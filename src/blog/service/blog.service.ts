@@ -17,6 +17,7 @@ import {
   IBlogUpdateDto,
 } from '../interfaces/blog.interfaces';
 import { LikesCounterBlogsService } from 'src/likes-counter-blogs/services/likes-counter-blogs.service';
+import { DataSource } from 'typeorm';
 
 @Injectable()
 export class BlogService {
@@ -26,6 +27,7 @@ export class BlogService {
     @Inject(forwardRef(() => CommentsService))
     private readonly commentsService: CommentsService,
     private readonly likesCounterBlogsService: LikesCounterBlogsService,
+    private dataSource: DataSource,
   ) {}
 
   async createBlog(
@@ -133,16 +135,24 @@ export class BlogService {
         message: `User with ID ${currentUser.id} is not authorized to delete this blog.`,
       });
     }
-    const affectedComments =
-      await this.commentsService.cascadeCommentDelete(id);
-    console.log('this is the affected comments deleted', affectedComments);
 
-    const afftectedLikeDislikeEntities =
-      await this.likesCounterBlogsService.cascadeDelete(id);
-    console.log(
-      'this is the affected likes& dislikes entities deleted',
-      afftectedLikeDislikeEntities,
-    );
+    await this.dataSource.transaction(async (manager) => {
+      //this are all the affected comments
+      const affectedComments = await this.commentsService.cascadeCommentDelete(
+        id,
+        manager,
+      );
+      // console.log('this is the affected comments deleted', affectedComments);
+
+      //this are all the affected likes & dislikes entity
+      const afftectedLikeDislikeEntities =
+        await this.likesCounterBlogsService.cascadeDelete(id, manager);
+      // console.log(
+      //   'this is the affected likes& dislikes entities deleted',
+      //   afftectedLikeDislikeEntities,
+      // );
+    });
+
     await this.blogRepository.delete(id);
   }
 

@@ -6,15 +6,17 @@ import { UsersModule } from 'src/users/users.module';
 import { BlogController } from './controllers/blog.controller';
 import { BlogEntity } from './entities/blog.entity';
 import { BlogService } from './service/blog.service';
+import { LikesCounterBlogsModule } from 'src/likes-counter-blogs/likes-counter-blogs.module';
+import { LikesCounterBlogsService } from 'src/likes-counter-blogs/services/likes-counter-blogs.service';
 
 
 @Module({
   imports: [
     TypeOrmModule.forFeature([BlogEntity]),
     UsersModule,
-    forwardRef(() => CommentsModule),
+    forwardRef(() => CommentsModule), LikesCounterBlogsModule
   ],
-  providers: [BlogService, UsersService],
+  providers: [BlogService, UsersService, LikesCounterBlogsService],
   controllers: [BlogController],
   exports: [BlogService],
 })

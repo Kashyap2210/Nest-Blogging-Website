@@ -33,7 +33,7 @@ export class LikesCounterBlogsService {
       });
     }
     await this.blogService.validatePresence(dto.blogId);
-    
+
     const existingLikeOrDislikeByUser =
       await this.likesCounterBlogRepository.findOneBy({
         blogId: dto.blogId,
@@ -81,7 +81,7 @@ export class LikesCounterBlogsService {
         message: 'current user is not logged in',
       });
     }
-     await this.blogService.validatePresence(blogId);
+    await this.blogService.validatePresence(blogId);
 
     const existingLikeOrDislikeByUser: IBlogLikesCounterEntity =
       await this.likesCounterBlogRepository.findOneBy({
@@ -97,5 +97,12 @@ export class LikesCounterBlogsService {
       id: deleteId,
     });
     return likeDislikeEntity;
+  }
+
+  async cascadeDelete(blogId: number) {
+    const likeDislikeEntitiesToDelete =
+      await this.likesCounterBlogRepository.findBy({ blogId });
+    const likeDislikeEntitiesToDeleteIds = likeDislikeEntitiesToDelete.map((entity)=>entity.id)
+    await this.likesCounterBlogRepository.delete(likeDislikeEntitiesToDeleteIds)
   }
 }

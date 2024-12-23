@@ -185,4 +185,10 @@ export class CommentsService {
     }
     return commentToFind;
   }
+
+  async cascadeCommentDelete(blogId: number) {
+    const comments = await this.validateCommentPresence({ blogId: blogId });
+    const commentIdsToDelete = comments.map((comment) => comment.id);
+    return this.commentRepository.delete(commentIdsToDelete);
+  }
 }

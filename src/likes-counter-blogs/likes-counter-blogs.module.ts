@@ -14,5 +14,6 @@ import { CommentsModule } from 'src/comments/comments.module';
   ],
   controllers: [LikesCounterBlogsController],
   providers: [LikesCounterBlogsService],
+  exports: [LikesCounterBlogsService],
 })
 export class LikesCounterBlogsModule {}

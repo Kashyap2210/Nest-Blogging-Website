@@ -151,9 +151,15 @@ export class BlogService {
       //   'this is the affected likes& dislikes entities deleted',
       //   afftectedLikeDislikeEntities,
       // );
-    });
 
-    await this.blogRepository.delete(id);
+      //this is to delete the blog
+      await this.blogRepository.delete(id);
+    });
+  }
+
+  async findBlogByUserId(currentUser: IUserEntity): Promise<IBlogEntity[]>{
+    const allBlogsOfUser = await this.blogRepository.findBy({ createdBy: currentUser.id })
+    return allBlogsOfUser;
   }
 
   async validatePresence(id: number): Promise<IBlogEntity[]> {

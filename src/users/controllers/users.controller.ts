@@ -10,10 +10,12 @@ import {
   Post,
   Req,
   UploadedFile,
+  UseGuards,
   UseInterceptors,
 } from '@nestjs/common';
 import { FileInterceptor } from '@nestjs/platform-express';
 import {
+  ApiBearerAuth,
   ApiBody,
   ApiConsumes,
   ApiOkResponse,
@@ -29,6 +31,7 @@ import {
   IUserEntityArray,
 } from '../interfaces/entity.interface';
 import { UsersService } from '../services/users.service';
+import { AuthGuard } from 'src/auth/auth.guard';
 
 @Controller('users')
 export class UsersController {
@@ -184,6 +187,8 @@ export class UsersController {
     return this.usersService.getUserById(id, currentUser);
   }
 
+  @ApiBearerAuth('access-token')
+  @UseGuards(AuthGuard)
   @ApiOperation({ summary: 'Delete a user' })
   @ApiOkResponse({ description: 'Delete a user with id' })
   @Delete(':id')

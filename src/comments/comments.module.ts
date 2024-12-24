@@ -9,7 +9,7 @@ import { CommentsService } from './service/comments.service';
 @Module({
   imports: [
     TypeOrmModule.forFeature([CommentEntity]),
-    UsersModule,
+    forwardRef(() => UsersModule),
     forwardRef(() => BlogModule),
   ],
   controllers: [CommentsController],

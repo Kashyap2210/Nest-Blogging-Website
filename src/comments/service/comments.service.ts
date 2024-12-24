@@ -186,13 +186,10 @@ export class CommentsService {
     return commentToFind;
   }
 
-  async cascadeCommentDelete(blogId: number, entityManager: EntityManager) {
+  async cascadeCommentDelete(blogId: number) {
     const comments = await this.validateCommentPresence({ blogId: blogId });
     const commentIdsToDelete = comments.map((comment) => comment.id);
 
-    const result = await entityManager
-      .getRepository(this.commentRepository.target)
-      .delete(commentIdsToDelete);
-    return result.affected || 0;
+    return this.commentRepository.delete(commentIdsToDelete);
   }
 }

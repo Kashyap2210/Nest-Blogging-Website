@@ -136,25 +136,21 @@ export class BlogService {
       });
     }
 
-    await this.dataSource.transaction(async (manager) => {
-      //this are all the affected comments
-      const affectedComments = await this.commentsService.cascadeCommentDelete(
-        id,
-        manager,
-      );
-      // console.log('this is the affected comments deleted', affectedComments);
+    //this are all the affected comments
+    const affectedComments =
+      await this.commentsService.cascadeCommentDelete(id);
+    console.log('this is the affected comments deleted', affectedComments);
 
-      //this are all the affected likes & dislikes entity
-      const afftectedLikeDislikeEntities =
-        await this.likesCounterBlogsService.cascadeDelete(id, manager);
-      // console.log(
-      //   'this is the affected likes& dislikes entities deleted',
-      //   afftectedLikeDislikeEntities,
-      // );
+    //this are all the affected likes & dislikes entity
+    const afftectedLikeDislikeEntities =
+      await this.likesCounterBlogsService.cascadeDelete(id);
+    console.log(
+      'this is the affected likes& dislikes entities deleted',
+      afftectedLikeDislikeEntities,
+    );
 
-      //this is to delete the blog
-      await this.blogRepository.delete(id);
-    });
+    //this is to delete the blog
+    await this.blogRepository.delete(id);
   }
 
   async findBlogByUserId(currentUser: IUserEntity): Promise<IBlogEntity[]>{

@@ -99,16 +99,18 @@ export class LikesCounterBlogsService {
     return likeDislikeEntity;
   }
 
-  async cascadeDelete(blogId: number, entityManager: EntityManager) {
+  async cascadeDelete(blogId: number) {
     const likeDislikeEntitiesToDelete =
       await this.likesCounterBlogRepository.findBy({ blogId });
     const likeDislikeEntitiesToDeleteIds = likeDislikeEntitiesToDelete.map(
       (entity) => entity.id,
     );
-
-    const result = await entityManager
-      .getRepository(this.likesCounterBlogRepository.target)
-      .delete(likeDislikeEntitiesToDeleteIds);
-    return result.affected || 0;
+    return await this.likesCounterBlogRepository.delete(
+      likeDislikeEntitiesToDeleteIds,
+    );
+    // const result = await entityManager
+    //   .getRepository(this.likesCounterBlogRepository.target)
+    //   .delete(likeDislikeEntitiesToDeleteIds);
+    // return result.affected || 0;
   }
 }

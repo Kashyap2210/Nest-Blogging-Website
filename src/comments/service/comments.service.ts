@@ -25,6 +25,7 @@ export class CommentsService {
   async create(
     createCommentDto: CreateCommentDto,
     currentUser: IUserEntity,
+    entityManager?: EntityManager,
   ): Promise<ICommentEntity> {
     if (!currentUser) {
       throw new BadRequestException({
@@ -34,7 +35,12 @@ export class CommentsService {
     }
 
     // check to if blog exists, if yes then code proceeds
-    await this.blogService.validatePresence(createCommentDto.blogId);
+    await this.blogService.validatePresence(
+      'id',
+      [createCommentDto.blogId],
+      'id',
+      entityManager,
+    );
 
     if (createCommentDto.isReplyComment) {
       if (!createCommentDto.replyCommentId) {

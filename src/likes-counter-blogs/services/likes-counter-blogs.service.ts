@@ -7,7 +7,7 @@ import {
 import { InjectRepository } from '@nestjs/typeorm';
 import { BlogService } from 'src/blog/service/blog.service';
 import { IUserEntity } from 'src/users/interfaces/entity.interface';
-import { Repository } from 'typeorm';
+import { EntityManager, Repository } from 'typeorm';
 import { CreateLikesCounterBlogDto } from '../dto/create-blog-likes.dto';
 import { BlogLikesCounterEntity } from '../entities/likes-counter-blog.entity';
 import { LikeStatus } from '../enums/like.status.enum';
@@ -33,7 +33,7 @@ export class LikesCounterBlogsService {
       });
     }
     await this.blogService.validatePresence(dto.blogId);
-    
+
     const existingLikeOrDislikeByUser =
       await this.likesCounterBlogRepository.findOneBy({
         blogId: dto.blogId,
@@ -81,7 +81,7 @@ export class LikesCounterBlogsService {
         message: 'current user is not logged in',
       });
     }
-     await this.blogService.validatePresence(blogId);
+    await this.blogService.validatePresence(blogId);
 
     const existingLikeOrDislikeByUser: IBlogLikesCounterEntity =
       await this.likesCounterBlogRepository.findOneBy({
@@ -97,5 +97,29 @@ export class LikesCounterBlogsService {
       id: deleteId,
     });
     return likeDislikeEntity;
+  }
+
+  async findLikeDislikeEntitiesByBlogId(
+    id: number,
+    currentUser: IUserEntity,
+  ): Promise<any> {
+    const likeDislikeEntitiesForBlog =
+      await this.likesCounterBlogRepository.findBy({ blogId: id });
+    return likeDislikeEntitiesForBlog;
+  }
+
+  async cascadeDelete(blogId: number) {
+    const likeDislikeEntitiesToDelete =
+      await this.likesCounterBlogRepository.findBy({ blogId });
+    const likeDislikeEntitiesToDeleteIds = likeDislikeEntitiesToDelete.map(
+      (entity) => entity.id,
+    );
+    return await this.likesCounterBlogRepository.delete(
+      likeDislikeEntitiesToDeleteIds,
+    );
+    // const result = await entityManager
+    //   .getRepository(this.likesCounterBlogRepository.target)
+    //   .delete(likeDislikeEntitiesToDeleteIds);
+    // return result.affected || 0;
   }
 }

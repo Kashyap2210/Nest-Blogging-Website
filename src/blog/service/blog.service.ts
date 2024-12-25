@@ -16,6 +16,8 @@ import {
   IBlogResponse,
   IBlogUpdateDto,
 } from '../interfaces/blog.interfaces';
+import { LikesCounterBlogsService } from 'src/likes-counter-blogs/services/likes-counter-blogs.service';
+import { DataSource } from 'typeorm';
 
 @Injectable()
 export class BlogService {
@@ -24,6 +26,8 @@ export class BlogService {
     private blogRepository: Repository<BlogEntity>,
     @Inject(forwardRef(() => CommentsService))
     private readonly commentsService: CommentsService,
+    private readonly likesCounterBlogsService: LikesCounterBlogsService,
+    private dataSource: DataSource,
   ) {}
 
   async createBlog(
@@ -132,7 +136,34 @@ export class BlogService {
       });
     }
 
+    //this are all the affected comments
+    const affectedComments = await this.commentsService.findCommentsByBlogId(id)
+    // console.log("this are all the affected comments", affectedComments)
+    const deletedComments = await this.commentsService.cascadeCommentDelete(id);
+    // console.log('this is the affected comments deleted', deletedComments);
+
+    //this are all the affected likes & dislikes entity
+    const likeDislikeEntitiesToBeDeleted =
+      await this.likesCounterBlogsService.findLikeDislikeEntitiesByBlogId(
+        id,
+        currentUser,
+      );
+    // console.log(
+    //   'this is the affected likes& dislikes entities deleted',
+    //   likeDislikeEntitiesToBeDeleted,
+    // );
+    const affectedEntities =
+      await this.likesCounterBlogsService.cascadeDelete(id);
+    // console.log('this are all the deleted Entities', affectedEntities);
+
+    //this is to delete the blog
     await this.blogRepository.delete(id);
+  }
+
+  async findBlogByUserId(currentUser: IUserEntity): Promise<IBlogEntity[]>{
+    const allBlogsOfUser = await this.blogRepository.findBy({ createdBy: currentUser.id })
+    
+    return allBlogsOfUser;
   }
 
   async validatePresence(id: number): Promise<IBlogEntity[]> {

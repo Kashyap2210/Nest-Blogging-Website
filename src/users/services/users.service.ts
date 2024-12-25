@@ -1,5 +1,7 @@
 import {
   BadRequestException,
+  forwardRef,
+  Inject,
   Injectable,
   NotFoundException,
 } from '@nestjs/common';
@@ -13,12 +15,15 @@ import {
   IUserEntity,
   IUserEntityArray,
 } from '../interfaces/entity.interface';
+import { BlogService } from 'src/blog/service/blog.service';
 
 @Injectable()
 export class UsersService {
   constructor(
     @InjectRepository(UserEntity)
     private readonly userRepository: Repository<UserEntity>,
+    @Inject(forwardRef(() => BlogService))
+    private blogService: BlogService,
   ) {}
 
   async checkUserExists(
@@ -174,21 +179,29 @@ export class UsersService {
     return updatedUserEntity;
   }
 
-  async deleteUserById(
-    id: number,
-    currentUser: IUserEntity,
-  ): Promise<IUserEntity> {
+  async deleteUserById(id: number, currentUser: IUserEntity): Promise<any> {
     if (!currentUser) {
       throw new BadRequestException({
         key: 'currentUser',
         message: 'current user is not logged in',
       });
     }
-    let [user] = await this.validatePresence(id);
-    if (user.id === currentUser.id || user.role === 'TOAA') {
-      this.userRepository.delete(id);
+    await this.validatePresence(id);
+
+    const allCurrentUsersBlogs =
+      await this.blogService.findBlogByUserId(currentUser);
+    // console.log(
+    //   'this are all the blogs of the current User',
+    //   allCurrentUsersBlogs,
+    // );
+    if (allCurrentUsersBlogs && allCurrentUsersBlogs.length > 0) {
+      for (const blog of allCurrentUsersBlogs) {
+        await this.blogService.deleteBlogById(blog.id, currentUser);
+      }
     }
-    return user;
+
+    this.userRepository.delete(id);
+    return 'This User is deleted';
   }
 
   async validatePresence(id: number): Promise<IUserEntity[]> {

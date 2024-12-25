@@ -99,6 +99,15 @@ export class LikesCounterBlogsService {
     return likeDislikeEntity;
   }
 
+  async findLikeDislikeEntitiesByBlogId(
+    id: number,
+    currentUser: IUserEntity,
+  ): Promise<any> {
+    const likeDislikeEntitiesForBlog =
+      await this.likesCounterBlogRepository.findBy({ blogId: id });
+    return likeDislikeEntitiesForBlog;
+  }
+
   async cascadeDelete(blogId: number) {
     const likeDislikeEntitiesToDelete =
       await this.likesCounterBlogRepository.findBy({ blogId });

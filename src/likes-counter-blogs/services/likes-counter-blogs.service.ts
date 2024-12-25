@@ -25,6 +25,7 @@ export class LikesCounterBlogsService {
   async createLikeDislikeEntity(
     dto: CreateLikesCounterBlogDto,
     currentUser: IUserEntity,
+    entityManager?: EntityManager,
   ): Promise<IBlogLikesCounterEntity> {
     if (!currentUser) {
       throw new BadRequestException({
@@ -32,7 +33,12 @@ export class LikesCounterBlogsService {
         message: 'current user is not logged in',
       });
     }
-    await this.blogService.validatePresence(dto.blogId);
+    await this.blogService.validatePresence(
+      'id',
+      [dto.blogId],
+      'id',
+      entityManager,
+    );
 
     const existingLikeOrDislikeByUser =
       await this.likesCounterBlogRepository.findOneBy({
@@ -74,6 +80,7 @@ export class LikesCounterBlogsService {
   async changeLikeStatusOfBlogById(
     blogId: number,
     currentUser: IUserEntity,
+    entityManager?: EntityManager,
   ): Promise<IBlogLikesCounterEntity> {
     if (!currentUser) {
       throw new BadRequestException({
@@ -81,7 +88,12 @@ export class LikesCounterBlogsService {
         message: 'current user is not logged in',
       });
     }
-    await this.blogService.validatePresence(blogId);
+    await this.blogService.validatePresence(
+      'id',
+      [blogId],
+      'id',
+      entityManager,
+    );
 
     const existingLikeOrDislikeByUser: IBlogLikesCounterEntity =
       await this.likesCounterBlogRepository.findOneBy({

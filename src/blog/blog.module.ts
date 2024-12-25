@@ -9,6 +9,7 @@ import { LikesCounterBlogsModule } from 'src/likes-counter-blogs/likes-counter-b
 import { LikesCounterBlogsService } from 'src/likes-counter-blogs/services/likes-counter-blogs.service';
 import { CommentsModule } from 'src/comments/comments.module';
 import { CommentsService } from 'src/comments/service/comments.service';
+import { BlogRepository } from './repository/blogs.repository';
 
 @Module({
   imports: [
@@ -22,6 +23,7 @@ import { CommentsService } from 'src/comments/service/comments.service';
     UsersService,
     LikesCounterBlogsService,
     CommentsService,
+    BlogRepository
   ],
   controllers: [BlogController],
   exports: [BlogService],

@@ -7,7 +7,7 @@ import {
 import { InjectRepository } from '@nestjs/typeorm';
 import { CommentsService } from 'src/comments/service/comments.service';
 import { IUserEntity } from 'src/users/interfaces/entity.interface';
-import { Repository } from 'typeorm';
+import { EntityManager, Repository } from 'typeorm';
 import { BlogEntity } from '../entities/blog.entity';
 import {
   IBlogCreateDto,
@@ -18,17 +18,24 @@ import {
 } from '../interfaces/blog.interfaces';
 import { LikesCounterBlogsService } from 'src/likes-counter-blogs/services/likes-counter-blogs.service';
 import { DataSource } from 'typeorm';
+import { EntityManagerBaseService } from 'src/helpers/entity.repository';
+import { BlogRepository } from '../repository/blogs.repository';
 
 @Injectable()
-export class BlogService {
+export class BlogService extends EntityManagerBaseService<BlogEntity> {
   constructor(
     @InjectRepository(BlogEntity)
-    private blogRepository: Repository<BlogEntity>,
+    private readonly blogRepository: BlogRepository, // Injecting custom repository
     @Inject(forwardRef(() => CommentsService))
     private readonly commentsService: CommentsService,
     private readonly likesCounterBlogsService: LikesCounterBlogsService,
     private dataSource: DataSource,
-  ) {}
+  ) {
+    super();
+  }
+  getEntityClass(): new () => BlogEntity {
+    return BlogEntity;
+  }
 
   async createBlog(
     dto: IBlogCreateDto,
@@ -40,25 +47,25 @@ export class BlogService {
         message: 'current user is not logged in',
       });
     }
-    const blog = this.blogRepository.create(dto);
+    const blog = await this.blogRepository.getInstance(dto, currentUser);
     blog.createdBy = blog.updatedBy = currentUser.id;
-    blog.author = currentUser.name;
-    return this.blogRepository.save(blog);
+    return this.blogRepository.create(blog);
   }
 
-  async getAllBlogs(currentUser: IUserEntity): Promise<IBlogEntityArray> {
-    if (!currentUser) {
-      throw new BadRequestException({
-        key: 'currentUser',
-        message: 'current user is not logged in',
-      });
-    }
-    return this.blogRepository.find();
-  }
+  // async getAllBlogs(currentUser: IUserEntity): Promise<IBlogEntityArray> {
+  //   if (!currentUser) {
+  //     throw new BadRequestException({
+  //       key: 'currentUser',
+  //       message: 'current user is not logged in',
+  //     });
+  //   }
+  //   return this.blogRepository.getById(id);
+  // }
 
   async getBlogById(
     id: number,
     currentUser: IUserEntity,
+    entityManager?: EntityManager,
   ): Promise<IBlogResponse> {
     if (!currentUser) {
       throw new BadRequestException({
@@ -67,7 +74,12 @@ export class BlogService {
       });
     }
     const blogComments = await this.commentsService.findCommentsByBlogId(id);
-    const [blogById] = await this.validatePresence(id);
+    const [blogById] = await this.blogRepository.validatePresence(
+      'id',
+      [id],
+      'id',
+      entityManager,
+    );
 
     return {
       blog: blogById,
@@ -79,6 +91,7 @@ export class BlogService {
     id: number,
     dto: IBlogUpdateDto,
     currentUser: IUserEntity,
+    entityManager?: EntityManager,
   ): Promise<IBlogEntity> {
     if (!currentUser) {
       throw new BadRequestException({
@@ -86,9 +99,14 @@ export class BlogService {
         message: 'current user is not logged in',
       });
     }
-    const [blogEntityById] = await this.validatePresence(id);
-    const blogFromDtoTitle = await this.blogRepository.findBy({
-      title: dto.title,
+    const [blogEntityById] = await this.blogRepository.validatePresence(
+      'id',
+      [id],
+      'id',
+      entityManager,
+    );
+    const blogFromDtoTitle = await this.blogRepository.getByFilter({
+      title: [dto.title],
     });
     if (blogFromDtoTitle.length > 0 && blogFromDtoTitle[0].id !== id) {
       throw new BadRequestException({
@@ -112,19 +130,30 @@ export class BlogService {
       (blogEntityById.updatedBy = blogEntityById.createdBy),
       (blogEntityById.keywords = dto.keywords);
 
-    const updatedBlog: IBlogEntity =
-      await this.blogRepository.save(blogEntityById);
+    const updatedBlog: IBlogEntity = await this.blogRepository.updateById(
+      id,
+      blogEntityById,
+    );
     return updatedBlog;
   }
 
-  async deleteBlogById(id: number, currentUser: IUserEntity): Promise<void> {
+  async deleteBlogById(
+    id: number,
+    currentUser: IUserEntity,
+    entityManager?: EntityManager,
+  ): Promise<void> {
     if (!currentUser) {
       throw new BadRequestException({
         key: 'currentUser',
         message: 'current user is not logged in',
       });
     }
-    const [blogToBeDeleted] = await this.validatePresence(id);
+    const [blogToBeDeleted] = await this.blogRepository.validatePresence(
+      'id',
+      [id],
+      'id',
+      entityManager,
+    );
 
     if (
       blogToBeDeleted.createdBy !== currentUser.id &&
@@ -137,43 +166,46 @@ export class BlogService {
     }
 
     //this are all the affected comments
-    const affectedComments = await this.commentsService.findCommentsByBlogId(id)
-    // console.log("this are all the affected comments", affectedComments)
-    const deletedComments = await this.commentsService.cascadeCommentDelete(id);
-    // console.log('this is the affected comments deleted', deletedComments);
+    // const affectedComments =
+    //   await this.commentsService.findCommentsByBlogId(id);
+    // // console.log("this are all the affected comments", affectedComments)
+    // const deletedComments = await this.commentsService.cascadeCommentDelete(id);
+    // // console.log('this is the affected comments deleted', deletedComments);
 
-    //this are all the affected likes & dislikes entity
-    const likeDislikeEntitiesToBeDeleted =
-      await this.likesCounterBlogsService.findLikeDislikeEntitiesByBlogId(
-        id,
-        currentUser,
-      );
-    // console.log(
-    //   'this is the affected likes& dislikes entities deleted',
-    //   likeDislikeEntitiesToBeDeleted,
-    // );
-    const affectedEntities =
-      await this.likesCounterBlogsService.cascadeDelete(id);
-    // console.log('this are all the deleted Entities', affectedEntities);
+    // //this are all the affected likes & dislikes entity
+    // const likeDislikeEntitiesToBeDeleted =
+    //   await this.likesCounterBlogsService.findLikeDislikeEntitiesByBlogId(
+    //     id,
+    //     currentUser,
+    //   );
+    // // console.log(
+    // //   'this is the affected likes& dislikes entities deleted',
+    // //   likeDislikeEntitiesToBeDeleted,
+    // // );
+    // const affectedEntities =
+    //   await this.likesCounterBlogsService.cascadeDelete(id);
+    // // console.log('this are all the deleted Entities', affectedEntities);
 
     //this is to delete the blog
-    await this.blogRepository.delete(id);
+    await this.blogRepository.deleteById(id);
   }
 
-  async findBlogByUserId(currentUser: IUserEntity): Promise<IBlogEntity[]>{
-    const allBlogsOfUser = await this.blogRepository.findBy({ createdBy: currentUser.id })
-    
+  async findBlogByUserId(currentUser: IUserEntity): Promise<IBlogEntity[]> {
+    const allBlogsOfUser = await this.blogRepository.getByFilter({
+      createdBy: [currentUser.id],
+    });
+
     return allBlogsOfUser;
   }
 
-  async validatePresence(id: number): Promise<IBlogEntity[]> {
-    const blogExists = await this.blogRepository.findBy({ id });
-    if (blogExists.length === 0) {
-      throw new BadRequestException({
-        key: 'id',
-        message: `Blog with id:${id} does not exists.`,
-      });
-    }
-    return blogExists;
-  }
+  // async validatePresence(id: number): Promise<IBlogEntity[]> {
+  //   const blogExists = await this.blogRepository.findBy({ id });
+  //   if (blogExists.length === 0) {
+  //     throw new BadRequestException({
+  //       key: 'id',
+  //       message: `Blog with id:${id} does not exists.`,
+  //     });
+  //   }
+  //   return blogExists;
+  // }
 }

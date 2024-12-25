@@ -23,9 +23,9 @@ import { BlogRepository } from './repository/blogs.repository';
     UsersService,
     LikesCounterBlogsService,
     CommentsService,
-    BlogRepository
+    BlogRepository,
   ],
   controllers: [BlogController],
-  exports: [BlogService],
+  exports: [BlogService, BlogRepository],
 })
 export class BlogModule {}

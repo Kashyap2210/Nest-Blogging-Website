@@ -190,17 +190,17 @@ export class UsersService {
 
     const allCurrentUsersBlogs =
       await this.blogService.findBlogByUserId(currentUser);
-    console.log(
-      'this are all the blogs of the current User',
-      allCurrentUsersBlogs,
-    );
+    // console.log(
+    //   'this are all the blogs of the current User',
+    //   allCurrentUsersBlogs,
+    // );
     if (allCurrentUsersBlogs && allCurrentUsersBlogs.length > 0) {
       for (const blog of allCurrentUsersBlogs) {
         await this.blogService.deleteBlogById(blog.id, currentUser);
       }
     }
 
-    // this.userRepository.delete(id);
+    this.userRepository.delete(id);
     return 'This User is deleted';
   }
 

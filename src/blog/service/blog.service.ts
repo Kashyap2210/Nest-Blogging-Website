@@ -138,20 +138,26 @@ export class BlogService {
 
     //this are all the affected comments
     const affectedComments = await this.commentsService.findCommentsByBlogId(id)
-    console.log("this are all the affected comments", affectedComments)
-      // await this.commentsService.cascadeCommentDelete(id);
-    // console.log('this is the affected comments deleted', affectedComments);
+    // console.log("this are all the affected comments", affectedComments)
+    const deletedComments = await this.commentsService.cascadeCommentDelete(id);
+    // console.log('this is the affected comments deleted', deletedComments);
 
     //this are all the affected likes & dislikes entity
-    const afftectedLikeDislikeEntities = await this.likesCounterBlogsService.findLikeDislikeEntitiesByBlogId(id, currentUser)
-      // await this.likesCounterBlogsService.cascadeDelete(id);
-    console.log(
-      'this is the affected likes& dislikes entities deleted',
-      afftectedLikeDislikeEntities,
-    );
+    const likeDislikeEntitiesToBeDeleted =
+      await this.likesCounterBlogsService.findLikeDislikeEntitiesByBlogId(
+        id,
+        currentUser,
+      );
+    // console.log(
+    //   'this is the affected likes& dislikes entities deleted',
+    //   likeDislikeEntitiesToBeDeleted,
+    // );
+    const affectedEntities =
+      await this.likesCounterBlogsService.cascadeDelete(id);
+    // console.log('this are all the deleted Entities', affectedEntities);
 
     //this is to delete the blog
-    // await this.blogRepository.delete(id);
+    await this.blogRepository.delete(id);
   }
 
   async findBlogByUserId(currentUser: IUserEntity): Promise<IBlogEntity[]>{

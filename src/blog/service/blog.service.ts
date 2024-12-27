@@ -4,27 +4,24 @@ import {
   Inject,
   Injectable,
 } from '@nestjs/common';
-import { InjectRepository } from '@nestjs/typeorm';
 import { CommentsService } from 'src/comments/service/comments.service';
+import { EntityManagerBaseService } from 'src/helpers/entity.repository';
+import { LikesCounterBlogsService } from 'src/likes-counter-blogs/services/likes-counter-blogs.service';
 import { IUserEntity } from 'src/users/interfaces/entity.interface';
-import { EntityManager, Repository } from 'typeorm';
+import { DataSource, EntityManager } from 'typeorm';
 import { BlogEntity } from '../entities/blog.entity';
 import {
   IBlogCreateDto,
   IBlogEntity,
-  IBlogEntityArray,
   IBlogResponse,
   IBlogUpdateDto,
 } from '../interfaces/blog.interfaces';
-import { LikesCounterBlogsService } from 'src/likes-counter-blogs/services/likes-counter-blogs.service';
-import { DataSource } from 'typeorm';
-import { EntityManagerBaseService } from 'src/helpers/entity.repository';
 import { BlogRepository } from '../repository/blogs.repository';
 
 @Injectable()
 export class BlogService extends EntityManagerBaseService<BlogEntity> {
   constructor(
-    @InjectRepository(BlogEntity)
+    // @InjectRepository(BlogRepository)
     private readonly blogRepository: BlogRepository, // Injecting custom repository
     @Inject(forwardRef(() => CommentsService))
     private readonly commentsService: CommentsService,
@@ -48,7 +45,6 @@ export class BlogService extends EntityManagerBaseService<BlogEntity> {
       });
     }
     const blog = await this.blogRepository.getInstance(dto, currentUser);
-    blog.createdBy = blog.updatedBy = currentUser.id;
     return this.blogRepository.create(blog);
   }
 
@@ -73,7 +69,7 @@ export class BlogService extends EntityManagerBaseService<BlogEntity> {
         message: 'current user is not logged in',
       });
     }
-    const blogComments = await this.commentsService.findCommentsByBlogId(id);
+    const blogComments = await this.commentsService.findCommentsByBlogId(id); 
     const [blogById] = await this.blogRepository.validatePresence(
       'id',
       [id],
@@ -130,10 +126,10 @@ export class BlogService extends EntityManagerBaseService<BlogEntity> {
       (blogEntityById.updatedBy = blogEntityById.createdBy),
       (blogEntityById.keywords = dto.keywords);
 
-    const updatedBlog: IBlogEntity = await this.blogRepository.updateById(
-      id,
-      blogEntityById,
-    );
+    const updatedBlog: IBlogEntity = await this.blogRepository.updateById(id, {
+      ...blogEntityById,
+      updatedBy: currentUser.id,
+    });
     return updatedBlog;
   }
 
@@ -165,37 +161,36 @@ export class BlogService extends EntityManagerBaseService<BlogEntity> {
       });
     }
 
-    //this are all the affected comments
-    // const affectedComments =
-    //   await this.commentsService.findCommentsByBlogId(id);
-    // // console.log("this are all the affected comments", affectedComments)
-    // const deletedComments = await this.commentsService.cascadeCommentDelete(id);
-    // // console.log('this is the affected comments deleted', deletedComments);
+    // this are all the affected comments
+    const affectedComments =
+      await this.commentsService.findCommentsByBlogId(id);
+    // console.log("this are all the affected comments", affectedComments)
+    const deletedComments = await this.commentsService.cascadeCommentDelete(id);
+    // console.log('this is the affected comments deleted', deletedComments);
 
-    // //this are all the affected likes & dislikes entity
-    // const likeDislikeEntitiesToBeDeleted =
-    //   await this.likesCounterBlogsService.findLikeDislikeEntitiesByBlogId(
-    //     id,
-    //     currentUser,
-    //   );
-    // // console.log(
-    // //   'this is the affected likes& dislikes entities deleted',
-    // //   likeDislikeEntitiesToBeDeleted,
-    // // );
-    // const affectedEntities =
-    //   await this.likesCounterBlogsService.cascadeDelete(id);
-    // // console.log('this are all the deleted Entities', affectedEntities);
+    //this are all the affected likes & dislikes entity
+    const likeDislikeEntitiesToBeDeleted =
+      await this.likesCounterBlogsService.findLikeDislikeEntitiesByBlogId(
+        id,
+        currentUser,
+      );
+    // console.log(
+    //   'this is the affected likes& dislikes entities deleted',
+    //   likeDislikeEntitiesToBeDeleted,
+    // );
+    const affectedEntities =
+      await this.likesCounterBlogsService.cascadeDelete(id);
+    // console.log('this are all the deleted Entities', affectedEntities);
 
     //this is to delete the blog
     await this.blogRepository.deleteById(id);
   }
 
-  async findBlogByUserId(currentUser: IUserEntity): Promise<IBlogEntity[]> {
-    const allBlogsOfUser = await this.blogRepository.getByFilter({
+  async getBlogByFilter(currentUser: IUserEntity): Promise<IBlogEntity> {
+    const [blogEntity] = await this.blogRepository.getByFilter({
       createdBy: [currentUser.id],
     });
-
-    return allBlogsOfUser;
+    return blogEntity;
   }
 
   // async validatePresence(id: number): Promise<IBlogEntity[]> {

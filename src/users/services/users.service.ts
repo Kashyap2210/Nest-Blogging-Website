@@ -188,8 +188,9 @@ export class UsersService {
     }
     await this.validatePresence(id);
 
+    //using getByFilter here because we dont want an exception that is thrown in validate presence
     const allCurrentUsersBlogs =
-      await this.blogService.findBlogByUserId(currentUser);
+      await this.blogService.getByFilter(currentUser);
     // console.log(
     //   'this are all the blogs of the current User',
     //   allCurrentUsersBlogs,

@@ -1,12 +1,11 @@
+import { EntityManagerBaseService } from 'src/helpers/entity.repository';
+import { IUserEntity } from 'src/users/interfaces/entity.interface';
 import { EntityManager, EntityRepository } from 'typeorm';
 import { BlogEntity } from '../entities/blog.entity';
-import { EntityManagerBaseService } from 'src/helpers/entity.repository';
 import {
   IBlogCreateDto,
-  IBlogEntity,
-  IBlogUpdateDto,
+  IBlogEntity
 } from '../interfaces/blog.interfaces';
-import { IUserEntity } from 'src/users/interfaces/entity.interface';
 
 @EntityRepository(BlogEntity)
 export class BlogRepository extends EntityManagerBaseService<BlogEntity> {
@@ -24,6 +23,8 @@ export class BlogRepository extends EntityManagerBaseService<BlogEntity> {
       content: dto.content,
       author: currentUser.name,
       keywords: dto.keywords,
+      createdBy: currentUser.id,
+      updatedBy: currentUser.id,
     };
     return this.getRepository(entityManager).save(blog);
   }
@@ -41,5 +42,9 @@ export class BlogRepository extends EntityManagerBaseService<BlogEntity> {
     entityManager?: EntityManager,
   ): Promise<any> {
     return this.getRepository(entityManager).update(id, updateEntity);
+  }
+
+  async deleteById<P>(id: number, entityManager?: EntityManager): Promise<void> {
+    await this.getRepository(entityManager).delete(id);
   }
 }

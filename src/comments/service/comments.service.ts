@@ -4,23 +4,29 @@ import {
   Inject,
   Injectable,
 } from '@nestjs/common';
-import { InjectRepository } from '@nestjs/typeorm';
 import { BlogService } from 'src/blog/service/blog.service';
 import { IUserEntity } from 'src/users/interfaces/entity.interface';
-import { EntityManager, Repository } from 'typeorm';
+import { EntityManager } from 'typeorm';
 import { CreateCommentDto } from '../dto/create-comment.dto';
 import { ICommentUpdateDto } from '../dto/update-comment.dto';
 import { CommentEntity } from '../entities/comment.entity';
 import { ICommentEntity } from '../interfaces/comment.entity.interface';
+import { EntityManagerBaseService } from 'src/helpers/entity.repository';
+import { CommentsRepository } from '../repository/comments.repository';
 
 @Injectable()
-export class CommentsService {
+export class CommentsService extends EntityManagerBaseService<CommentEntity> {
   constructor(
-    @InjectRepository(CommentEntity)
-    private commentRepository: Repository<CommentEntity>,
+    private commentRepository: CommentsRepository,
     @Inject(forwardRef(() => BlogService))
     private blogService: BlogService,
-  ) {}
+  ) {
+    super();
+  }
+
+  getEntityClass(): new () => CommentEntity {
+    return CommentEntity;
+  }
 
   async create(
     createCommentDto: CreateCommentDto,
@@ -35,10 +41,8 @@ export class CommentsService {
     }
 
     // check to if blog exists, if yes then code proceeds
-    await this.blogService.validatePresence(
-      'id',
-      [createCommentDto.blogId],
-      'id',
+    await this.blogService.checkBlogPresence(
+      createCommentDto.blogId,
       entityManager,
     );
 
@@ -51,22 +55,21 @@ export class CommentsService {
       }
 
       // Check to see if parent comment exists
-      await this.validateCommentPresence({
-        parentCommentId: createCommentDto.replyCommentId,
-      });
+      await this.commentRepository.validatePresence(
+        'id',
+        [createCommentDto.replyCommentId],
+        'id',
+        entityManager,
+      );
     }
 
-    const newComment = {
-      text: createCommentDto.text,
-      authorId: currentUser.id,
-      blogId: createCommentDto.blogId,
-      isReplyComment: createCommentDto.isReplyComment ?? false,
-      replyCommentId: createCommentDto.replyCommentId ?? null,
-    };
-    const comment = this.commentRepository.create(newComment);
-    comment.createdBy = comment.updatedBy = currentUser.id;
+    const comment = await this.commentRepository.getInstance(
+      createCommentDto,
+      currentUser,
+      entityManager,
+    );
 
-    return this.commentRepository.save(comment);
+    return this.commentRepository.create(comment);
   }
 
   /*
@@ -107,6 +110,7 @@ export class CommentsService {
     id: number,
     dto: ICommentUpdateDto,
     currentUser: IUserEntity,
+    entityManager?: EntityManager,
   ): Promise<ICommentEntity> {
     if (!currentUser) {
       throw new BadRequestException({
@@ -114,7 +118,12 @@ export class CommentsService {
         message: 'current user is not logged in',
       });
     }
-    const [commentToUpdate] = await this.validateCommentPresence({ id: id });
+    const [commentToUpdate] = await this.commentRepository.validatePresence(
+      'id',
+      [id],
+      'id',
+      entityManager,
+    );
     if (
       commentToUpdate.authorId !== currentUser.id &&
       currentUser.role !== 'TOAA'
@@ -131,17 +140,26 @@ export class CommentsService {
       updatedOn: new Date(),
       authorId: currentUser.id,
     };
-    return this.commentRepository.save(updatedComment);
+    return this.commentRepository.updateById(id, updatedComment);
   }
 
-  async removeComment(id: number, currentUser: IUserEntity): Promise<void> {
+  async removeComment(
+    id: number,
+    currentUser: IUserEntity,
+    entityManager?: EntityManager,
+  ): Promise<void> {
     if (!currentUser) {
       throw new BadRequestException({
         key: 'currentUser',
         message: 'current user is not logged in',
       });
     }
-    const [commentToDelete] = await this.validateCommentPresence({ id: id });
+    const [commentToDelete] = await this.commentRepository.validatePresence(
+      'id',
+      [id],
+      'id',
+      entityManager,
+    );
     if (
       currentUser.id !== commentToDelete.authorId &&
       currentUser.role !== 'TOAA'
@@ -151,11 +169,19 @@ export class CommentsService {
         message: 'You are not authorized to delete this comment',
       });
     }
-    await this.commentRepository.delete(id);
+    await this.commentRepository.deleteById(id);
   }
 
-  async findCommentsByBlogId(blogId: number): Promise<ICommentEntity[]> {
-    return await this.validateCommentPresence({ blogId: blogId });
+  async findCommentsByBlogId(
+    blogId: number,
+    entityManager?: EntityManager,
+  ): Promise<ICommentEntity[]> {
+    return await this.commentRepository.validatePresence(
+      'blogId',
+      [blogId],
+      'blogId',
+      entityManager,
+    );
   }
 
   async validateCommentPresence(params: {
@@ -174,7 +200,9 @@ export class CommentsService {
     }
 
     const filter = id ? { id } : blogId ? { blogId } : { parentCommentId };
-    const commentToFind = await this.commentRepository.findBy(filter);
+    const commentToFind = await this.commentRepository.getByFilter({
+      filter,
+    });
 
     if (commentToFind.length === 0) {
       const errorKey = id ? 'commentId' : blogId ? 'blogId' : 'replyCommentId';
@@ -192,10 +220,14 @@ export class CommentsService {
     return commentToFind;
   }
 
-  async cascadeCommentDelete(blogId: number) {
-    const comments = await this.validateCommentPresence({ blogId: blogId });
+  async cascadeCommentDelete(blogId: number, entityManager?: EntityManager) {
+    const comments = await this.commentRepository.validatePresence(
+      'blogId',
+      [blogId],
+      'blogId',
+      entityManager,
+    );
     const commentIdsToDelete = comments.map((comment) => comment.id);
-
-    return this.commentRepository.delete(commentIdsToDelete);
+    return this.commentRepository.deleteMany(commentIdsToDelete);
   }
 }

@@ -21,7 +21,6 @@ import { BlogRepository } from '../repository/blogs.repository';
 @Injectable()
 export class BlogService extends EntityManagerBaseService<BlogEntity> {
   constructor(
-    // @InjectRepository(BlogRepository)
     private readonly blogRepository: BlogRepository, // Injecting custom repository
     @Inject(forwardRef(() => CommentsService))
     private readonly commentsService: CommentsService,
@@ -69,7 +68,7 @@ export class BlogService extends EntityManagerBaseService<BlogEntity> {
         message: 'current user is not logged in',
       });
     }
-    const blogComments = await this.commentsService.findCommentsByBlogId(id); 
+    const blogComments = await this.commentsService.findCommentsByBlogId(id);
     const [blogById] = await this.blogRepository.validatePresence(
       'id',
       [id],
@@ -193,14 +192,16 @@ export class BlogService extends EntityManagerBaseService<BlogEntity> {
     return blogEntity;
   }
 
-  // async validatePresence(id: number): Promise<IBlogEntity[]> {
-  //   const blogExists = await this.blogRepository.findBy({ id });
-  //   if (blogExists.length === 0) {
-  //     throw new BadRequestException({
-  //       key: 'id',
-  //       message: `Blog with id:${id} does not exists.`,
-  //     });
-  //   }
-  //   return blogExists;
-  // }
+  async checkBlogPresence(
+    id: number,
+    entityManager?: EntityManager,
+  ): Promise<IBlogEntity> {
+    const [blogExists] = await this.blogRepository.validatePresence(
+      'id',
+      [id],
+      'id',
+      entityManager,
+    );
+    return blogExists;
+  }
 }

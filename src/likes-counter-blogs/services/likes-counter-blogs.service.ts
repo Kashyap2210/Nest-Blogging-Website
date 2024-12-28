@@ -12,6 +12,7 @@ import { CreateLikesCounterBlogDto } from '../dto/create-blog-likes.dto';
 import { BlogLikesCounterEntity } from '../entities/likes-counter-blog.entity';
 import { LikeStatus } from '../enums/like.status.enum';
 import { IBlogLikesCounterEntity } from '../interfaces/blog-like-counter.interface';
+import { BlogRepository } from 'src/blog/repository/blogs.repository';
 
 @Injectable()
 export class LikesCounterBlogsService {
@@ -19,6 +20,7 @@ export class LikesCounterBlogsService {
     @InjectRepository(BlogLikesCounterEntity)
     private readonly likesCounterBlogRepository: Repository<BlogLikesCounterEntity>,
     @Inject(forwardRef(() => BlogService))
+    // @Inject(forwardRef(() => BlogRepository))
     private readonly blogService: BlogService,
   ) {}
 

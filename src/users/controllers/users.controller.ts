@@ -162,17 +162,17 @@ export class UsersController {
     return await this.usersService.updateUserById(id, dto, currentUser);
   }
 
-  @ApiOperation({ summary: 'Get all users' })
-  @ApiOkResponse({
-    description: 'A list of users returned with type IUserEntityArray',
-  })
-  @Get()
-  async getAllUsers(
-    @CurrentUser() currentUser: IUserEntity,
-  ): Promise<IUserEntityArray> {
-    //exclude password from the response
-    return this.usersService.getAllUsers(currentUser);
-  }
+  // @ApiOperation({ summary: 'Get all users' })
+  // @ApiOkResponse({
+  //   description: 'A list of users returned with type IUserEntityArray',
+  // })
+  // @Get()
+  // async getAllUsers(
+  //   @CurrentUser() currentUser: IUserEntity,
+  // ): Promise<IUserEntityArray> {
+  //   //exclude password from the response
+  //   return this.usersService.getAllUsers(currentUser);
+  // }
 
   @ApiOperation({ summary: 'Get a user' })
   @ApiOkResponse({

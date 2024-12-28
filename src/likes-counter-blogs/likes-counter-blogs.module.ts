@@ -4,6 +4,8 @@ import { LikesCounterBlogsController } from './controllers/likes-counter-blogs.c
 import { UsersModule } from 'src/users/users.module';
 import { BlogModule } from 'src/blog/blog.module';
 import { CommentsModule } from 'src/comments/comments.module';
+import { CommentsService } from 'src/comments/service/comments.service';
+import { CommentsRepository } from 'src/comments/repository/comments.repository';
 
 @Module({
   imports: [
@@ -12,7 +14,7 @@ import { CommentsModule } from 'src/comments/comments.module';
     CommentsModule, //Comments module is imported here as the blogmodule has a dependency on it
   ],
   controllers: [LikesCounterBlogsController],
-  providers: [LikesCounterBlogsService],
+  providers: [LikesCounterBlogsService, CommentsService, CommentsRepository],
   exports: [LikesCounterBlogsService],
 })
 export class LikesCounterBlogsModule {}

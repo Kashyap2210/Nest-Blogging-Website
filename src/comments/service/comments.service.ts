@@ -62,14 +62,12 @@ export class CommentsService extends EntityManagerBaseService<CommentEntity> {
         entityManager,
       );
     }
-
     const comment = await this.commentRepository.getInstance(
       createCommentDto,
-      currentUser,
       entityManager,
     );
-
-    return this.commentRepository.create(comment);
+    comment.authorId = comment.createdBy = comment.updatedBy = currentUser.id;
+    return this.commentRepository.create(comment, entityManager);
   }
 
   /*
@@ -127,10 +125,9 @@ export class CommentsService extends EntityManagerBaseService<CommentEntity> {
 
     const updatedComment = {
       ...commentToUpdate,
-      text: dto.text,
+      ...dto,
       updatedBy: currentUser.id,
       updatedOn: new Date(),
-      authorId: currentUser.id,
     };
     return this.commentRepository.updateById(id, updatedComment);
   }
@@ -152,7 +149,6 @@ export class CommentsService extends EntityManagerBaseService<CommentEntity> {
       'id',
       entityManager,
     );
-
     await this.commentRepository.deleteById(id);
   }
 
@@ -160,12 +156,7 @@ export class CommentsService extends EntityManagerBaseService<CommentEntity> {
     blogId: number,
     entityManager?: EntityManager,
   ): Promise<ICommentEntity[]> {
-    return await this.commentRepository.validatePresence(
-      'blogId',
-      [blogId],
-      'blogId',
-      entityManager,
-    );
+    return await this.commentRepository.getByFilter({blogId:[blogId]},entityManager);
   }
 
   async validateCommentPresence(params: {

@@ -15,17 +15,20 @@ export class UsersRepository extends EntityManagerBaseService<UserEntity> {
     entityManager?: EntityManager,
   ): Promise<IUserEntity> {
     const hashedPassword = await bcrypt.hash(dto.password, 10);
-    const blog = {
+    const user = {
       name: dto.name,
       username: dto.name,
-      passowrd: hashedPassword,
+      password: hashedPassword,
       emailId: dto.emailId,
       contactNo: dto.contactNo,
       profilePictureUrl: dto.profilePictureUrl,
       gender: dto.gender ? dto.gender : UserGender.PREFER_NOT_TO_SAY,
       role: dto.role ? dto.role : null,
+      createdBy: 1,
+      updatedBy: 1,
     };
-    return this.getRepository(entityManager).save(blog);
+    console.log('this is the user from repository', user);
+    return this.getRepository(entityManager).save(user);
   }
 
   async create(
@@ -35,14 +38,13 @@ export class UsersRepository extends EntityManagerBaseService<UserEntity> {
     return this.getRepository(entityManager).save(user);
   }
 
-    async updateById(
-      id: number,
-      updateEntity: IUserEntity,
-      entityManager?: EntityManager,
-    ): Promise<any> {
-      return this.getRepository(entityManager).update(id, updateEntity);
-    }
-  
+  async updateById(
+    id: number,
+    updateEntity: IUserEntity,
+    entityManager?: EntityManager,
+  ): Promise<any> {
+    return this.getRepository(entityManager).update(id, updateEntity);
+  }
 
   async deleteById<P>(
     id: number,

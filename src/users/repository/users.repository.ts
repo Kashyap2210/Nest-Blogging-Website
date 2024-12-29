@@ -44,7 +44,7 @@ export class UsersRepository extends EntityManagerBaseService<UserEntity> {
     entityManager?: EntityManager,
   ): Promise<IUserEntity[]> {
     await this.getRepository(entityManager).update(id, updateEntity);
-    return this.getByFilter({ id: [id] });
+    return this.getByFilter({ id: [id] }, entityManager);
   }
 
   async deleteById<P>(

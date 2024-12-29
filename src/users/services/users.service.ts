@@ -212,7 +212,7 @@ export class UsersService extends EntityManagerBaseService<UserEntity> {
     if (currentUser.role !== 'TOAA') {
       throw new ForbiddenException({
         key: 'user.role',
-        message: 'Current user does not have permission to access all users',
+        message: 'Current user does not have permission to delete any user',
       });
     }
     await this.userRepository.deleteById(id);

@@ -5,7 +5,7 @@ export class UserSignInDto {
   @IsString()
   @ApiProperty({
     description: 'Username',
-    example: 'johnDoe',
+    example: 'kash1997',
     required: true,
   })
   username: string;
@@ -14,6 +14,7 @@ export class UserSignInDto {
   @ApiProperty({
     description: 'Enter your password',
     required: true,
+    example: 'kash1997',
   })
   password: string;
 }

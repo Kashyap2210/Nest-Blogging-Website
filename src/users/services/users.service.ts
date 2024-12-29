@@ -1,5 +1,6 @@
 import {
   BadRequestException,
+  ForbiddenException,
   forwardRef,
   Inject,
   Injectable,
@@ -105,6 +106,12 @@ export class UsersService extends EntityManagerBaseService<UserEntity> {
         message: 'current user is not logged in',
       });
     }
+    if (currentUser.role !== 'TOAA') {
+      throw new ForbiddenException({
+        key: 'user.role',
+        message: 'Current user does not have permission to access all users',
+      });
+    }
     const allUsers = await this.userRepository.getByFilter({});
     let allUsersResponse: Partial<IUserEntityArray> = [];
     for (const user of allUsers) {
@@ -115,7 +122,14 @@ export class UsersService extends EntityManagerBaseService<UserEntity> {
   }
 
   async findUserByUserName(name: string): Promise<IUserEntity> {
-    return this.userRepository.getByFilter({ username: [name] })[0];
+    const [userByUsername] = await this.userRepository.getByFilter({
+      username: [name],
+    });
+    // console.log(
+    //   'this is the user by username from user service',
+    //   userByUsername,
+    // );
+    return userByUsername;
   }
 
   async getUserByIdAuth(id: number): Promise<IUserEntity> {

@@ -1,5 +1,6 @@
 import {
   BadRequestException,
+  ForbiddenException,
   forwardRef,
   Inject,
   Injectable,
@@ -8,7 +9,7 @@ import { CommentsService } from 'src/comments/service/comments.service';
 import { EntityManagerBaseService } from 'src/helpers/entity.repository';
 import { LikesCounterBlogsService } from 'src/likes-counter-blogs/services/likes-counter-blogs.service';
 import { IUserEntity } from 'src/users/interfaces/entity.interface';
-import { DataSource, EntityManager } from 'typeorm';
+import { EntityManager } from 'typeorm';
 import { BlogEntity } from '../entities/blog.entity';
 import {
   IBlogCreateDto,
@@ -26,7 +27,7 @@ export class BlogService extends EntityManagerBaseService<BlogEntity> {
     @Inject(forwardRef(() => CommentsService))
     private readonly commentsService: CommentsService,
     private readonly likesCounterBlogsService: LikesCounterBlogsService,
-    private dataSource: DataSource,
+    // private dataSource: DataSource,
   ) {
     super();
   }
@@ -37,6 +38,7 @@ export class BlogService extends EntityManagerBaseService<BlogEntity> {
   async createBlog(
     dto: IBlogCreateDto,
     currentUser: IUserEntity,
+    entityManager?: EntityManager,
   ): Promise<IBlogEntity> {
     if (!currentUser) {
       throw new BadRequestException({
@@ -44,18 +46,29 @@ export class BlogService extends EntityManagerBaseService<BlogEntity> {
         message: 'current user is not logged in',
       });
     }
-    const blog = await this.blogRepository.getInstance(dto, currentUser);
-    return this.blogRepository.create(blog);
+    const blog = await this.blogRepository.getInstance(dto, entityManager);
+    blog['author'] = currentUser.name;
+    blog['createdBy'] = blog['updatedBy'] = currentUser.id;
+    return this.blogRepository.create(blog, entityManager);
   }
 
-  async getAllBlogs(currentUser: IUserEntity): Promise<IBlogEntityArray> {
+  async getAllBlogs(
+    currentUser: IUserEntity,
+    entityManager?: EntityManager,
+  ): Promise<IBlogEntityArray> {
     if (!currentUser) {
       throw new BadRequestException({
         key: 'currentUser',
         message: 'current user is not logged in',
       });
     }
-    const allBlogs = await this.blogRepository.getByFilter({});
+    if (currentUser.role !== 'TOAA') {
+      throw new ForbiddenException({
+        key: 'user.role',
+        message: 'Current user does not have permission to access all blogs',
+      });
+    }
+    const allBlogs = await this.blogRepository.getByFilter({}, entityManager);
     return allBlogs;
   }
 
@@ -102,6 +115,12 @@ export class BlogService extends EntityManagerBaseService<BlogEntity> {
       'id',
       entityManager,
     );
+    if (currentUser.id !== blogEntityById.createdBy) {
+      throw new BadRequestException({
+        key: 'currentUser',
+        message: 'current user is not same as the one who created this blog',
+      });
+    }
     const blogFromDtoTitle = await this.blogRepository.getByFilter({
       title: [dto.title],
     });
@@ -112,16 +131,15 @@ export class BlogService extends EntityManagerBaseService<BlogEntity> {
       });
     }
 
-    (blogEntityById.title = dto.title),
-      (blogEntityById.content = dto.content),
-      (blogEntityById.updatedBy = blogEntityById.createdBy),
-      (blogEntityById.keywords = dto.keywords);
-
-    const updatedBlog: IBlogEntity = await this.blogRepository.updateById(id, {
+    const updatedBlog = {
       ...blogEntityById,
+      ...dto,
       updatedBy: currentUser.id,
-    });
-    return updatedBlog;
+    };
+
+    const responseUpdatedBlog: IBlogEntity =
+      await this.blogRepository.updateById(id, updatedBlog);
+    return responseUpdatedBlog;
   }
 
   async deleteBlogById(
@@ -135,15 +153,38 @@ export class BlogService extends EntityManagerBaseService<BlogEntity> {
         message: 'current user is not logged in',
       });
     }
-    await this.blogRepository.validatePresence('id', [id], 'id', entityManager);
 
+    const [blogToBeDeleted] = await this.blogRepository.validatePresence(
+      'id',
+      [id],
+      'id',
+      entityManager,
+    );
+    if (blogToBeDeleted.createdBy !== currentUser.id) {
+      throw new BadRequestException({
+        key: 'user.id',
+        message: 'Current user cannot delete this blog',
+      });
+    }
     await this.blogRepository.deleteById(id);
   }
 
-  async getBlogByFilter(currentUser: IUserEntity): Promise<IBlogEntity> {
-    const [blogEntity] = await this.blogRepository.getByFilter({
-      createdBy: [currentUser.id],
-    });
+  async getBlogByFilter(
+    currentUser: IUserEntity,
+    entityManager?: EntityManager,
+  ): Promise<IBlogEntity> {
+    if (!currentUser) {
+      throw new BadRequestException({
+        key: 'currentUser',
+        message: 'current user is not logged in',
+      });
+    }
+    const [blogEntity] = await this.blogRepository.getByFilter(
+      {
+        createdBy: [currentUser.id],
+      },
+      entityManager,
+    );
     return blogEntity;
   }
 

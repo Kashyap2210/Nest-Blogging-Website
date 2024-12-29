@@ -19,7 +19,6 @@ export class LikesCounterBlogsService {
     @InjectRepository(BlogLikesCounterEntity)
     private readonly likesCounterBlogRepository: Repository<BlogLikesCounterEntity>,
     @Inject(forwardRef(() => BlogService))
-    // @Inject(forwardRef(() => BlogRepository))
     private readonly blogService: BlogService,
   ) {}
 
@@ -34,12 +33,9 @@ export class LikesCounterBlogsService {
         message: 'current user is not logged in',
       });
     }
-    await this.blogService.validatePresence(
-      'id',
-      [dto.blogId],
-      'id',
-      entityManager,
-    );
+
+    //Check to see if blog exists
+    await this.blogService.checkBlogPresence(dto.blogId, entityManager);
 
     const existingLikeOrDislikeByUser =
       await this.likesCounterBlogRepository.findOneBy({

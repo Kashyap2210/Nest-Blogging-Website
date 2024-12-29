@@ -122,18 +122,18 @@ export class LikesCounterBlogsService {
     return likeDislikeEntitiesForBlog;
   }
 
-  async cascadeDelete(blogId: number) {
-    const likeDislikeEntitiesToDelete =
-      await this.likesCounterBlogRepository.findBy({ blogId });
-    const likeDislikeEntitiesToDeleteIds = likeDislikeEntitiesToDelete.map(
-      (entity) => entity.id,
-    );
-    return await this.likesCounterBlogRepository.delete(
-      likeDislikeEntitiesToDeleteIds,
-    );
-    // const result = await entityManager
-    //   .getRepository(this.likesCounterBlogRepository.target)
-    //   .delete(likeDislikeEntitiesToDeleteIds);
-    // return result.affected || 0;
-  }
+  // async cascadeDelete(blogId: number) {
+  //   const likeDislikeEntitiesToDelete =
+  //     await this.likesCounterBlogRepository.findBy({ blogId });
+  //   const likeDislikeEntitiesToDeleteIds = likeDislikeEntitiesToDelete.map(
+  //     (entity) => entity.id,
+  //   );
+  //   return await this.likesCounterBlogRepository.delete(
+  //     likeDislikeEntitiesToDeleteIds,
+  //   );
+  //   // const result = await entityManager
+  //   //   .getRepository(this.likesCounterBlogRepository.target)
+  //   //   .delete(likeDislikeEntitiesToDeleteIds);
+  //   // return result.affected || 0;
+  // }
 }

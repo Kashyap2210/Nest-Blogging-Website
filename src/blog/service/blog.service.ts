@@ -13,6 +13,7 @@ import { BlogEntity } from '../entities/blog.entity';
 import {
   IBlogCreateDto,
   IBlogEntity,
+  IBlogEntityArray,
   IBlogResponse,
   IBlogUpdateDto,
 } from '../interfaces/blog.interfaces';
@@ -47,15 +48,16 @@ export class BlogService extends EntityManagerBaseService<BlogEntity> {
     return this.blogRepository.create(blog);
   }
 
-  // async getAllBlogs(currentUser: IUserEntity): Promise<IBlogEntityArray> {
-  //   if (!currentUser) {
-  //     throw new BadRequestException({
-  //       key: 'currentUser',
-  //       message: 'current user is not logged in',
-  //     });
-  //   }
-  //   return this.blogRepository.getById(id);
-  // }
+  async getAllBlogs(currentUser: IUserEntity): Promise<IBlogEntityArray> {
+    if (!currentUser) {
+      throw new BadRequestException({
+        key: 'currentUser',
+        message: 'current user is not logged in',
+      });
+    }
+    const allBlogs = await this.blogRepository.getByFilter({});
+    return allBlogs;
+  }
 
   async getBlogById(
     id: number,
@@ -110,16 +112,6 @@ export class BlogService extends EntityManagerBaseService<BlogEntity> {
       });
     }
 
-    if (
-      blogEntityById.createdBy !== currentUser.id &&
-      currentUser.role !== 'TOAA'
-    ) {
-      throw new BadRequestException({
-        key: 'userId',
-        message: `Current User with id ${currentUser.id} is not allowed to update this blog or he is not superAdmin`,
-      });
-    }
-
     (blogEntityById.title = dto.title),
       (blogEntityById.content = dto.content),
       (blogEntityById.updatedBy = blogEntityById.createdBy),
@@ -143,45 +135,8 @@ export class BlogService extends EntityManagerBaseService<BlogEntity> {
         message: 'current user is not logged in',
       });
     }
-    const [blogToBeDeleted] = await this.blogRepository.validatePresence(
-      'id',
-      [id],
-      'id',
-      entityManager,
-    );
+    await this.blogRepository.validatePresence('id', [id], 'id', entityManager);
 
-    if (
-      blogToBeDeleted.createdBy !== currentUser.id &&
-      currentUser.role !== 'TOAA'
-    ) {
-      throw new BadRequestException({
-        key: 'userId',
-        message: `User with ID ${currentUser.id} is not authorized to delete this blog.`,
-      });
-    }
-
-    // this are all the affected comments
-    const affectedComments =
-      await this.commentsService.findCommentsByBlogId(id);
-    // console.log("this are all the affected comments", affectedComments)
-    const deletedComments = await this.commentsService.cascadeCommentDelete(id);
-    // console.log('this is the affected comments deleted', deletedComments);
-
-    //this are all the affected likes & dislikes entity
-    const likeDislikeEntitiesToBeDeleted =
-      await this.likesCounterBlogsService.findLikeDislikeEntitiesByBlogId(
-        id,
-        currentUser,
-      );
-    // console.log(
-    //   'this is the affected likes& dislikes entities deleted',
-    //   likeDislikeEntitiesToBeDeleted,
-    // );
-    const affectedEntities =
-      await this.likesCounterBlogsService.cascadeDelete(id);
-    // console.log('this are all the deleted Entities', affectedEntities);
-
-    //this is to delete the blog
     await this.blogRepository.deleteById(id);
   }
 

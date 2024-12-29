@@ -88,7 +88,7 @@ export class UsersController {
     @UploadedFile() file: Express.Multer.File,
     // @CurrentUser() currentUser: IUserEntity,
   ): Promise<IUserEntity> {
-    console.log('Request body:', request.body); // Check request body
+    // console.log('Request body:', request.body); // Check request body
     console.log('Uploaded file:', file); // Check uploaded file object
 
     if (!file) {
@@ -113,6 +113,8 @@ export class UsersController {
   @ApiOkResponse({
     description: 'User with id will be edited',
   })
+  @ApiBearerAuth('access-token')
+  @UseGuards(AuthGuard)
   @Patch(':id')
   @ApiBody({
     description: 'Data required to update a single user',
@@ -159,6 +161,7 @@ export class UsersController {
     @Param('id', ParseIntPipe) id: number,
     @CurrentUser() currentUser: IUserEntity,
   ): Promise<IUserEntity> {
+    // console.log('this is the dto from controller', dto);
     return await this.usersService.updateUserById(id, dto, currentUser);
   }
 
@@ -166,6 +169,8 @@ export class UsersController {
   @ApiOkResponse({
     description: 'A list of users returned with type IUserEntityArray',
   })
+  @ApiBearerAuth('access-token')
+  @UseGuards(AuthGuard)
   @Get()
   async getAllUsers(
     @CurrentUser() currentUser: IUserEntity,
@@ -178,6 +183,8 @@ export class UsersController {
     description:
       'User returned with specific id & type IUserEntity. Use this API to decorate the profile page.',
   })
+  @ApiBearerAuth('access-token')
+  @UseGuards(AuthGuard)
   @Get(':id')
   async getUser(
     @Param('id', ParseIntPipe) id: number,

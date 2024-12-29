@@ -22,7 +22,7 @@ import { UpdateBlogDto } from '../dtos/update.blog.dto';
 import {
   IBlogEntity,
   IBlogEntityArray,
-  IBlogResponse
+  IBlogResponse,
 } from '../interfaces/blog.interfaces';
 import { BlogService } from '../service/blog.service';
 
@@ -45,17 +45,17 @@ export class BlogController {
     return this.blogService.createBlog(dto, currentUser);
   }
 
-  // @ApiOperation({ summary: 'Get all blog' })
-  // @ApiOkResponse({
-  //   description: 'All blogs returned with type IBlogEntityArray',
-  // })
-  // @Get('')
-  // async getAllBlog(
-  //   @CurrentUser() currentUser: IUserEntity,
-  // ): Promise<IBlogEntityArray> {
-  //   const blogEntity = await this.blogService.getAllBlogs(currentUser);
-  //   return blogEntity;
-  // }
+  @ApiOperation({ summary: 'Get all blog' })
+  @ApiOkResponse({
+    description: 'All blogs returned with type IBlogEntityArray',
+  })
+  @Get('')
+  async getAllBlog(
+    @CurrentUser() currentUser: IUserEntity,
+  ): Promise<IBlogEntityArray> {
+    const blogEntity = await this.blogService.getAllBlogs(currentUser);
+    return blogEntity;
+  }
 
   @ApiOperation({ summary: 'Get a blog by id' })
   @ApiOkResponse({

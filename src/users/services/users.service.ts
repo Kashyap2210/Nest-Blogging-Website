@@ -83,7 +83,7 @@ export class UsersService extends EntityManagerBaseService<UserEntity> {
     const allUsers = await this.userRepository.getByFilter({});
     let allUsersResponse: Partial<IUserEntityArray> = [];
     for (const user of allUsers) {
-      delete user['password'];  //Removing password from all the response
+      delete user['password']; //Removing password from all the response
       allUsersResponse.push(user);
     }
     return allUsersResponse;
@@ -119,8 +119,7 @@ export class UsersService extends EntityManagerBaseService<UserEntity> {
     dto: IUserUpdateDto,
     currentUser: IUserEntity,
     entityManager?: EntityManager,
-    // ): Promise<IUserEntity> {
-  ): Promise<any> {
+  ): Promise<IUserEntity> {
     if (!currentUser) {
       throw new BadRequestException({
         key: 'currentUser',
@@ -160,7 +159,7 @@ export class UsersService extends EntityManagerBaseService<UserEntity> {
     id: number,
     currentUser: IUserEntity,
     entityManager?: EntityManager,
-  ): Promise<any> {
+  ): Promise<void> {
     if (!currentUser) {
       throw new BadRequestException({
         key: 'currentUser',
@@ -168,16 +167,6 @@ export class UsersService extends EntityManagerBaseService<UserEntity> {
       });
     }
     await this.userRepository.validatePresence('id', [id], 'id', entityManager);
-    //using getByFilter here because we dont want an exception that is thrown in validate presence
-    const allCurrentUsersBlogs =
-      await this.blogService.getByFilter(currentUser);
-
-    if (allCurrentUsersBlogs && allCurrentUsersBlogs.length > 0) {
-      for (const blog of allCurrentUsersBlogs) {
-        await this.blogService.deleteBlogById(blog.id, currentUser);
-      }
-    }
-
-    return this.userRepository.deleteById(id);
+    await this.userRepository.deleteById(id);
   }
 }

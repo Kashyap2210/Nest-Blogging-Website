@@ -204,14 +204,14 @@ export class CommentsService extends EntityManagerBaseService<CommentEntity> {
     return commentToFind;
   }
 
-  async cascadeCommentDelete(blogId: number, entityManager?: EntityManager) {
-    const comments = await this.commentRepository.validatePresence(
-      'blogId',
-      [blogId],
-      'blogId',
-      entityManager,
-    );
-    const commentIdsToDelete = comments.map((comment) => comment.id);
-    return this.commentRepository.deleteMany(commentIdsToDelete);
-  }
+  // async cascadeCommentDelete(blogId: number, entityManager?: EntityManager) {
+  //   const comments = await this.commentRepository.validatePresence(
+  //     'blogId',
+  //     [blogId],
+  //     'blogId',
+  //     entityManager,
+  //   );
+  //   const commentIdsToDelete = comments.map((comment) => comment.id);
+  //   return this.commentRepository.deleteMany(commentIdsToDelete);
+  // }
 }

@@ -124,15 +124,7 @@ export class CommentsService extends EntityManagerBaseService<CommentEntity> {
       'id',
       entityManager,
     );
-    if (
-      commentToUpdate.authorId !== currentUser.id &&
-      currentUser.role !== 'TOAA'
-    ) {
-      throw new BadRequestException({
-        key: 'userId',
-        message: 'comment does not belong to current user',
-      });
-    }
+
     const updatedComment = {
       ...commentToUpdate,
       text: dto.text,
@@ -160,15 +152,7 @@ export class CommentsService extends EntityManagerBaseService<CommentEntity> {
       'id',
       entityManager,
     );
-    if (
-      currentUser.id !== commentToDelete.authorId &&
-      currentUser.role !== 'TOAA'
-    ) {
-      throw new BadRequestException({
-        key: 'userId',
-        message: 'You are not authorized to delete this comment',
-      });
-    }
+
     await this.commentRepository.deleteById(id);
   }
 

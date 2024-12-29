@@ -35,6 +35,15 @@ export class UsersRepository extends EntityManagerBaseService<UserEntity> {
     return this.getRepository(entityManager).save(user);
   }
 
+    async updateById(
+      id: number,
+      updateEntity: IUserEntity,
+      entityManager?: EntityManager,
+    ): Promise<any> {
+      return this.getRepository(entityManager).update(id, updateEntity);
+    }
+  
+
   async deleteById<P>(
     id: number,
     entityManager?: EntityManager,

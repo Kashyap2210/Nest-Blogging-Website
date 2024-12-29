@@ -110,15 +110,6 @@ export class BlogService extends EntityManagerBaseService<BlogEntity> {
       });
     }
 
-    if (
-      blogEntityById.createdBy !== currentUser.id &&
-      currentUser.role !== 'TOAA'
-    ) {
-      throw new BadRequestException({
-        key: 'userId',
-        message: `Current User with id ${currentUser.id} is not allowed to update this blog or he is not superAdmin`,
-      });
-    }
 
     (blogEntityById.title = dto.title),
       (blogEntityById.content = dto.content),
@@ -149,16 +140,6 @@ export class BlogService extends EntityManagerBaseService<BlogEntity> {
       'id',
       entityManager,
     );
-
-    if (
-      blogToBeDeleted.createdBy !== currentUser.id &&
-      currentUser.role !== 'TOAA'
-    ) {
-      throw new BadRequestException({
-        key: 'userId',
-        message: `User with ID ${currentUser.id} is not authorized to delete this blog.`,
-      });
-    }
 
     // this are all the affected comments
     const affectedComments =

@@ -92,7 +92,7 @@ export class UsersService extends EntityManagerBaseService<UserEntity> {
       dto,
       entityManager,
     );
-    console.log('this is the user instance from service', userInstance);
+    // console.log('this is the user instance from service', userInstance);
     // userInstance.createdBy = userInstance.updatedBy = 1;
     return this.userRepository.create(userInstance, entityManager);
   }
@@ -189,7 +189,7 @@ export class UsersService extends EntityManagerBaseService<UserEntity> {
       ...(dto.contactNo && { contactNo: dto.contactNo }),
       ...(dto.profilePictureUrl && { profilePicture: dto.profilePictureUrl }),
     };
-    const updatedUserEntity = await this.userRepository.updateById(
+    const [updatedUserEntity] = await this.userRepository.updateById(
       id,
       updatedUser,
       entityManager,
@@ -209,6 +209,12 @@ export class UsersService extends EntityManagerBaseService<UserEntity> {
       });
     }
     await this.userRepository.validatePresence('id', [id], 'id', entityManager);
+    if (currentUser.role !== 'TOAA') {
+      throw new ForbiddenException({
+        key: 'user.role',
+        message: 'Current user does not have permission to access all users',
+      });
+    }
     await this.userRepository.deleteById(id);
   }
 }

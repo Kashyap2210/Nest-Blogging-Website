@@ -5,6 +5,7 @@ import { IUserCreateDto } from '../interfaces/entity.interface';
 export interface IUserUpdateDto extends Partial<IUserCreateDto>{}
 
 export class UserUpdateDto implements IUserUpdateDto {
+  @IsOptional()
   @IsString()
   @ApiProperty({
     description: 'Unique username for the user',
@@ -13,6 +14,7 @@ export class UserUpdateDto implements IUserUpdateDto {
   })
   name?: string;
 
+  @IsOptional()
   @IsString()
   @ApiProperty({
     description: 'Unique username for the user',
@@ -21,6 +23,7 @@ export class UserUpdateDto implements IUserUpdateDto {
   })
   username?: string;
 
+  @IsOptional()
   @IsString()
   @ApiProperty({
     description: 'Unique username for the user',
@@ -29,6 +32,7 @@ export class UserUpdateDto implements IUserUpdateDto {
   })
   password?: string;
 
+  @IsOptional()
   @IsEmail()
   @ApiProperty({
     description: 'Email address of the user',
@@ -37,6 +41,7 @@ export class UserUpdateDto implements IUserUpdateDto {
   })
   emailId?: string;
 
+  @IsOptional()
   @IsString()
   @ApiProperty({
     description: 'Contact number of the user',
@@ -45,8 +50,8 @@ export class UserUpdateDto implements IUserUpdateDto {
   })
   contactNo?: string;
 
-  @IsString()
   @IsOptional()
+  @IsString()
   @ApiProperty({
     description: 'User’s profile picture',
     type: 'string',

@@ -31,29 +31,53 @@ export class UsersService extends EntityManagerBaseService<UserEntity> {
   }
 
   async checkUserExists(
-    emailId: string,
-    username: string,
-    contactNo: string,
+    emailId?: string,
+    username?: string,
+    contactNo?: string,
     entityManager?: EntityManager,
-  ): Promise<void> {
-    await this.userRepository.validatePresence(
-      'emailId',
-      [emailId],
-      'emailId',
-      entityManager,
-    );
-    await this.userRepository.validatePresence(
-      'username',
-      [username],
-      'username',
-      entityManager,
-    );
-    await this.userRepository.validatePresence(
-      'contactNo',
-      [contactNo],
-      'contactNo',
-      entityManager,
-    );
+  ): Promise<boolean> {
+    if (emailId && emailId !== undefined && emailId !== null) {
+      const existingUserByEmailId = await this.userRepository.getByFilter(
+        { emailId: [emailId] },
+        entityManager,
+      );
+      // Check if the user already exists
+      if (existingUserByEmailId.length > 0) {
+        throw new BadRequestException({
+          key: 'emailId',
+          message: `User with emailId: ${emailId} already exists`,
+        });
+      }
+    }
+
+    if (username && username !== undefined && username !== null) {
+      const existingUserByUsername = await this.userRepository.getByFilter(
+        { username: [username] },
+        entityManager,
+      );
+      // Check if the user already exists
+      if (existingUserByUsername.length > 0) {
+        throw new BadRequestException({
+          key: 'username',
+          message: `User with username: ${username} already exists`,
+        });
+      }
+    }
+
+    if (contactNo && contactNo !== undefined && contactNo !== null) {
+      const existingUserByContactNo = await this.userRepository.getByFilter(
+        { contactNo: [contactNo] },
+        entityManager,
+      );
+      // Check if the user already exists
+      if (existingUserByContactNo.length > 0) {
+        throw new BadRequestException({
+          key: 'contactNo',
+          message: `User with contactNo: ${contactNo} already exists`,
+        });
+      }
+    }
+    return false;
   }
 
   async createUser(
@@ -67,7 +91,8 @@ export class UsersService extends EntityManagerBaseService<UserEntity> {
       dto,
       entityManager,
     );
-    userInstance.createdBy = userInstance.updatedBy = 1;
+    console.log('this is the user instance from service', userInstance);
+    // userInstance.createdBy = userInstance.updatedBy = 1;
     return this.userRepository.create(userInstance, entityManager);
   }
 
@@ -126,26 +151,29 @@ export class UsersService extends EntityManagerBaseService<UserEntity> {
         message: 'current user is not logged in',
       });
     }
-    const [existingUserById] = await this.userRepository.validatePresence(
+    const [existingUser] = await this.userRepository.validatePresence(
       'id',
       [id],
       'id',
       entityManager,
     );
 
-    //Check if user with same contact number exists via seperate method
-    await this.checkUserExists(dto.emailId, dto.username, dto.contactNo);
+    //Check if user with same credentials exists via seperate method
+    await this.checkUserExists(
+      dto.emailId !== existingUser.emailId ? dto.emailId : undefined,
+      dto.username !== existingUser.username ? dto.username : undefined,
+      dto.contactNo !== existingUser.contactNo ? dto.contactNo : undefined,
+      entityManager,
+    );
 
     const updatedUser = {
-      ...existingUserById,
-      id: id,
-      name: dto.name,
-      username: dto.username,
-      password: dto.password,
-      emailId: dto.emailId,
-      contactNo: dto.contactNo,
-      profilePicture: dto.profilePictureUrl,
-      gender: existingUserById[0].gender,
+      ...existingUser,
+      ...(dto.name && { name: dto.name }),
+      ...(dto.username && { username: dto.username }),
+      ...(dto.password && { password: dto.password }),
+      ...(dto.emailId && { emailId: dto.emailId }),
+      ...(dto.contactNo && { contactNo: dto.contactNo }),
+      ...(dto.profilePictureUrl && { profilePicture: dto.profilePictureUrl }),
     };
     const updatedUserEntity = await this.userRepository.updateById(
       id,

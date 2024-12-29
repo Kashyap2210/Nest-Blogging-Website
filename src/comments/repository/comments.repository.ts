@@ -13,17 +13,16 @@ export class CommentsRepository extends EntityManagerBaseService<CommentEntity> 
 
   async getInstance(
     dto: ICommentCreateDto,
-    currentUser: IUserEntity,
     entityManager?: EntityManager,
   ): Promise<ICommentEntity> {
     const blog = {
       text: dto.text,
-      authorId: currentUser.id,
+      authorId: 1,
       blogId: dto.blogId,
       isReplyComment: dto.isReplyComment,
       replyCommentId: dto.replyCommentId,
-      createdBy: currentUser.id,
-      updatedBy: currentUser.id,
+      createdBy: 1,
+      updatedBy: 1,
     };
     return this.getRepository(entityManager).save(blog);
   }
@@ -40,13 +39,11 @@ export class CommentsRepository extends EntityManagerBaseService<CommentEntity> 
     updateEntity: ICommentEntity,
     entityManager?: EntityManager,
   ): Promise<any> {
-    return this.getRepository(entityManager).update(id, updateEntity);
+    await this.getRepository(entityManager).update(id, updateEntity);
+    return this.getByFilter({ id: [id] });
   }
 
-  async deleteById<P>(
-    id: number,
-    entityManager?: EntityManager,
-  ): Promise<void> {
+  async deleteById(id: number, entityManager?: EntityManager): Promise<void> {
     await this.getRepository(entityManager).delete(id);
   }
 

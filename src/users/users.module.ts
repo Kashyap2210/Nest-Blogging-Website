@@ -10,6 +10,7 @@ import { CommentsService } from 'src/comments/service/comments.service';
 import { LikesCounterBlogsService } from 'src/likes-counter-blogs/services/likes-counter-blogs.service';
 import { UsersRepository } from './repository/users.repository';
 import { CommentsRepository } from 'src/comments/repository/comments.repository';
+import { LikesCounterBlogRepository } from 'src/likes-counter-blogs/repository/likes-counter-blogs.repository';
 @Module({
   imports: [
     TypeOrmModule.forFeature([UserEntity]),
@@ -24,6 +25,7 @@ import { CommentsRepository } from 'src/comments/repository/comments.repository'
     CommentsService,
     CommentsRepository,
     LikesCounterBlogsService,
+    LikesCounterBlogRepository,
   ],
   exports: [UsersService],
 })

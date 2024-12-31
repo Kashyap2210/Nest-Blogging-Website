@@ -11,6 +11,7 @@ import { CommentsModule } from 'src/comments/comments.module';
 import { CommentsService } from 'src/comments/service/comments.service';
 import { BlogRepository } from './repository/blogs.repository';
 import { UsersRepository } from 'src/users/repository/users.repository';
+import { LikesCounterBlogRepository } from 'src/likes-counter-blogs/repository/likes-counter-blogs.repository';
 
 @Module({
   imports: [
@@ -24,6 +25,7 @@ import { UsersRepository } from 'src/users/repository/users.repository';
     UsersService,
     UsersRepository,
     LikesCounterBlogsService,
+    LikesCounterBlogRepository,
     CommentsService,
     BlogRepository,
   ],

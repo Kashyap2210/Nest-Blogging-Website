@@ -7,7 +7,7 @@ import { LikeStatus } from '../enums/like.status.enum';
 import { IUserEntity } from 'src/users/interfaces/entity.interface';
 
 @EntityRepository(BlogLikesCounterEntity)
-export class CommentsRepository extends EntityManagerBaseService<BlogLikesCounterEntity> {
+export class LikesCounterBlogRepository extends EntityManagerBaseService<BlogLikesCounterEntity> {
   getEntityClass(): new () => BlogLikesCounterEntity {
     return BlogLikesCounterEntity;
   }
@@ -17,7 +17,7 @@ export class CommentsRepository extends EntityManagerBaseService<BlogLikesCounte
     currentUser: IUserEntity,
     entityManager?: EntityManager,
   ): Promise<IBlogLikesCounterEntity> {
-    const blog = {
+    const blogLikesCounter = {
       blogId: dto.blogId,
       likedStatus: dto.likedStatus,
       likedBy: dto.likedStatus === LikeStatus.LIKED ? currentUser.id : null,
@@ -26,7 +26,7 @@ export class CommentsRepository extends EntityManagerBaseService<BlogLikesCounte
       createdBy: 1,
       updatedBy: 1,
     };
-    return this.getRepository(entityManager).save(blog);
+    return this.getRepository(entityManager).save(blogLikesCounter);
   }
 
   async create(

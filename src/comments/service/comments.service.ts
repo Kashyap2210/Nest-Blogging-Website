@@ -70,40 +70,6 @@ export class CommentsService extends EntityManagerBaseService<CommentEntity> {
     return this.commentRepository.create(comment, entityManager);
   }
 
-  /*
-  async createRepeatComment(
-    dto: ICommentCreateDto,
-    currentUser: IUserEntity,
-  ): Promise<any> {
-    if (!currentUser) {
-      throw new BadRequestException({
-        key: 'currentUser',
-        message: 'current user is not logged in',
-      });
-    }
-    const blogExists = await this.blogService.getBlogById(
-      dto.blogId,
-      currentUser,
-    );
-    console.log(blogExists);
-    if (!blogExists) {
-      throw new BadRequestException({
-        key: 'blogId',
-        message: `Blog with id: ${dto.blogId} does not exists`,
-      });
-    }
-    const newReplyComment = {
-      text: dto.text,
-      authorId: currentUser.id,
-      blogId: dto.blogId,
-      isReplyComment: dto.isRepeatComment,
-      replyCommentId: dto.repeatCommentId,
-    };
-    const replyComment = this.commentRepository.create(newReplyComment);
-    replyComment.createdBy = replyComment.updatedBy = currentUser.name;
-    return this, this.commentRepository.save(replyComment);
-  }
-*/
   async updateCommentById(
     id: number,
     dto: ICommentUpdateDto,

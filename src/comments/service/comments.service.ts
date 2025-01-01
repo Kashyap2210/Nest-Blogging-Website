@@ -157,7 +157,10 @@ export class CommentsService extends EntityManagerBaseService<CommentEntity> {
       'id',
       entityManager,
     );
-    if (commentToDelete.createdBy !== currentUser.id && currentUser.role !== "TOAA") {
+    if (
+      commentToDelete.createdBy !== currentUser.id &&
+      currentUser.role !== 'TOAA'
+    ) {
       throw new BadRequestException({
         key: 'user.id',
         message: 'Current user cannot delete this comment',
@@ -167,10 +170,13 @@ export class CommentsService extends EntityManagerBaseService<CommentEntity> {
   }
 
   async findCommentsByBlogId(
-    blogId: number,
+    blogId: number[],
     entityManager?: EntityManager,
   ): Promise<ICommentEntity[]> {
-    return await this.commentRepository.getByFilter({blogId:[blogId]},entityManager);
+    return await this.commentRepository.getByFilter(
+      { blogId: blogId },
+      entityManager,
+    );
   }
 
   async validateCommentPresence(params: {

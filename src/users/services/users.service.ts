@@ -13,6 +13,7 @@ import {
   IUserEntity,
   IUserEntityArray,
 } from '../interfaces/entity.interface';
+import * as bcrypt from 'bcrypt';
 import { BlogService } from 'src/blog/service/blog.service';
 import { UsersRepository } from '../repository/users.repository';
 import { EntityManagerBaseService } from 'src/helpers/entity.repository';
@@ -94,7 +95,7 @@ export class UsersService extends EntityManagerBaseService<UserEntity> {
     );
     // console.log('this is the user instance from service', userInstance);
     // userInstance.createdBy = userInstance.updatedBy = 1;
-    return this.userRepository.create(userInstance, entityManager);
+    return await this.userRepository.create(userInstance, entityManager);
   }
 
   async getAllUsers(
@@ -172,6 +173,15 @@ export class UsersService extends EntityManagerBaseService<UserEntity> {
       entityManager,
     );
 
+    // Check if the user editing is the same user that is updated or has the role of "TOAA"
+    console.log('this is the creent user id', currentUser.id);
+    if (existingUser.id !== currentUser.id && currentUser.role !== 'TOAA') {
+      throw new BadRequestException({
+        key: 'currentUser',
+        message: `Current User with id: ${id} does not have permission to update this user.`,
+      });
+    }
+
     //Check if user with same credentials exists via seperate method
     await this.checkUserExists(
       dto.emailId !== existingUser.emailId ? dto.emailId : undefined,
@@ -179,15 +189,18 @@ export class UsersService extends EntityManagerBaseService<UserEntity> {
       dto.contactNo !== existingUser.contactNo ? dto.contactNo : undefined,
       entityManager,
     );
-
+    let hashedPassword: string;
+    if (dto.password) {
+      hashedPassword = await bcrypt.hash(dto.password, 10);
+    }
     const updatedUser = {
       ...existingUser,
       ...(dto.name && { name: dto.name }),
       ...(dto.username && { username: dto.username }),
-      ...(dto.password && { password: dto.password }),
       ...(dto.emailId && { emailId: dto.emailId }),
       ...(dto.contactNo && { contactNo: dto.contactNo }),
       ...(dto.profilePictureUrl && { profilePicture: dto.profilePictureUrl }),
+      password: dto.password ? hashedPassword : existingUser.password,
     };
     const [updatedUserEntity] = await this.userRepository.updateById(
       id,
@@ -208,8 +221,14 @@ export class UsersService extends EntityManagerBaseService<UserEntity> {
         message: 'current user is not logged in',
       });
     }
-    await this.userRepository.validatePresence('id', [id], 'id', entityManager);
-    if (currentUser.role !== 'TOAA') {
+    const [userToBeDeleted] = await this.userRepository.validatePresence(
+      'id',
+      [id],
+      'id',
+      entityManager,
+    );
+    // console.log('this is the current users role', [currentUser.role]);
+    if (userToBeDeleted.id !== currentUser.id && currentUser.role !== 'TOAA') {
       throw new ForbiddenException({
         key: 'user.role',
         message: 'Current user does not have permission to delete any user',

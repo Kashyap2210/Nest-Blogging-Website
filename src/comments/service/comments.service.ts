@@ -5,13 +5,13 @@ import {
   Injectable,
 } from '@nestjs/common';
 import { BlogService } from 'src/blog/service/blog.service';
+import { EntityManagerBaseService } from 'src/helpers/entity.repository';
 import { IUserEntity } from 'src/users/interfaces/entity.interface';
 import { EntityManager } from 'typeorm';
 import { CreateCommentDto } from '../dto/create-comment.dto';
 import { ICommentUpdateDto } from '../dto/update-comment.dto';
 import { CommentEntity } from '../entities/comment.entity';
 import { ICommentEntity } from '../interfaces/comment.entity.interface';
-import { EntityManagerBaseService } from 'src/helpers/entity.repository';
 import { CommentsRepository } from '../repository/comments.repository';
 
 @Injectable()
@@ -70,40 +70,6 @@ export class CommentsService extends EntityManagerBaseService<CommentEntity> {
     return this.commentRepository.create(comment, entityManager);
   }
 
-  /*
-  async createRepeatComment(
-    dto: ICommentCreateDto,
-    currentUser: IUserEntity,
-  ): Promise<any> {
-    if (!currentUser) {
-      throw new BadRequestException({
-        key: 'currentUser',
-        message: 'current user is not logged in',
-      });
-    }
-    const blogExists = await this.blogService.getBlogById(
-      dto.blogId,
-      currentUser,
-    );
-    console.log(blogExists);
-    if (!blogExists) {
-      throw new BadRequestException({
-        key: 'blogId',
-        message: `Blog with id: ${dto.blogId} does not exists`,
-      });
-    }
-    const newReplyComment = {
-      text: dto.text,
-      authorId: currentUser.id,
-      blogId: dto.blogId,
-      isReplyComment: dto.isRepeatComment,
-      replyCommentId: dto.repeatCommentId,
-    };
-    const replyComment = this.commentRepository.create(newReplyComment);
-    replyComment.createdBy = replyComment.updatedBy = currentUser.name;
-    return this, this.commentRepository.save(replyComment);
-  }
-*/
   async updateCommentById(
     id: number,
     dto: ICommentUpdateDto,
@@ -157,20 +123,47 @@ export class CommentsService extends EntityManagerBaseService<CommentEntity> {
       'id',
       entityManager,
     );
-    if (commentToDelete.createdBy !== currentUser.id && currentUser.role !== "TOAA") {
+    if (
+      commentToDelete.createdBy !== currentUser.id &&
+      currentUser.role !== 'TOAA'
+    ) {
       throw new BadRequestException({
         key: 'user.id',
         message: 'Current user cannot delete this comment',
       });
     }
-    await this.commentRepository.deleteById(id);
+    const allComments = async (parentCommentId: number): Promise<number[]> => {
+      const replies = await this.commentRepository.getByFilter(
+        {
+          replyCommentId: parentCommentId,
+        },
+        entityManager,
+      );
+      let allReplies = replies.map((reply) => reply.id);
+      for (const reply of allReplies) {
+        const childReplies = await allComments(reply);
+        allReplies.push(...childReplies);
+      }
+      return allReplies;
+    };
+    let uniqueReplyCommentArray: number[] = [];
+    uniqueReplyCommentArray = Array.from(new Set(await allComments(id)));
+    uniqueReplyCommentArray.push(id);
+
+    await this.commentRepository.deleteMany(
+      uniqueReplyCommentArray,
+      entityManager,
+    );
   }
 
   async findCommentsByBlogId(
-    blogId: number,
+    blogId: number[],
     entityManager?: EntityManager,
   ): Promise<ICommentEntity[]> {
-    return await this.commentRepository.getByFilter({blogId:[blogId]},entityManager);
+    return await this.commentRepository.getByFilter(
+      { blogId: blogId },
+      entityManager,
+    );
   }
 
   async validateCommentPresence(params: {
@@ -208,15 +201,4 @@ export class CommentsService extends EntityManagerBaseService<CommentEntity> {
     }
     return commentToFind;
   }
-
-  // async cascadeCommentDelete(blogId: number, entityManager?: EntityManager) {
-  //   const comments = await this.commentRepository.validatePresence(
-  //     'blogId',
-  //     [blogId],
-  //     'blogId',
-  //     entityManager,
-  //   );
-  //   const commentIdsToDelete = comments.map((comment) => comment.id);
-  //   return this.commentRepository.deleteMany(commentIdsToDelete);
-  // }
 }

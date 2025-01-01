@@ -46,6 +46,21 @@ export class BlogService extends EntityManagerBaseService<BlogEntity> {
         message: 'current user is not logged in',
       });
     }
+
+    //Check if blog with same title exists
+    const existingBlogs = await this.blogRepository.getByFilter(
+      {
+        title: [dto.title],
+      },
+      entityManager,
+    );
+    if (existingBlogs.length > 0) {
+      throw new BadRequestException({
+        key: 'title',
+        message: 'Blog with this title already exists',
+      });
+    }
+
     const blog = await this.blogRepository.getInstance(dto, entityManager);
     blog['author'] = currentUser.name;
     blog['createdBy'] = blog['updatedBy'] = currentUser.id;
@@ -89,7 +104,7 @@ export class BlogService extends EntityManagerBaseService<BlogEntity> {
       'id',
       entityManager,
     );
-    const blogComments = await this.commentsService.findCommentsByBlogId(id);
+    const blogComments = await this.commentsService.findCommentsByBlogId([id]);
 
     return {
       blog: blogById,
@@ -164,16 +179,50 @@ export class BlogService extends EntityManagerBaseService<BlogEntity> {
       'id',
       entityManager,
     );
-    if (blogToBeDeleted.createdBy !== currentUser.id && currentUser.role !== "TOAA") {
+    if (
+      blogToBeDeleted.createdBy !== currentUser.id &&
+      currentUser.role !== 'TOAA'
+    ) {
       throw new BadRequestException({
         key: 'user.id',
         message: 'Current user cannot delete this blog',
       });
     }
+
+    //finding comments on the blog with id:id
+    const commentIdsOnBlog = (
+      await this.commentsService.getByFilter(
+        {
+          blogId: [id],
+        },
+        entityManager,
+      )
+    ).map((comments) => comments.id);
+    // console.log('this are the comments on the blog', commentIdsOnBlog);
+    if (commentIdsOnBlog.length > 0) {
+      await this.commentsService.deleteMany(commentIdsOnBlog, entityManager);
+    }
+
+    //finding likesAndDislikesEntities on the blog with id:id
+    let likeAndDislikeIds = (
+      await this.likesCounterBlogsService.getByFilter(
+        {
+          blogId: [id],
+        },
+        entityManager,
+      )
+    ).map((likesCounterEntity) => likesCounterEntity.id);
+    // console.log('this are the like and dislike entities', likeAndDislikeIds);
+    if (likeAndDislikeIds.length > 0) {
+      await this.likesCounterBlogsService.deleteMany(
+        likeAndDislikeIds,
+        entityManager,
+      );
+    }
     await this.blogRepository.deleteById(id);
   }
 
-  async getBlogByFilter(
+  async getBlogUserIdFilter(
     currentUser: IUserEntity,
     entityManager?: EntityManager,
   ): Promise<IBlogEntity> {

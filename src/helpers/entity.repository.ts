@@ -117,11 +117,6 @@ export abstract class EntityManagerBaseService<T> {
   ): Promise<void> {
     const repository = this.getRepository(entityManager);
     const tableName = repository.metadata.tableName;
-    let query = repository.createQueryBuilder(tableName);
-
-    query = query.andWhere(`${tableName}.${id} IN (:...${id})`, {
-      [id]: id,
-    });
     const entity = await repository.delete(id);
     if (entity.affected === 0) {
       throw new BadRequestException({
@@ -153,5 +148,21 @@ export abstract class EntityManagerBaseService<T> {
     // Execute the query and fetch the results
     const entities = await query.getMany();
     return entities;
+  }
+
+  async deleteMany<P>(
+    ids: number[], // Key is the property name, value is the value to
+    entityManager?: EntityManager,
+  ): Promise<void> {
+    const repository = this.getRepository(entityManager);
+    const tableName = repository.metadata.tableName;
+
+    const entities = await repository.delete(ids);
+    if (entities.affected === 0) {
+      throw new BadRequestException({
+        key: ids,
+        message: `${tableName.charAt(0).toUpperCase() + tableName.slice(1)} entities with ${ids.join(",")} not found`
+      })
+    }
   }
 }

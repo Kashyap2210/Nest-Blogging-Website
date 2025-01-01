@@ -17,7 +17,7 @@ export class UsersRepository extends EntityManagerBaseService<UserEntity> {
     const hashedPassword = await bcrypt.hash(dto.password, 10);
     const user = {
       name: dto.name,
-      username: dto.name,
+      username: dto.username,
       password: hashedPassword,
       emailId: dto.emailId,
       contactNo: dto.contactNo,

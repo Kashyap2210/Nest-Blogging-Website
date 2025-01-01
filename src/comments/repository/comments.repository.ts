@@ -1,5 +1,4 @@
 import { EntityManagerBaseService } from 'src/helpers/entity.repository';
-import { IUserEntity } from 'src/users/interfaces/entity.interface';
 import { EntityManager, EntityRepository } from 'typeorm';
 import { CommentEntity } from '../entities/comment.entity';
 import { ICommentCreateDto } from '../interfaces/comment.create.interface';

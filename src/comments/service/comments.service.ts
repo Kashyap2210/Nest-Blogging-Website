@@ -122,7 +122,15 @@ export class CommentsService extends EntityManagerBaseService<CommentEntity> {
       'id',
       entityManager,
     );
-
+    if (
+      commentToUpdate.createdBy !== currentUser.id &&
+      currentUser.role !== 'TOAA'
+    ) {
+      throw new BadRequestException({
+        key: 'user.id',
+        message: 'Current user cannot update this comment',
+      });
+    }
     const updatedComment = {
       ...commentToUpdate,
       ...dto,
@@ -149,6 +157,12 @@ export class CommentsService extends EntityManagerBaseService<CommentEntity> {
       'id',
       entityManager,
     );
+    if (commentToDelete.createdBy !== currentUser.id && currentUser.role !== "TOAA") {
+      throw new BadRequestException({
+        key: 'user.id',
+        message: 'Current user cannot delete this comment',
+      });
+    }
     await this.commentRepository.deleteById(id);
   }
 

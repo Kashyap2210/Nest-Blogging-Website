@@ -83,13 +83,13 @@ export class BlogService extends EntityManagerBaseService<BlogEntity> {
         message: 'current user is not logged in',
       });
     }
-    const blogComments = await this.commentsService.findCommentsByBlogId(id);
     const [blogById] = await this.blogRepository.validatePresence(
       'id',
       [id],
       'id',
       entityManager,
     );
+    const blogComments = await this.commentsService.findCommentsByBlogId(id);
 
     return {
       blog: blogById,
@@ -115,10 +115,14 @@ export class BlogService extends EntityManagerBaseService<BlogEntity> {
       'id',
       entityManager,
     );
-    if (currentUser.id !== blogEntityById.createdBy) {
+    if (
+      currentUser.id !== blogEntityById.createdBy &&
+      currentUser.role !== 'TOAA'
+    ) {
       throw new BadRequestException({
-        key: 'currentUser',
-        message: 'current user is not same as the one who created this blog',
+        key: 'id | role',
+        message:
+          'current user did not create this blog or does not have permission to update this blog',
       });
     }
     const blogFromDtoTitle = await this.blogRepository.getByFilter({
@@ -160,7 +164,7 @@ export class BlogService extends EntityManagerBaseService<BlogEntity> {
       'id',
       entityManager,
     );
-    if (blogToBeDeleted.createdBy !== currentUser.id) {
+    if (blogToBeDeleted.createdBy !== currentUser.id && currentUser.role !== "TOAA") {
       throw new BadRequestException({
         key: 'user.id',
         message: 'Current user cannot delete this blog',

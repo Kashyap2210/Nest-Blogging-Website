@@ -21,9 +21,9 @@ export interface IBlogCreateDto {
 export type IBulkBlogCreateDto = [IBlogCreateDto];
 
 export interface IBlogUpdateDto {
-  title: string;
-  content: string;
-  keywords: string;
+  title?: string;
+  content?: string;
+  keywords?: string;
 }
 
 export type IBlogResponse = {

@@ -198,7 +198,7 @@ export class BlogService extends EntityManagerBaseService<BlogEntity> {
         entityManager,
       )
     ).map((comments) => comments.id);
-    console.log('this are the comments on the blog', commentIdsOnBlog);
+    // console.log('this are the comments on the blog', commentIdsOnBlog);
     if (commentIdsOnBlog.length > 0) {
       await this.commentsService.deleteMany(commentIdsOnBlog, entityManager);
     }
@@ -212,7 +212,7 @@ export class BlogService extends EntityManagerBaseService<BlogEntity> {
         entityManager,
       )
     ).map((likesCounterEntity) => likesCounterEntity.id);
-    console.log('this are the like and dislike entities', likeAndDislikeIds);
+    // console.log('this are the like and dislike entities', likeAndDislikeIds);
     if (likeAndDislikeIds.length > 0) {
       await this.likesCounterBlogsService.deleteMany(
         likeAndDislikeIds,

@@ -277,7 +277,6 @@ export class UsersService extends EntityManagerBaseService<UserEntity> {
 
       //check if the values actually exists only then proced to delete
       if (currentUserBlogsIds.length > 0) {
-        console.log('code is here');
         await this.blogService.deleteMany(currentUserBlogsIds, entityManager);
       }
       if (commentIdsOnUsersBlogs.length > 0) {

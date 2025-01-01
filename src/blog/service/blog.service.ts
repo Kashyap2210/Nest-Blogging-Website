@@ -188,6 +188,37 @@ export class BlogService extends EntityManagerBaseService<BlogEntity> {
         message: 'Current user cannot delete this blog',
       });
     }
+
+    //finding comments on the blog with id:id
+    const commentIdsOnBlog = (
+      await this.commentsService.getByFilter(
+        {
+          blogId: [id],
+        },
+        entityManager,
+      )
+    ).map((comments) => comments.id);
+    console.log('this are the comments on the blog', commentIdsOnBlog);
+    if (commentIdsOnBlog.length > 0) {
+      await this.commentsService.deleteMany(commentIdsOnBlog, entityManager);
+    }
+
+    //finding likesAndDislikesEntities on the blog with id:id
+    let likeAndDislikeIds = (
+      await this.likesCounterBlogsService.getByFilter(
+        {
+          blogId: [id],
+        },
+        entityManager,
+      )
+    ).map((likesCounterEntity) => likesCounterEntity.id);
+    console.log('this are the like and dislike entities', likeAndDislikeIds);
+    if (likeAndDislikeIds.length > 0) {
+      await this.likesCounterBlogsService.deleteMany(
+        likeAndDislikeIds,
+        entityManager,
+      );
+    }
     await this.blogRepository.deleteById(id);
   }
 

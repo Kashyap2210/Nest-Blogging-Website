@@ -1,8 +1,7 @@
-import { Body, Controller, Injectable, Post, UseGuards } from '@nestjs/common';
+import { Body, Controller, Injectable, Post } from '@nestjs/common';
 import { AuthService } from './auth.service';
 import { UserSignInDto } from './dto/user.signIn.dto';
 import { ApiOkResponse, ApiOperation, ApiTags } from '@nestjs/swagger';
-import { AuthGuard } from './auth.guard';
 
 @Injectable()
 @ApiTags('auth')

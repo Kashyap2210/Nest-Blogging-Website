@@ -22,8 +22,9 @@ import {
   ApiOperation,
 } from '@nestjs/swagger';
 import { diskStorage } from 'multer';
-import { imageFileFilter, profilePictureEditor } from 'src/file.utils';
+import { AuthGuard } from 'src/auth/auth.guard';
 import { CurrentUser } from 'src/decorators/current_user.decorator';
+import { imageFileFilter, profilePictureEditor } from 'src/file.utils';
 import { UserUpdateDto } from '../dtos/user.update.dto';
 import {
   IUserCreateDto,
@@ -31,7 +32,6 @@ import {
   IUserEntityArray,
 } from '../interfaces/entity.interface';
 import { UsersService } from '../services/users.service';
-import { AuthGuard } from 'src/auth/auth.guard';
 
 @Controller('users')
 export class UsersController {

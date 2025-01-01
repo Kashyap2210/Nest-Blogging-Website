@@ -1,6 +1,6 @@
+import { AuditColumnEntity } from 'src/helpers/audti.column.entity';
 import { Column, Entity, PrimaryGeneratedColumn } from "typeorm";
 import { IBlogEntity } from "../interfaces/blog.interfaces";
-import { AuditColumnEntity } from 'src/helpers/audti.column.entity';
 
 @Entity('blogs')
 export class BlogEntity extends AuditColumnEntity implements IBlogEntity {

@@ -13,6 +13,7 @@ import { CommentEntity } from '../entities/comment.entity';
 import { ICommentEntity } from '../interfaces/comment.entity.interface';
 import { EntityManagerBaseService } from 'src/helpers/entity.repository';
 import { CommentsRepository } from '../repository/comments.repository';
+import { repl } from '@nestjs/core';
 
 @Injectable()
 export class CommentsService extends EntityManagerBaseService<CommentEntity> {
@@ -166,7 +167,28 @@ export class CommentsService extends EntityManagerBaseService<CommentEntity> {
         message: 'Current user cannot delete this comment',
       });
     }
-    await this.commentRepository.deleteById(id);
+    const allComments = async (parentCommentId: number): Promise<number[]> => {
+      const replies = await this.commentRepository.getByFilter(
+        {
+          replyCommentId: parentCommentId,
+        },
+        entityManager,
+      );
+      let allReplies = replies.map((reply) => reply.id);
+      for (const reply of allReplies) {
+        const childReplies = await allComments(reply);
+        allReplies.push(...childReplies);
+      }
+      return allReplies;
+    };
+    let uniqueReplyCommentArray: number[] = [];
+    uniqueReplyCommentArray = Array.from(new Set(await allComments(id)));
+    uniqueReplyCommentArray.push(id);
+
+    await this.commentRepository.deleteMany(
+      uniqueReplyCommentArray,
+      entityManager,
+    );
   }
 
   async findCommentsByBlogId(

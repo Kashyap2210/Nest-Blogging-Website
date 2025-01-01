@@ -96,10 +96,14 @@ export class LikesCounterBlogsService extends EntityManagerBaseService<IBlogLike
       await this.likesCounterBlogRepository.getByFilter(
         {
           blogId: blogId,
+          createdBy: currentUser.id,
         },
         entityManager,
       );
-
+    console.log(
+      'this is the like dislike entity of the user ',
+      existingLikeOrDislikeByUser,
+    );
     if (existingLikeOrDislikeByUser) {
       this.likesCounterBlogRepository.deleteById(
         existingLikeOrDislikeByUser.id,

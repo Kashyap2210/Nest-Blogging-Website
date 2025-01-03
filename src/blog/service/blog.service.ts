@@ -8,7 +8,7 @@ import {
 import { CommentsService } from 'src/comments/service/comments.service';
 import { EntityManagerBaseService } from 'src/helpers/entity.repository';
 import { LikesCounterBlogsService } from 'src/likes-counter-blogs/services/likes-counter-blogs.service';
-import { IUserEntity } from 'src/users/interfaces/entity.interface';
+// import { IUserEntity } from 'src/users/interfaces/entity.interface';
 import { EntityManager } from 'typeorm';
 import { BlogEntity } from '../entities/blog.entity';
 import {
@@ -19,6 +19,7 @@ import {
   IBlogUpdateDto,
 } from '../interfaces/blog.interfaces';
 import { BlogRepository } from '../repository/blogs.repository';
+import { IUserEntity } from 'blog-common-1.0';
 
 @Injectable()
 export class BlogService extends EntityManagerBaseService<BlogEntity> {

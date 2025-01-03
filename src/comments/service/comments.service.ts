@@ -6,13 +6,14 @@ import {
 } from '@nestjs/common';
 import { BlogService } from 'src/blog/service/blog.service';
 import { EntityManagerBaseService } from 'src/helpers/entity.repository';
-import { IUserEntity } from 'src/users/interfaces/entity.interface';
+// import { IUserEntity } from 'src/users/interfaces/entity.interface';
 import { EntityManager } from 'typeorm';
 import { CreateCommentDto } from '../dto/create-comment.dto';
 import { ICommentUpdateDto } from '../dto/update-comment.dto';
 import { CommentEntity } from '../entities/comment.entity';
 import { ICommentEntity } from '../interfaces/comment.entity.interface';
 import { CommentsRepository } from '../repository/comments.repository';
+import { IUserEntity } from 'blog-common-1.0';
 
 @Injectable()
 export class CommentsService extends EntityManagerBaseService<CommentEntity> {

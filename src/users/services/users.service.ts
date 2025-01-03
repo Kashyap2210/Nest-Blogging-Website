@@ -13,12 +13,12 @@ import { LikesCounterBlogsService } from 'src/likes-counter-blogs/services/likes
 import { EntityManager } from 'typeorm';
 import { IUserUpdateDto } from '../dtos/user.update.dto';
 import { UserEntity } from '../entities/user.entity';
-import {
-  IUserCreateDto,
-  IUserEntity,
-  IUserEntityArray,
-} from '../interfaces/entity.interface';
+// import {
+//   IUserCreateDto,
+//   IUserEntityArray,
+// } from '../interfaces/entity.interface';
 import { UsersRepository } from '../repository/users.repository';
+import { IUserCreateDto, IUserEntity, IUserEntityArray } from 'blog-common-1.0';
 
 @Injectable()
 export class UsersService extends EntityManagerBaseService<UserEntity> {

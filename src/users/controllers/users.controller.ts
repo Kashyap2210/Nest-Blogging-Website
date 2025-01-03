@@ -26,12 +26,13 @@ import { AuthGuard } from 'src/auth/auth.guard';
 import { CurrentUser } from 'src/decorators/current_user.decorator';
 import { imageFileFilter, profilePictureEditor } from 'src/file.utils';
 import { UserUpdateDto } from '../dtos/user.update.dto';
-import {
-  IUserCreateDto,
-  IUserEntity,
-  IUserEntityArray,
-} from '../interfaces/entity.interface';
+// import {
+//   IUserCreateDto,
+//   IUserEntity,
+//   IUserEntityArray,
+// } from '../interfaces/entity.interface';
 import { UsersService } from '../services/users.service';
+import { IUserCreateDto, IUserEntity, IUserEntityArray } from 'blog-common-1.0';
 
 @Controller('users')
 export class UsersController {

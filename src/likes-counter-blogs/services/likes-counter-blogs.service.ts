@@ -5,7 +5,7 @@ import {
   Injectable,
 } from '@nestjs/common';
 import { BlogService } from 'src/blog/service/blog.service';
-import { IUserEntity } from 'src/users/interfaces/entity.interface';
+// import { IUserEntity } from 'src/users/interfaces/entity.interface';
 import { EntityManager } from 'typeorm';
 import { CreateLikesCounterBlogDto } from '../dto/create-blog-likes.dto';
 import { BlogLikesCounterEntity } from '../entities/likes-counter-blog.entity';
@@ -13,6 +13,7 @@ import { LikeStatus } from '../enums/like.status.enum';
 import { IBlogLikesCounterEntity } from '../interfaces/blog-like-counter.interface';
 import { EntityManagerBaseService } from 'src/helpers/entity.repository';
 import { LikesCounterBlogRepository } from '../repository/likes-counter-blogs.repository';
+import { IUserEntity } from 'blog-common-1.0';
 
 @Injectable()
 export class LikesCounterBlogsService extends EntityManagerBaseService<IBlogLikesCounterEntity> {

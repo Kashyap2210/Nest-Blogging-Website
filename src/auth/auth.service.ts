@@ -3,6 +3,7 @@ import { JwtService } from '@nestjs/jwt';
 import * as bcrypt from 'bcrypt';
 import { UsersService } from 'src/users/services/users.service';
 import { UserSignInDto } from './dto/user.signIn.dto';
+import { IUserEntity, IUserLoginResponse } from 'blog-common-1.0';
 
 export interface IJwtPayload {
   username: string;
@@ -18,7 +19,8 @@ export class AuthService {
 
   async logIn(signInDto: UserSignInDto) {
     const { username, password } = signInDto;
-    const user = await this.usersService.findUserByUserName(username);
+    const user: IUserEntity =
+      await this.usersService.findUserByUserName(username);
     // console.log('this is the user from auth service', user);
     if (!user) {
       throw new UnauthorizedException('Invalid username or password');
@@ -33,10 +35,11 @@ export class AuthService {
       delete user['password'];
       const thisAccessToken = this.jwtService.sign(payload);
       // console.log('this is the access token', thisAccessToken);
-      return {
+      const response: IUserLoginResponse = {
         accessToken: thisAccessToken,
-        user,
+        user: user,
       };
+      return response;
     }
   }
 }

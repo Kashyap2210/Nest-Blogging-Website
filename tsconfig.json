@@ -17,7 +17,10 @@
     "strictBindCallApply": false,
     "forceConsistentCasingInFileNames": false,
     "noFallthroughCasesInSwitch": false,
-    "typeRoots": ["./node_modules/@types", "./@types"]
+    "typeRoots": ["./node_modules/@types", "./@types"],
+    "paths": {
+      "blog-common": ["node_modules/blog-common"]
+    }
   },
     "include": ["src/**/*", "@types/**/*"]
 

@@ -1,7 +1,6 @@
-import { Column, Entity, PrimaryGeneratedColumn } from 'typeorm';
-import { IUserEntity } from '../interfaces/entity.interface';
-import { UserGender } from '../enums/gender.enum';
+import { IUserEntity, UserGender } from 'blog-common-1.0';
 import { AuditColumnEntity } from 'src/helpers/audti.column.entity';
+import { Column, Entity, PrimaryGeneratedColumn } from 'typeorm';
 
 @Entity('users')
 export class UserEntity extends AuditColumnEntity implements IUserEntity {

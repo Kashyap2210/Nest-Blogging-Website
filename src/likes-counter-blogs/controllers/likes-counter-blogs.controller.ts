@@ -5,13 +5,11 @@ import {
   UseGuards
 } from '@nestjs/common';
 import { ApiBearerAuth, ApiBody, ApiResponse, ApiTags } from '@nestjs/swagger';
+import { IBlogLikesCounterEntity, IUserEntity } from 'blog-common-1.0';
 import { AuthGuard } from 'src/auth/auth.guard';
 import { CurrentUser } from 'src/decorators/current_user.decorator';
-// import { IUserEntity } from 'src/users/interfaces/entity.interface';
 import { CreateLikesCounterBlogDto } from '../dto/create-blog-likes.dto';
-import { IBlogLikesCounterEntity } from '../interfaces/blog-like-counter.interface';
 import { LikesCounterBlogsService } from '../services/likes-counter-blogs.service';
-import { IUserEntity } from 'blog-common-1.0';
 
 @ApiTags('likes-counter-blogs')
 @Controller('likes-counter-blogs')

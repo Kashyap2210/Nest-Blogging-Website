@@ -1,7 +1,6 @@
 import { ICommentEntity } from 'blog-common-1.0';
 import { AuditColumnEntity } from 'src/helpers/audti.column.entity';
 import { Column, Entity, PrimaryGeneratedColumn } from 'typeorm';
-// import { ICommentEntity } from '../interfaces/comment.entity.interface';
 
 @Entity('comments')
 export class CommentEntity extends AuditColumnEntity implements ICommentEntity {

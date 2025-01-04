@@ -1,5 +1,5 @@
+import { IAuditColumnEntity } from 'blog-common-1.0';
 import { Column } from 'typeorm';
-import { IAuditColumnEntity } from './audit.column.entity.interface';
 
 export class AuditColumnEntity implements IAuditColumnEntity {
   @Column({

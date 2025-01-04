@@ -4,16 +4,17 @@ import {
   Inject,
   Injectable,
 } from '@nestjs/common';
+import {
+  ICommentEntity,
+  ICommentUpdateDto,
+  IUserEntity,
+} from 'blog-common-1.0';
 import { BlogService } from 'src/blog/service/blog.service';
 import { EntityManagerBaseService } from 'src/helpers/entity.repository';
-// import { IUserEntity } from 'src/users/interfaces/entity.interface';
 import { EntityManager } from 'typeorm';
 import { CreateCommentDto } from '../dto/create-comment.dto';
-import { ICommentUpdateDto } from '../dto/update-comment.dto';
 import { CommentEntity } from '../entities/comment.entity';
-import { ICommentEntity } from '../interfaces/comment.entity.interface';
 import { CommentsRepository } from '../repository/comments.repository';
-import { IUserEntity } from 'blog-common-1.0';
 
 @Injectable()
 export class CommentsService extends EntityManagerBaseService<CommentEntity> {
@@ -63,7 +64,7 @@ export class CommentsService extends EntityManagerBaseService<CommentEntity> {
         entityManager,
       );
     }
-    const comment = await this.commentRepository.getInstance(
+    const comment: ICommentEntity = await this.commentRepository.getInstance(
       createCommentDto,
       entityManager,
     );
@@ -83,12 +84,13 @@ export class CommentsService extends EntityManagerBaseService<CommentEntity> {
         message: 'current user is not logged in',
       });
     }
-    const [commentToUpdate] = await this.commentRepository.validatePresence(
-      'id',
-      [id],
-      'id',
-      entityManager,
-    );
+    const [commentToUpdate]: ICommentEntity[] =
+      await this.commentRepository.validatePresence(
+        'id',
+        [id],
+        'id',
+        entityManager,
+      );
     if (
       commentToUpdate.createdBy !== currentUser.id &&
       currentUser.role !== 'TOAA'
@@ -98,7 +100,7 @@ export class CommentsService extends EntityManagerBaseService<CommentEntity> {
         message: 'Current user cannot update this comment',
       });
     }
-    const updatedComment = {
+    const updatedComment: ICommentEntity = {
       ...commentToUpdate,
       ...dto,
       updatedBy: currentUser.id,
@@ -118,12 +120,13 @@ export class CommentsService extends EntityManagerBaseService<CommentEntity> {
         message: 'current user is not logged in',
       });
     }
-    const [commentToDelete] = await this.commentRepository.validatePresence(
-      'id',
-      [id],
-      'id',
-      entityManager,
-    );
+    const [commentToDelete]: ICommentEntity[] =
+      await this.commentRepository.validatePresence(
+        'id',
+        [id],
+        'id',
+        entityManager,
+      );
     if (
       commentToDelete.createdBy !== currentUser.id &&
       currentUser.role !== 'TOAA'
@@ -134,15 +137,16 @@ export class CommentsService extends EntityManagerBaseService<CommentEntity> {
       });
     }
     const allComments = async (parentCommentId: number): Promise<number[]> => {
-      const replies = await this.commentRepository.getByFilter(
-        {
-          replyCommentId: parentCommentId,
-        },
-        entityManager,
-      );
-      let allReplies = replies.map((reply) => reply.id);
+      const replies: ICommentEntity[] =
+        await this.commentRepository.getByFilter(
+          {
+            replyCommentId: parentCommentId,
+          },
+          entityManager,
+        );
+      let allReplies: number[] = replies.map((reply) => reply.id);
       for (const reply of allReplies) {
-        const childReplies = await allComments(reply);
+        const childReplies: number[] = await allComments(reply);
         allReplies.push(...childReplies);
       }
       return allReplies;
@@ -183,13 +187,14 @@ export class CommentsService extends EntityManagerBaseService<CommentEntity> {
     }
 
     const filter = id ? { id } : blogId ? { blogId } : { parentCommentId };
-    const commentToFind = await this.commentRepository.getByFilter({
-      filter,
-    });
+    const commentToFind: ICommentEntity[] =
+      await this.commentRepository.getByFilter({
+        filter,
+      });
 
     if (commentToFind.length === 0) {
       const errorKey = id ? 'commentId' : blogId ? 'blogId' : 'replyCommentId';
-      const errorMessage = id
+      const errorMessage: string = id
         ? `Comment with id ${id} not found.`
         : blogId
           ? `No comments found for blog with id ${blogId}.`

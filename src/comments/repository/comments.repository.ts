@@ -1,9 +1,7 @@
 import { EntityManagerBaseService } from 'src/helpers/entity.repository';
 import { EntityManager, EntityRepository } from 'typeorm';
 import { CommentEntity } from '../entities/comment.entity';
-// import { ICommentCreateDto } from '../interfaces/comment.create.interface';
 import { ICommentCreateDto, ICommentEntity } from 'blog-common-1.0';
-// import { ICommentEntity } from '../interfaces/comment.entity.interface';
 
 @EntityRepository(CommentEntity)
 export class CommentsRepository extends EntityManagerBaseService<CommentEntity> {

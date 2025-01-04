@@ -1,9 +1,8 @@
 import { Injectable, UnauthorizedException } from '@nestjs/common';
 import { JwtService } from '@nestjs/jwt';
 import * as bcrypt from 'bcrypt';
-import { UsersService } from 'src/users/services/users.service';
-import { UserSignInDto } from './dto/user.signIn.dto';
 import { IUserEntity, IUserLoginResponse, IUserSignDto } from 'blog-common-1.0';
+import { UsersService } from 'src/users/services/users.service';
 
 export interface IJwtPayload {
   username: string;
@@ -25,7 +24,7 @@ export class AuthService {
     if (!user) {
       throw new UnauthorizedException('Invalid username or password');
     }
-    const isMatch = await bcrypt.compare(password, user.password);
+    const isMatch: boolean = await bcrypt.compare(password, user.password);
     if (isMatch) {
       const payload: IJwtPayload = {
         username: user.username,
@@ -33,7 +32,7 @@ export class AuthService {
       };
 
       delete user['password'];
-      const thisAccessToken = this.jwtService.sign(payload);
+      const thisAccessToken: string = this.jwtService.sign(payload);
       // console.log('this is the access token', thisAccessToken);
       const response: IUserLoginResponse = {
         accessToken: thisAccessToken,

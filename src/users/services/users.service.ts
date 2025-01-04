@@ -11,14 +11,14 @@ import { CommentsService } from 'src/comments/service/comments.service';
 import { EntityManagerBaseService } from 'src/helpers/entity.repository';
 import { LikesCounterBlogsService } from 'src/likes-counter-blogs/services/likes-counter-blogs.service';
 import { EntityManager } from 'typeorm';
-import { IUserUpdateDto } from '../dtos/user.update.dto';
 import { UserEntity } from '../entities/user.entity';
-// import {
-//   IUserCreateDto,
-//   IUserEntityArray,
-// } from '../interfaces/entity.interface';
 import { UsersRepository } from '../repository/users.repository';
-import { IUserCreateDto, IUserEntity, IUserEntityArray } from 'blog-common-1.0';
+import {
+  IUserCreateDto,
+  IUserEntity,
+  IUserEntityArray,
+  IUserUpdateDto,
+} from 'blog-common-1.0';
 
 @Injectable()
 export class UsersService extends EntityManagerBaseService<UserEntity> {
@@ -43,10 +43,11 @@ export class UsersService extends EntityManagerBaseService<UserEntity> {
     entityManager?: EntityManager,
   ): Promise<boolean> {
     if (emailId && emailId !== undefined && emailId !== null) {
-      const existingUserByEmailId = await this.userRepository.getByFilter(
-        { emailId: [emailId] },
-        entityManager,
-      );
+      const existingUserByEmailId: IUserEntity[] =
+        await this.userRepository.getByFilter(
+          { emailId: [emailId] },
+          entityManager,
+        );
       // Check if the user already exists
       if (existingUserByEmailId.length > 0) {
         throw new BadRequestException({
@@ -57,10 +58,11 @@ export class UsersService extends EntityManagerBaseService<UserEntity> {
     }
 
     if (username && username !== undefined && username !== null) {
-      const existingUserByUsername = await this.userRepository.getByFilter(
-        { username: [username] },
-        entityManager,
-      );
+      const existingUserByUsername: IUserEntity[] =
+        await this.userRepository.getByFilter(
+          { username: [username] },
+          entityManager,
+        );
       // Check if the user already exists
       if (existingUserByUsername.length > 0) {
         throw new BadRequestException({
@@ -93,11 +95,11 @@ export class UsersService extends EntityManagerBaseService<UserEntity> {
     //checking if user already exists via seperate method
     await this.checkUserExists(dto.emailId, dto.username, dto.contactNo);
 
-    const userInstance = await this.userRepository.getInstance(
+    const userInstance: IUserEntity = await this.userRepository.getInstance(
       dto,
       entityManager,
     );
-    // // console.log('this is the user instance from service', userInstance);
+    // console.log('this is the user instance from service', userInstance);
     // userInstance.createdBy = userInstance.updatedBy = 1;
     return await this.userRepository.create(userInstance, entityManager);
   }
@@ -117,7 +119,7 @@ export class UsersService extends EntityManagerBaseService<UserEntity> {
         message: 'Current user does not have permission to access all users',
       });
     }
-    const allUsers = await this.userRepository.getByFilter({});
+    const allUsers: IUserEntity[] = await this.userRepository.getByFilter({});
     let allUsersResponse: Partial<IUserEntityArray> = [];
     for (const user of allUsers) {
       delete user['password']; //Removing password from all the response
@@ -127,10 +129,11 @@ export class UsersService extends EntityManagerBaseService<UserEntity> {
   }
 
   async findUserByUserName(name: string): Promise<IUserEntity> {
-    const [userByUsername] = await this.userRepository.getByFilter({
-      username: [name],
-    });
-    // // console.log(
+    const [userByUsername]: IUserEntity[] =
+      await this.userRepository.getByFilter({
+        username: [name],
+      });
+    // console.log(
     //   'this is the user by username from user service',
     //   userByUsername,
     // );
@@ -138,7 +141,9 @@ export class UsersService extends EntityManagerBaseService<UserEntity> {
   }
 
   async getUserByIdAuth(id: number): Promise<IUserEntity> {
-    const [userById] = await this.userRepository.getByFilter({ id: [id] });
+    const [userById]: IUserEntity[] = await this.userRepository.getByFilter({
+      id: [id],
+    });
     delete userById['password'];
     return userById;
   }
@@ -153,7 +158,9 @@ export class UsersService extends EntityManagerBaseService<UserEntity> {
         message: 'current user is not logged in',
       });
     }
-    const [userById] = await this.userRepository.getByFilter({ id: [id] });
+    const [userById]: IUserEntity[] = await this.userRepository.getByFilter({
+      id: [id],
+    });
     delete userById['password'];
     return userById;
   }
@@ -170,12 +177,13 @@ export class UsersService extends EntityManagerBaseService<UserEntity> {
         message: 'current user is not logged in',
       });
     }
-    const [existingUser] = await this.userRepository.validatePresence(
-      'id',
-      [id],
-      'id',
-      entityManager,
-    );
+    const [existingUser]: IUserEntity[] =
+      await this.userRepository.validatePresence(
+        'id',
+        [id],
+        'id',
+        entityManager,
+      );
 
     // Check if the user editing is the same user that is updated or has the role of "TOAA"
     // console.log('this is the creent user id', currentUser.id);
@@ -197,7 +205,7 @@ export class UsersService extends EntityManagerBaseService<UserEntity> {
     if (dto.password) {
       hashedPassword = await bcrypt.hash(dto.password, 10);
     }
-    const updatedUser = {
+    const updatedUser: IUserEntity = {
       ...existingUser,
       ...(dto.name && { name: dto.name }),
       ...(dto.username && { username: dto.username }),
@@ -206,11 +214,8 @@ export class UsersService extends EntityManagerBaseService<UserEntity> {
       ...(dto.profilePictureUrl && { profilePicture: dto.profilePictureUrl }),
       password: dto.password ? hashedPassword : existingUser.password,
     };
-    const [updatedUserEntity] = await this.userRepository.updateById(
-      id,
-      updatedUser,
-      entityManager,
-    );
+    const [updatedUserEntity]: IUserEntity[] =
+      await this.userRepository.updateById(id, updatedUser, entityManager);
     return updatedUserEntity;
   }
 
@@ -225,12 +230,13 @@ export class UsersService extends EntityManagerBaseService<UserEntity> {
         message: 'current user is not logged in',
       });
     }
-    const [userToBeDeleted] = await this.userRepository.validatePresence(
-      'id',
-      [id],
-      'id',
-      entityManager,
-    );
+    const [userToBeDeleted]: IUserEntity[] =
+      await this.userRepository.validatePresence(
+        'id',
+        [id],
+        'id',
+        entityManager,
+      );
     // console.log('this is the current users role', [currentUser.role]);
     if (userToBeDeleted.id !== currentUser.id && currentUser.role !== 'TOAA') {
       throw new ForbiddenException({
@@ -240,7 +246,7 @@ export class UsersService extends EntityManagerBaseService<UserEntity> {
     }
 
     // finding all the blogs related to the user
-    const currentUserBlogsIds = (
+    const currentUserBlogsIds: number[] = (
       await this.blogService.getByFilter(
         {
           createdBy: [currentUser.id],
@@ -253,7 +259,7 @@ export class UsersService extends EntityManagerBaseService<UserEntity> {
     // if blogs exists only then we check for further comments and like dislike entities
     if (currentUserBlogsIds.length > 0) {
       //finding all the comments related to the users' blogs
-      let commentIdsOnUsersBlogs = (
+      let commentIdsOnUsersBlogs: number[] = (
         await this.commentsService.findCommentsByBlogId(
           currentUserBlogsIds,
           entityManager,
@@ -266,7 +272,7 @@ export class UsersService extends EntityManagerBaseService<UserEntity> {
         );
       */
       //finding all the like and dislike entity
-      let likeAndDislikeIds = (
+      let likeAndDislikeIds: number[] = (
         await this.likesCounterService.getByFilter(
           {
             blogId: currentUserBlogsIds,

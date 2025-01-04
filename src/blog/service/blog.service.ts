@@ -5,13 +5,6 @@ import {
   Inject,
   Injectable,
 } from '@nestjs/common';
-import { CommentsService } from 'src/comments/service/comments.service';
-import { EntityManagerBaseService } from 'src/helpers/entity.repository';
-import { LikesCounterBlogsService } from 'src/likes-counter-blogs/services/likes-counter-blogs.service';
-// import { IUserEntity } from 'src/users/interfaces/entity.interface';
-import { EntityManager } from 'typeorm';
-import { BlogEntity } from '../entities/blog.entity';
-import { BlogRepository } from '../repository/blogs.repository';
 import {
   IBlogCreateDto,
   IBlogEntity,
@@ -21,15 +14,20 @@ import {
   ICommentEntity,
   IUserEntity,
 } from 'blog-common-1.0';
+import { CommentsService } from 'src/comments/service/comments.service';
+import { EntityManagerBaseService } from 'src/helpers/entity.repository';
+import { LikesCounterBlogsService } from 'src/likes-counter-blogs/services/likes-counter-blogs.service';
+import { EntityManager } from 'typeorm';
+import { BlogEntity } from '../entities/blog.entity';
+import { BlogRepository } from '../repository/blogs.repository';
 
 @Injectable()
 export class BlogService extends EntityManagerBaseService<BlogEntity> {
   constructor(
-    private readonly blogRepository: BlogRepository, // Injecting custom repository
+    private readonly blogRepository: BlogRepository,
     @Inject(forwardRef(() => CommentsService))
     private readonly commentsService: CommentsService,
     private readonly likesCounterBlogsService: LikesCounterBlogsService,
-    // private dataSource: DataSource,
   ) {
     super();
   }
@@ -217,7 +215,7 @@ export class BlogService extends EntityManagerBaseService<BlogEntity> {
     }
 
     //finding likesAndDislikesEntities on the blog with id:id
-    let likeAndDislikeIds : number[]= (
+    let likeAndDislikeIds: number[] = (
       await this.likesCounterBlogsService.getByFilter(
         {
           blogId: [id],
@@ -245,7 +243,7 @@ export class BlogService extends EntityManagerBaseService<BlogEntity> {
         message: 'current user is not logged in',
       });
     }
-    const [blogEntity] : IBlogEntity[]= await this.blogRepository.getByFilter(
+    const [blogEntity]: IBlogEntity[] = await this.blogRepository.getByFilter(
       {
         createdBy: [currentUser.id],
       },
@@ -258,12 +256,13 @@ export class BlogService extends EntityManagerBaseService<BlogEntity> {
     id: number,
     entityManager?: EntityManager,
   ): Promise<IBlogEntity> {
-    const [blogExists] : IBlogEntity[]= await this.blogRepository.validatePresence(
-      'id',
-      [id],
-      'id',
-      entityManager,
-    );
+    const [blogExists]: IBlogEntity[] =
+      await this.blogRepository.validatePresence(
+        'id',
+        [id],
+        'id',
+        entityManager,
+      );
     return blogExists;
   }
 }

@@ -1,8 +1,8 @@
 import { Global, Module } from '@nestjs/common';
 import { TypeOrmModule } from '@nestjs/typeorm';
-import { BlogEntity } from '../blog/entities/blog.entity';
-import { UserEntity } from 'src/users/entities/user.entity';
 import { ConfigService } from '@nestjs/config';
+import { BlogEntity } from 'src/blog/entities/blog.entity';
+import { UserEntity } from 'src/users/entities/user.entity';
 import { CommentEntity } from 'src/comments/entities/comment.entity';
 import { BlogLikesCounterEntity } from 'src/likes-counter-blogs/entities/likes-counter-blog.entity';
 

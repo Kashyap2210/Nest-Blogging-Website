@@ -1,6 +1,7 @@
 import { IsString } from "@nestjs/class-validator";
 import { ApiProperty } from "@nestjs/swagger";
-import { IBlogCreateDto } from "../interfaces/blog.interfaces";
+import { IBlogCreateDto } from "blog-common-1.0";
+// import { IBlogCreateDto } from "../interfaces/blog.interfaces";
 
 export class CreateBlogDto implements IBlogCreateDto {
   @IsString()

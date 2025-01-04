@@ -1,7 +1,7 @@
 import { EntityManagerBaseService } from 'src/helpers/entity.repository';
 import { EntityManager, EntityRepository } from 'typeorm';
 import { BlogEntity } from '../entities/blog.entity';
-import { IBlogCreateDto, IBlogEntity } from '../interfaces/blog.interfaces';
+import { IBlogCreateDto, IBlogEntity } from 'blog-common-1.0';
 
 @EntityRepository(BlogEntity)
 export class BlogRepository extends EntityManagerBaseService<BlogEntity> {

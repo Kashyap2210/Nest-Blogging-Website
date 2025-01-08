@@ -26,12 +26,4 @@ export class CreateBlogDto implements IBlogCreateDto {
     required: true,
   })
   content: string;
-
-  @IsString()
-  @ApiProperty({
-    description: 'Author of blog',
-    example: 'John Doe',
-    required: true,
-  })
-  author: string;
 }

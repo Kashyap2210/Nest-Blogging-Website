@@ -19,7 +19,6 @@ export class AuthController {
     @Body() signInDto: UserSignInDto,
   ): Promise<IUserLoginResponse> {
     const loggedInUser = await this.authService.logIn(signInDto);
-    console.log('this is the loggedInUser', loggedInUser);
     return loggedInUser;
   }
 }

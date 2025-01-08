@@ -1,7 +1,6 @@
 import { IsEnum, IsPositive } from '@nestjs/class-validator';
-import { IBlogLikeDto } from '../interfaces/create-blog-like.dto.interface';
 import { ApiProperty } from '@nestjs/swagger';
-import { LikeStatus } from '../enums/like.status.enum';
+import { IBlogLikeDto, LikeStatus } from 'blog-common-1.0';
 
 export class CreateLikesCounterBlogDto implements IBlogLikeDto {
   @IsPositive()
@@ -19,7 +18,7 @@ export class CreateLikesCounterBlogDto implements IBlogLikeDto {
   @ApiProperty({
     description: 'status of like',
     required: true,
-    example:'liked'
+    example: 'liked',
   })
   likedStatus: LikeStatus;
 }

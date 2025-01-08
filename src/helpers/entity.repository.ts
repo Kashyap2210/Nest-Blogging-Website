@@ -11,12 +11,13 @@ export abstract class EntityManagerBaseService<T> {
   abstract getEntityClass(): new () => T;
 
   getRepository(entityManager?: EntityManager): Repository<T> {
-    const effectiveEntityManager = this.getEntityManager(entityManager);
+    const effectiveEntityManager: EntityManager =
+      this.getEntityManager(entityManager);
     return effectiveEntityManager.getRepository(this.getEntityClass());
   }
 
   getQueryBuilder(entityManager: EntityManager): SelectQueryBuilder<T> {
-    const repository = this.getRepository(entityManager);
+    const repository : Repository<T> = this.getRepository(entityManager);
     return repository.createQueryBuilder(repository.metadata.tableName);
   }
 
@@ -26,8 +27,8 @@ export abstract class EntityManagerBaseService<T> {
     key?: string,
     entityManager?: EntityManager,
   ): Promise<T[]> {
-    const repository = this.getRepository(entityManager);
-    const tableName = repository.metadata.tableName;
+    const repository: Repository<T> = this.getRepository(entityManager);
+    const tableName: string = repository.metadata.tableName;
 
     // Correctly parameterize the query using the IN clause
     const query = repository
@@ -37,7 +38,7 @@ export abstract class EntityManagerBaseService<T> {
       });
 
     // Execute the query
-    const entities = await query.getMany();
+    const entities: T[] = await query.getMany();
 
     // Find missing values that don't exist in the entities
     const existingValues = entities.map((entity) => entity[propertyName]);

@@ -14,16 +14,11 @@ import {
   ApiOperation,
   ApiTags,
 } from '@nestjs/swagger';
+import { IBlogEntity, IBlogEntityArray, IBlogResponse, IUserEntity } from 'blog-common-1.0';
 import { AuthGuard } from 'src/auth/auth.guard';
 import { CurrentUser } from 'src/decorators/current_user.decorator';
-import { IUserEntity } from 'src/users/interfaces/entity.interface';
 import { CreateBlogDto } from '../dtos/create.blog.dto';
 import { UpdateBlogDto } from '../dtos/update.blog.dto';
-import {
-  IBlogEntity,
-  IBlogEntityArray,
-  IBlogResponse,
-} from '../interfaces/blog.interfaces';
 import { BlogService } from '../service/blog.service';
 
 @ApiTags('blogs')

@@ -1,9 +1,8 @@
 import { EntityManagerBaseService } from 'src/helpers/entity.repository';
 import { UserEntity } from '../entities/user.entity';
-import { IUserCreateDto, IUserEntity } from '../interfaces/entity.interface';
 import { EntityManager } from 'typeorm';
 import * as bcrypt from 'bcrypt';
-import { UserGender } from '../enums/gender.enum';
+import { IUserCreateDto, IUserEntity, UserGender } from 'blog-common-1.0';
 
 export class UsersRepository extends EntityManagerBaseService<UserEntity> {
   getEntityClass(): new () => UserEntity {

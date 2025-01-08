@@ -7,12 +7,11 @@ import {
 import { ApiProperty } from '@nestjs/swagger';
 import { Type } from 'class-transformer';
 import { IsEmail } from 'class-validator';
-// import {
-//   IBulkUserCreateDto,
-//   IUserCreateDto,
-// } from '../interfaces/entity.interface';
-import { IBulkUserCreateDto, IUserCreateDto, UserGender } from 'blog-common-1.0';
-// import { UserGender } from '../enums/gender.enum';
+import {
+  IBulkUserCreateDto,
+  IUserCreateDto,
+  UserGender,
+} from 'blog-common-1.0';
 
 export class UserCreateDto implements IUserCreateDto {
   @IsString()

@@ -4,14 +4,16 @@ import {
   Inject,
   Injectable,
 } from '@nestjs/common';
+import {
+  IBlogLikesCounterEntity,
+  IUserEntity,
+  LikeStatus,
+} from 'blog-common-1.0';
 import { BlogService } from 'src/blog/service/blog.service';
-import { IUserEntity } from 'src/users/interfaces/entity.interface';
+import { EntityManagerBaseService } from 'src/helpers/entity.repository';
 import { EntityManager } from 'typeorm';
 import { CreateLikesCounterBlogDto } from '../dto/create-blog-likes.dto';
 import { BlogLikesCounterEntity } from '../entities/likes-counter-blog.entity';
-import { LikeStatus } from '../enums/like.status.enum';
-import { IBlogLikesCounterEntity } from '../interfaces/blog-like-counter.interface';
-import { EntityManagerBaseService } from 'src/helpers/entity.repository';
 import { LikesCounterBlogRepository } from '../repository/likes-counter-blogs.repository';
 
 @Injectable()
@@ -43,7 +45,7 @@ export class LikesCounterBlogsService extends EntityManagerBaseService<IBlogLike
     //Check to see if blog exists
     await this.blogService.checkBlogPresence(dto.blogId, entityManager);
 
-    const [existingLikeOrDislikeByUser] =
+    const [existingLikeOrDislikeByUser]: IBlogLikesCounterEntity[] =
       await this.likesCounterBlogRepository.getByFilter({
         blogId: dto.blogId,
         ...(dto.likedStatus === LikeStatus.LIKED
@@ -51,7 +53,7 @@ export class LikesCounterBlogsService extends EntityManagerBaseService<IBlogLike
           : { disLikedBy: currentUser.id }),
       });
     if (!existingLikeOrDislikeByUser) {
-      const newLikeDislikeEntity =
+      const newLikeDislikeEntity: IBlogLikesCounterEntity =
         await this.likesCounterBlogRepository.getInstance(
           dto,
           currentUser,
@@ -59,7 +61,7 @@ export class LikesCounterBlogsService extends EntityManagerBaseService<IBlogLike
         );
       newLikeDislikeEntity.createdBy = newLikeDislikeEntity.updatedBy =
         currentUser.id;
-      const newLikedOrDisLikedEntity =
+      const newLikedOrDisLikedEntity: IBlogLikesCounterEntity =
         await this.likesCounterBlogRepository.create(
           newLikeDislikeEntity,
           entityManager,
@@ -122,23 +124,8 @@ export class LikesCounterBlogsService extends EntityManagerBaseService<IBlogLike
         message: 'current user is not logged in',
       });
     }
-    const likeDislikeEntitiesForBlog =
+    const likeDislikeEntitiesForBlog: IBlogLikesCounterEntity[] =
       await this.likesCounterBlogRepository.getByFilter({ blogId: id });
     return likeDislikeEntitiesForBlog;
   }
-
-  // async cascadeDelete(blogId: number) {
-  //   const likeDislikeEntitiesToDelete =
-  //     await this.likesCounterBlogRepository.findBy({ blogId });
-  //   const likeDislikeEntitiesToDeleteIds = likeDislikeEntitiesToDelete.map(
-  //     (entity) => entity.id,
-  //   );
-  //   return await this.likesCounterBlogRepository.delete(
-  //     likeDislikeEntitiesToDeleteIds,
-  //   );
-  //   // const result = await entityManager
-  //   //   .getRepository(this.likesCounterBlogRepository.target)
-  //   //   .delete(likeDislikeEntitiesToDeleteIds);
-  //   // return result.affected || 0;
-  // }
 }

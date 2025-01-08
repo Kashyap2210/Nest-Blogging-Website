@@ -1,6 +1,6 @@
 import { ApiProperty } from '@nestjs/swagger';
+import { IBlogUpdateDto } from 'blog-common-1.0';
 import { IsOptional, IsString } from 'class-validator';
-import { IBlogUpdateDto } from '../interfaces/blog.interfaces';
 
 export class UpdateBlogDto implements IBlogUpdateDto {
   @IsOptional()

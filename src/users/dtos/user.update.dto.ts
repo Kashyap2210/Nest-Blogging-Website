@@ -1,9 +1,6 @@
 import { ApiProperty } from '@nestjs/swagger';
-import { IUserCreateDto } from 'blog-common-1.0';
+import { IUserUpdateDto } from 'blog-common-1.0';
 import { IsEmail, IsOptional, IsString } from 'class-validator';
-// import { IUserCreateDto } from '../interfaces/entity.interface';
-
-export interface IUserUpdateDto extends Partial<IUserCreateDto>{}
 
 export class UserUpdateDto implements IUserUpdateDto {
   @IsOptional()

@@ -5,29 +5,29 @@ import {
   Inject,
   Injectable,
 } from '@nestjs/common';
-import { CommentsService } from 'src/comments/service/comments.service';
-import { EntityManagerBaseService } from 'src/helpers/entity.repository';
-import { LikesCounterBlogsService } from 'src/likes-counter-blogs/services/likes-counter-blogs.service';
-import { IUserEntity } from 'src/users/interfaces/entity.interface';
-import { EntityManager } from 'typeorm';
-import { BlogEntity } from '../entities/blog.entity';
 import {
   IBlogCreateDto,
   IBlogEntity,
   IBlogEntityArray,
   IBlogResponse,
   IBlogUpdateDto,
-} from '../interfaces/blog.interfaces';
+  ICommentEntity,
+  IUserEntity,
+} from 'blog-common-1.0';
+import { CommentsService } from 'src/comments/service/comments.service';
+import { EntityManagerBaseService } from 'src/helpers/entity.repository';
+import { LikesCounterBlogsService } from 'src/likes-counter-blogs/services/likes-counter-blogs.service';
+import { EntityManager } from 'typeorm';
+import { BlogEntity } from '../entities/blog.entity';
 import { BlogRepository } from '../repository/blogs.repository';
 
 @Injectable()
 export class BlogService extends EntityManagerBaseService<BlogEntity> {
   constructor(
-    private readonly blogRepository: BlogRepository, // Injecting custom repository
+    private readonly blogRepository: BlogRepository,
     @Inject(forwardRef(() => CommentsService))
     private readonly commentsService: CommentsService,
     private readonly likesCounterBlogsService: LikesCounterBlogsService,
-    // private dataSource: DataSource,
   ) {
     super();
   }
@@ -48,7 +48,7 @@ export class BlogService extends EntityManagerBaseService<BlogEntity> {
     }
 
     //Check if blog with same title exists
-    const existingBlogs = await this.blogRepository.getByFilter(
+    const existingBlogs: IBlogEntity[] = await this.blogRepository.getByFilter(
       {
         title: [dto.title],
       },
@@ -61,7 +61,10 @@ export class BlogService extends EntityManagerBaseService<BlogEntity> {
       });
     }
 
-    const blog = await this.blogRepository.getInstance(dto, entityManager);
+    const blog: IBlogEntity = await this.blogRepository.getInstance(
+      dto,
+      entityManager,
+    );
     blog['author'] = currentUser.name;
     blog['createdBy'] = blog['updatedBy'] = currentUser.id;
     return this.blogRepository.create(blog, entityManager);
@@ -83,7 +86,10 @@ export class BlogService extends EntityManagerBaseService<BlogEntity> {
         message: 'Current user does not have permission to access all blogs',
       });
     }
-    const allBlogs = await this.blogRepository.getByFilter({}, entityManager);
+    const allBlogs: IBlogEntityArray = await this.blogRepository.getByFilter(
+      {},
+      entityManager,
+    );
     return allBlogs;
   }
 
@@ -98,13 +104,15 @@ export class BlogService extends EntityManagerBaseService<BlogEntity> {
         message: 'current user is not logged in',
       });
     }
-    const [blogById] = await this.blogRepository.validatePresence(
-      'id',
-      [id],
-      'id',
-      entityManager,
-    );
-    const blogComments = await this.commentsService.findCommentsByBlogId([id]);
+    const [blogById]: IBlogEntity[] =
+      await this.blogRepository.validatePresence(
+        'id',
+        [id],
+        'id',
+        entityManager,
+      );
+    const blogComments: ICommentEntity[] =
+      await this.commentsService.findCommentsByBlogId([id]);
 
     return {
       blog: blogById,
@@ -124,12 +132,13 @@ export class BlogService extends EntityManagerBaseService<BlogEntity> {
         message: 'current user is not logged in',
       });
     }
-    const [blogEntityById] = await this.blogRepository.validatePresence(
-      'id',
-      [id],
-      'id',
-      entityManager,
-    );
+    const [blogEntityById]: IBlogEntity[] =
+      await this.blogRepository.validatePresence(
+        'id',
+        [id],
+        'id',
+        entityManager,
+      );
     if (
       currentUser.id !== blogEntityById.createdBy &&
       currentUser.role !== 'TOAA'
@@ -140,9 +149,10 @@ export class BlogService extends EntityManagerBaseService<BlogEntity> {
           'current user did not create this blog or does not have permission to update this blog',
       });
     }
-    const blogFromDtoTitle = await this.blogRepository.getByFilter({
-      title: [dto.title],
-    });
+    const blogFromDtoTitle: IBlogEntity[] =
+      await this.blogRepository.getByFilter({
+        title: [dto.title],
+      });
     if (blogFromDtoTitle.length > 0 && blogFromDtoTitle[0].id !== id) {
       throw new BadRequestException({
         key: 'Already exists',
@@ -150,7 +160,7 @@ export class BlogService extends EntityManagerBaseService<BlogEntity> {
       });
     }
 
-    const updatedBlog = {
+    const updatedBlog: IBlogEntity = {
       ...blogEntityById,
       ...dto,
       updatedBy: currentUser.id,
@@ -173,12 +183,13 @@ export class BlogService extends EntityManagerBaseService<BlogEntity> {
       });
     }
 
-    const [blogToBeDeleted] = await this.blogRepository.validatePresence(
-      'id',
-      [id],
-      'id',
-      entityManager,
-    );
+    const [blogToBeDeleted]: IBlogEntity[] =
+      await this.blogRepository.validatePresence(
+        'id',
+        [id],
+        'id',
+        entityManager,
+      );
     if (
       blogToBeDeleted.createdBy !== currentUser.id &&
       currentUser.role !== 'TOAA'
@@ -190,7 +201,7 @@ export class BlogService extends EntityManagerBaseService<BlogEntity> {
     }
 
     //finding comments on the blog with id:id
-    const commentIdsOnBlog = (
+    const commentIdsOnBlog: number[] = (
       await this.commentsService.getByFilter(
         {
           blogId: [id],
@@ -204,7 +215,7 @@ export class BlogService extends EntityManagerBaseService<BlogEntity> {
     }
 
     //finding likesAndDislikesEntities on the blog with id:id
-    let likeAndDislikeIds = (
+    let likeAndDislikeIds: number[] = (
       await this.likesCounterBlogsService.getByFilter(
         {
           blogId: [id],
@@ -232,7 +243,7 @@ export class BlogService extends EntityManagerBaseService<BlogEntity> {
         message: 'current user is not logged in',
       });
     }
-    const [blogEntity] = await this.blogRepository.getByFilter(
+    const [blogEntity]: IBlogEntity[] = await this.blogRepository.getByFilter(
       {
         createdBy: [currentUser.id],
       },
@@ -245,12 +256,13 @@ export class BlogService extends EntityManagerBaseService<BlogEntity> {
     id: number,
     entityManager?: EntityManager,
   ): Promise<IBlogEntity> {
-    const [blogExists] = await this.blogRepository.validatePresence(
-      'id',
-      [id],
-      'id',
-      entityManager,
-    );
+    const [blogExists]: IBlogEntity[] =
+      await this.blogRepository.validatePresence(
+        'id',
+        [id],
+        'id',
+        entityManager,
+      );
     return blogExists;
   }
 }

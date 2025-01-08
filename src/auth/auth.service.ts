@@ -1,8 +1,8 @@
 import { Injectable, UnauthorizedException } from '@nestjs/common';
 import { JwtService } from '@nestjs/jwt';
 import * as bcrypt from 'bcrypt';
+import { IUserEntity, IUserLoginResponse, IUserSignDto } from 'blog-common-1.0';
 import { UsersService } from 'src/users/services/users.service';
-import { UserSignInDto } from './dto/user.signIn.dto';
 
 export interface IJwtPayload {
   username: string;
@@ -16,14 +16,15 @@ export class AuthService {
     private jwtService: JwtService,
   ) {}
 
-  async logIn(signInDto: UserSignInDto) {
+  async logIn(signInDto: IUserSignDto) {
     const { username, password } = signInDto;
-    const user = await this.usersService.findUserByUserName(username);
+    const user: IUserEntity =
+      await this.usersService.findUserByUserName(username);
     // console.log('this is the user from auth service', user);
     if (!user) {
       throw new UnauthorizedException('Invalid username or password');
     }
-    const isMatch = await bcrypt.compare(password, user.password);
+    const isMatch: boolean = await bcrypt.compare(password, user.password);
     if (isMatch) {
       const payload: IJwtPayload = {
         username: user.username,
@@ -31,12 +32,13 @@ export class AuthService {
       };
 
       delete user['password'];
-      const thisAccessToken = this.jwtService.sign(payload);
+      const thisAccessToken: string = this.jwtService.sign(payload);
       // console.log('this is the access token', thisAccessToken);
-      return {
+      const response: IUserLoginResponse = {
         accessToken: thisAccessToken,
-        user,
+        user: user,
       };
+      return response;
     }
   }
 }

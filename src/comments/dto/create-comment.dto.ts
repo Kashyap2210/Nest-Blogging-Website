@@ -1,7 +1,7 @@
-import { IsOptional, IsString } from "class-validator";
-import { ICommentCreateDto } from "../interfaces/comment.create.interface";
 import { IsBoolean, IsPositive } from '@nestjs/class-validator';
 import { ApiProperty } from '@nestjs/swagger';
+import { ICommentCreateDto } from "blog-common-1.0";
+import { IsOptional, IsString } from "class-validator";
 
 export class CreateCommentDto implements ICommentCreateDto {
   @IsString()

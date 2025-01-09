@@ -35,7 +35,7 @@ export class BlogRepository extends EntityManagerBaseService<BlogEntity> {
     id: number,
     updateEntity: IBlogEntity,
     entityManager?: EntityManager,
-  ): Promise<any> {
+  ): Promise<IBlogEntity[]> {
     await this.getRepository(entityManager).update(id, updateEntity);
     return this.getByFilter({ id: [id] }, entityManager);
   }

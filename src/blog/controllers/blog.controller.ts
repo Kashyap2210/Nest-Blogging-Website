@@ -21,7 +21,7 @@ import { CreateBlogDto } from '../dtos/create.blog.dto';
 import { UpdateBlogDto } from '../dtos/update.blog.dto';
 import { BlogService } from '../service/blog.service';
 
-@ApiTags('blogs')
+@ApiTags('blog')
 @Controller('blog')
 @ApiBearerAuth('access-token')
 @UseGuards(AuthGuard)

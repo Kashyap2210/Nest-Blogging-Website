@@ -19,7 +19,8 @@
     "noFallthroughCasesInSwitch": false,
     "typeRoots": ["./node_modules/@types", "./@types"],
     "paths": {
-      "blog-common": ["node_modules/blog-common"]
+      "blog-common": ["node_modules/blog-common"],
+      "@src/*": ["src/*"]
     }
   },
     "include": ["src/**/*", "@types/**/*"]

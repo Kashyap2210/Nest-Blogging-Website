@@ -14,9 +14,9 @@ import {
   ICommentEntity,
   IUserEntity,
 } from 'blog-common-1.0';
-import { CommentsService } from 'src/comments/service/comments.service';
-import { EntityManagerBaseService } from 'src/helpers/entity.repository';
-import { LikesCounterBlogsService } from 'src/likes-counter-blogs/services/likes-counter-blogs.service';
+import { CommentsService } from '@src/comments/service/comments.service';
+import { EntityManagerBaseService } from '@src/helpers/entity.repository';
+import { LikesCounterBlogsService } from '@src/likes-counter-blogs/services/likes-counter-blogs.service';
 import { EntityManager } from 'typeorm';
 import { BlogEntity } from '../entities/blog.entity';
 import { BlogRepository } from '../repository/blogs.repository';

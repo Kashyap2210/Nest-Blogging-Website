@@ -15,8 +15,8 @@ import {
   ApiTags,
 } from '@nestjs/swagger';
 import { IUserEntity } from 'blog-common-1.0';
-import { AuthGuard } from 'src/auth/auth.guard';
-import { CurrentUser } from 'src/decorators/current_user.decorator';
+import { AuthGuard } from '@src/auth/auth.guard';
+import { CurrentUser } from '@src/decorators/current_user.decorator';
 import { CreateCommentDto } from '../dto/create-comment.dto';
 import { UpdateCommentDto } from '../dto/update-comment.dto';
 import { CommentsService } from '../service/comments.service';

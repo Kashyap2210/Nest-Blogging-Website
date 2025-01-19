@@ -1,4 +1,4 @@
-import { EntityManagerBaseService } from 'src/helpers/entity.repository';
+import { EntityManagerBaseService } from '@src/helpers/entity.repository';
 import { UserEntity } from '../entities/user.entity';
 import { EntityManager } from 'typeorm';
 import * as bcrypt from 'bcrypt';

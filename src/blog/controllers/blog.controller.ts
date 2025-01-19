@@ -15,8 +15,8 @@ import {
   ApiTags,
 } from '@nestjs/swagger';
 import { IBlogEntity, IBlogEntityArray, IBlogResponse, IUserEntity } from 'blog-common-1.0';
-import { AuthGuard } from 'src/auth/auth.guard';
-import { CurrentUser } from 'src/decorators/current_user.decorator';
+import { AuthGuard } from '@src/auth/auth.guard';
+import { CurrentUser } from '@src/decorators/current_user.decorator';
 import { CreateBlogDto } from '../dtos/create.blog.dto';
 import { UpdateBlogDto } from '../dtos/update.blog.dto';
 import { BlogService } from '../service/blog.service';

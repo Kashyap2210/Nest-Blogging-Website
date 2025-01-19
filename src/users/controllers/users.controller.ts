@@ -23,9 +23,9 @@ import {
 } from '@nestjs/swagger';
 import { IUserCreateDto, IUserEntity, IUserEntityArray } from 'blog-common-1.0';
 import { diskStorage } from 'multer';
-import { AuthGuard } from 'src/auth/auth.guard';
-import { CurrentUser } from 'src/decorators/current_user.decorator';
-import { imageFileFilter, profilePictureEditor } from 'src/file.utils';
+import { AuthGuard } from '@src/auth/auth.guard';
+import { CurrentUser } from '@src/decorators/current_user.decorator';
+import { imageFileFilter, profilePictureEditor } from '@src/file.utils';
 import { UserUpdateDto } from '../dtos/user.update.dto';
 import { UsersService } from '../services/users.service';
 

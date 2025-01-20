@@ -6,10 +6,10 @@ import {
   Injectable,
 } from '@nestjs/common';
 import * as bcrypt from 'bcrypt';
-import { BlogService } from '@src/blog/service/blog.service';
-import { CommentsService } from '@src/comments/service/comments.service';
-import { EntityManagerBaseService } from '@src/helpers/entity.repository';
-import { LikesCounterBlogsService } from '@src/likes-counter-blogs/services/likes-counter-blogs.service';
+import { BlogService } from 'src/blog/service/blog.service';
+import { CommentsService } from 'src/comments/service/comments.service';
+import { EntityManagerBaseService } from 'src/helpers/entity.repository';
+import { LikesCounterBlogsService } from 'src/likes-counter-blogs/services/likes-counter-blogs.service';
 import { EntityManager } from 'typeorm';
 import { UserEntity } from '../entities/user.entity';
 import { UsersRepository } from '../repository/users.repository';

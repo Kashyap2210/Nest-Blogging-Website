@@ -1,11 +1,11 @@
-import { EntityManagerBaseService } from '@src/helpers/entity.repository';
+import { EntityManagerBaseService } from 'src/helpers/entity.repository';
 import { EntityManager, EntityRepository } from 'typeorm';
 import { BlogLikesCounterEntity } from '../entities/likes-counter-blog.entity';
 // import { IBlogLikeDto } from '../interfaces/create-blog-like.dto.interface';
 // import { IBlogLikesCounterEntity } from '../interfaces/blog-like-counter.interface';
 // import { LikeStatus } from '../enums/like.status.enum';
 import { IBlogLikeDto, IBlogLikesCounterEntity, IUserEntity, LikeStatus } from 'blog-common-1.0';
-// import { IUserEntity } from '@src/users/interfaces/entity.interface';
+// import { IUserEntity } from 'src/users/interfaces/entity.interface';
 
 @EntityRepository(BlogLikesCounterEntity)
 export class LikesCounterBlogRepository extends EntityManagerBaseService<BlogLikesCounterEntity> {

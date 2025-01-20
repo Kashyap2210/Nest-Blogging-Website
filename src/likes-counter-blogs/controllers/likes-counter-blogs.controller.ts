@@ -6,8 +6,8 @@ import {
 } from '@nestjs/common';
 import { ApiBearerAuth, ApiBody, ApiResponse, ApiTags } from '@nestjs/swagger';
 import { IBlogLikesCounterEntity, IUserEntity } from 'blog-common-1.0';
-import { AuthGuard } from '@src/auth/auth.guard';
-import { CurrentUser } from '@src/decorators/current_user.decorator';
+import { AuthGuard } from 'src/auth/auth.guard';
+import { CurrentUser } from 'src/decorators/current_user.decorator';
 import { CreateLikesCounterBlogDto } from '../dto/create-blog-likes.dto';
 import { LikesCounterBlogsService } from '../services/likes-counter-blogs.service';
 

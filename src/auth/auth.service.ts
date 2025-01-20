@@ -2,7 +2,7 @@ import { Injectable, UnauthorizedException } from '@nestjs/common';
 import { JwtService } from '@nestjs/jwt';
 import * as bcrypt from 'bcrypt';
 import { IUserEntity, IUserLoginResponse, IUserSignDto } from 'blog-common-1.0';
-import { UsersService } from '@src/users/services/users.service';
+import { UsersService } from 'src/users/services/users.service';
 
 export interface IJwtPayload {
   username: string;

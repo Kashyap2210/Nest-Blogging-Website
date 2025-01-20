@@ -6,7 +6,7 @@ import {
 } from '@nestjs/common';
 import { JwtService } from '@nestjs/jwt';
 import { Request } from 'express'; // Import Express Request
-import { UsersService } from '@src/users/services/users.service';
+import { UsersService } from 'src/users/services/users.service';
 import { jwtConstants } from './constants';
 import { IUserEntity } from 'blog-common-1.0';
 

@@ -1,4 +1,4 @@
-import { EntityManagerBaseService } from '@src/helpers/entity.repository';
+import { EntityManagerBaseService } from 'src/helpers/entity.repository';
 import { EntityManager, EntityRepository } from 'typeorm';
 import { BlogEntity } from '../entities/blog.entity';
 import { IBlogCreateDto, IBlogEntity } from 'blog-common-1.0';

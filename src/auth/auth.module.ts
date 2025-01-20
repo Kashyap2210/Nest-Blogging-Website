@@ -4,8 +4,8 @@ import { AuthController } from './auth.controller';
 import { AuthGuard } from './auth.guard';
 import { AuthService } from './auth.service';
 import { jwtConstants } from './constants';
-import { UsersModule } from '@src/users/users.module';
-// import { UsersModule } from '@src/users/users.module';
+import { UsersModule } from 'src/users/users.module';
+// import { UsersModule } from 'src/users/users.module';
 
 
 @Module({

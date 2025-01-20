@@ -1,5 +1,5 @@
 // @types/express/index.d.ts
-import { IUserEntity } from '@src/users/interfaces/entity.interface';
+import { IUserEntity } from 'src/users/interfaces/entity.interface';
 
 declare global {
   namespace Express {

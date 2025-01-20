@@ -1,5 +1,5 @@
 import { IBlogLikesCounterEntity, LikeStatus } from 'blog-common-1.0';
-import { AuditColumnEntity } from '@src/helpers/audti.column.entity';
+import { AuditColumnEntity } from 'src/helpers/audti.column.entity';
 import { Column, Entity, PrimaryGeneratedColumn } from 'typeorm';
 
 @Entity('blogs_likes_counter')

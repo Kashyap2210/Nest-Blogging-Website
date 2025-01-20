@@ -9,8 +9,8 @@ import {
   ICommentUpdateDto,
   IUserEntity,
 } from 'blog-common-1.0';
-import { BlogService } from '@src/blog/service/blog.service';
-import { EntityManagerBaseService } from '@src/helpers/entity.repository';
+import { BlogService } from 'src/blog/service/blog.service';
+import { EntityManagerBaseService } from 'src/helpers/entity.repository';
 import { EntityManager } from 'typeorm';
 import { CreateCommentDto } from '../dto/create-comment.dto';
 import { CommentEntity } from '../entities/comment.entity';

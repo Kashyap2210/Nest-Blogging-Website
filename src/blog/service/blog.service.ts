@@ -165,7 +165,7 @@ export class BlogService extends EntityManagerBaseService<BlogEntity> {
       ...dto,
       updatedBy: currentUser.id,
     };
-
+    // console.log("this is the updated blog", updatedBlog)
     const [responseUpdatedBlog]: IBlogEntity[] =
       await this.blogRepository.updateById(id, updatedBlog);
     return responseUpdatedBlog;

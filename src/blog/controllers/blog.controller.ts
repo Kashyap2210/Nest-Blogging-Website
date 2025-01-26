@@ -12,6 +12,7 @@ import {
   ApiBearerAuth,
   ApiOkResponse,
   ApiOperation,
+  ApiParam,
   ApiTags,
 } from '@nestjs/swagger';
 import { IBlogEntity, IBlogEntityArray, IBlogResponse, IUserEntity } from 'blog-common-1.0';
@@ -19,6 +20,7 @@ import { AuthGuard } from 'src/auth/auth.guard';
 import { CurrentUser } from 'src/decorators/current_user.decorator';
 import { CreateBlogDto } from '../dtos/create.blog.dto';
 import { UpdateBlogDto } from '../dtos/update.blog.dto';
+import { UpdateBlogWithTitleDto } from '../dtos/update.blog.with.title.dto';
 import { BlogService } from '../service/blog.service';
 
 @ApiTags('blog')
@@ -26,7 +28,7 @@ import { BlogService } from '../service/blog.service';
 @ApiBearerAuth('access-token')
 @UseGuards(AuthGuard)
 export class BlogController {
-  constructor(private readonly blogService: BlogService) {}
+  constructor(private readonly blogService: BlogService) { }
 
   @ApiOperation({ summary: 'Create a blog' })
   @ApiOkResponse({
@@ -65,6 +67,25 @@ export class BlogController {
     return blogEntity;
   }
 
+  //Patch req based on a key in place of id
+  @ApiOperation({ summary: 'Edit a blog by title' })
+  @ApiParam({
+    name: "title", type: String, description: "What are you doing? Man"
+  })
+  @ApiOkResponse({
+    description:
+      'A blog with id & edited details is returned with type IBlogEntity',
+  })
+  @Patch(':title')
+  async updateBlogByKey(
+    @Param('title') title: string,
+    @Body() dto: UpdateBlogWithTitleDto,
+    @CurrentUser() currentUser: IUserEntity,
+  ): Promise<IBlogEntity> {
+    // console.log("this is the title in req", title)
+    return this.blogService.updateBlogByKey(title, dto, currentUser)
+  }
+
   @ApiOperation({ summary: 'Edit a blog by id' })
   @ApiOkResponse({
     description:
@@ -80,6 +101,8 @@ export class BlogController {
       await this.blogService.updateBlogById(id, dto, currentUser);
     return updatedBlogEntity;
   }
+
+
 
   @ApiOperation({ summary: 'Delete a blog by id' })
   @ApiOkResponse({

@@ -165,7 +165,7 @@ export class BlogService extends EntityManagerBaseService<BlogEntity> {
       ...dto,
       updatedBy: currentUser.id,
     };
-    // console.log("this is the updated blog", updatedBlog)
+    console.log("this is the updated blog", updatedBlog)
     const [responseUpdatedBlog]: IBlogEntity[] =
       await this.blogRepository.updateById(id, updatedBlog);
     return responseUpdatedBlog;
@@ -264,5 +264,13 @@ export class BlogService extends EntityManagerBaseService<BlogEntity> {
         entityManager,
       );
     return blogExists;
+  }
+
+  async updateBlogByKey(blogTitle: string, dto: IBlogUpdateDto, currentUser: IUserEntity, entityManager?: EntityManager): Promise<IBlogEntity> {
+    const [blogByTitle] = await this.blogRepository.validatePresence("title", [blogTitle], "blogTitle", entityManager)
+    // console.log("this is the blog to be updated", blogByTitle);
+    const updatedBlog = await this.updateBlogById(blogByTitle.id, dto, currentUser, entityManager)
+    // console.log("this is the updated blog", updatedBlog)
+    return updatedBlog;
   }
 }

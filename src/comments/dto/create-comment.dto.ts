@@ -1,6 +1,6 @@
 import { IsBoolean, IsPositive } from '@nestjs/class-validator';
 import { ApiProperty } from '@nestjs/swagger';
-import { ICommentCreateDto } from "blog-common-1.0";
+import { ICommentCreateDto } from 'blog-common-1.0';
 import { IsOptional, IsString } from "class-validator";
 
 export class CreateCommentDto implements ICommentCreateDto {
@@ -28,9 +28,9 @@ export class CreateCommentDto implements ICommentCreateDto {
     name: 'replyCommentId',
     description: 'id of the blog',
     example: 1,
-    required: true,
+    required: false,
   })
-  replyCommentId: number;
+  replyCommentId?: number;
 
   @IsBoolean()
   @IsOptional()
@@ -38,7 +38,7 @@ export class CreateCommentDto implements ICommentCreateDto {
     name: 'isReplyComment',
     description: 'is this a repeated comment',
     example: true,
-    required: true,
+    required: false,
   })
-  isReplyComment: boolean;
+  isReplyComment?: boolean;
 } 

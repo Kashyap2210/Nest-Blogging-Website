@@ -14,7 +14,7 @@ import {
   ApiOperation,
   ApiTags,
 } from '@nestjs/swagger';
-import { IUserEntity } from 'blog-common-1.0';
+import { ICommentEntity, IUserEntity } from 'blog-common-1.0';
 import { AuthGuard } from 'src/auth/auth.guard';
 import { CurrentUser } from 'src/decorators/current_user.decorator';
 import { CreateCommentDto } from '../dto/create-comment.dto';
@@ -36,7 +36,7 @@ export class CommentsController {
   async createComment(
     @Body() createCommentDto: CreateCommentDto,
     @CurrentUser() currentUser: IUserEntity,
-  ) {
+  ): Promise<ICommentEntity> {
     return this.commentsService.create(createCommentDto, currentUser);
   }
 

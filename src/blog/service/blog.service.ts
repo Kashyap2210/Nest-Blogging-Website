@@ -114,9 +114,11 @@ export class BlogService extends EntityManagerBaseService<BlogEntity> {
     const blogComments: ICommentEntity[] =
       await this.commentsService.findCommentsByBlogId([id]);
 
+    const blogLikesAndDislikes = await this.likesCounterBlogsService.findLikeDislikeEntitiesByBlogId(id, currentUser)  
     return {
       blog: blogById,
       comments: blogComments,
+      likes: blogLikesAndDislikes 
     };
   }
 

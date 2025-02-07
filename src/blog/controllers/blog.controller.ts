@@ -6,7 +6,8 @@ import {
   Param,
   ParseIntPipe,
   Patch,
-  Post, UseGuards
+  Post,
+  UseGuards,
 } from '@nestjs/common';
 import {
   ApiBearerAuth,
@@ -15,7 +16,12 @@ import {
   ApiParam,
   ApiTags,
 } from '@nestjs/swagger';
-import { IBlogEntity, IBlogEntityArray, IBlogResponse, IUserEntity } from 'blog-common-1.0';
+import {
+  IBlogEntity,
+  IBlogEntityArray,
+  IBlogResponse,
+  IUserEntity,
+} from 'blog-common-1.0';
 import { AuthGuard } from 'src/auth/auth.guard';
 import { CurrentUser } from 'src/decorators/current_user.decorator';
 import { CreateBlogDto } from '../dtos/create.blog.dto';
@@ -28,7 +34,7 @@ import { BlogService } from '../service/blog.service';
 @ApiBearerAuth('access-token')
 @UseGuards(AuthGuard)
 export class BlogController {
-  constructor(private readonly blogService: BlogService) { }
+  constructor(private readonly blogService: BlogService) {}
 
   @ApiOperation({ summary: 'Create a blog' })
   @ApiOkResponse({
@@ -67,6 +73,37 @@ export class BlogController {
     return blogEntity;
   }
 
+  
+  @ApiOperation({ summary: 'Edit a blog by id' })
+  @ApiOkResponse({
+    description:
+      'A blog with id & eidted details is returned with type IBlogEntity',
+  })
+  @Patch(':id')
+  async updateBlog(
+    @Param('id', ParseIntPipe) id: number,
+    @Body() dto: UpdateBlogDto,
+    @CurrentUser() currentUser: IUserEntity,
+  ): Promise<IBlogEntity> {
+    const updatedBlogEntity: IBlogEntity =
+      await this.blogService.updateBlogById(id, dto, currentUser);
+    return updatedBlogEntity;
+  }
+
+  @ApiOperation({ summary: 'Delete a blog by id' })
+  @ApiOkResponse({
+    description: 'Delete a blog with specific id & return IBlogEntity',
+  })
+  @Delete(':id')
+  async deleteBlog(
+    @Param('id', ParseIntPipe) id: number,
+    @CurrentUser() currentUser: IUserEntity,
+  ): Promise<string> {
+    await this.blogService.deleteBlogById(id, currentUser);
+    return 'Blog Deleted';
+  }
+
+/*
   //Patch req based on a key in place of id
   @ApiOperation({ summary: 'Edit a blog by title' })
   @ApiParam({
@@ -85,35 +122,7 @@ export class BlogController {
     // console.log("this is the title in req", title)
     return this.blogService.updateBlogByKey(title, dto, currentUser)
   }
-
-  @ApiOperation({ summary: 'Edit a blog by id' })
-  @ApiOkResponse({
-    description:
-      'A blog with id & eidted details is returned with type IBlogEntity',
-  })
-  @Patch(':id')
-  async updateBlog(
-    @Param('id', ParseIntPipe) id: number,
-    @Body() dto: UpdateBlogDto,
-    @CurrentUser() currentUser: IUserEntity,
-  ): Promise<IBlogEntity> {
-    const updatedBlogEntity: IBlogEntity =
-      await this.blogService.updateBlogById(id, dto, currentUser);
-    return updatedBlogEntity;
-  }
+*/
 
 
-
-  @ApiOperation({ summary: 'Delete a blog by id' })
-  @ApiOkResponse({
-    description: 'Delete a blog with specific id & return IBlogEntity',
-  })
-  @Delete(':id')
-  async deleteBlog(
-    @Param('id', ParseIntPipe) id: number,
-    @CurrentUser() currentUser: IUserEntity,
-  ): Promise<string> {
-    await this.blogService.deleteBlogById(id, currentUser);
-    return 'Blog Deleted';
-  }
 }

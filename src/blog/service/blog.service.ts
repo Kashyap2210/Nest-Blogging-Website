@@ -155,6 +155,8 @@ export class BlogService extends EntityManagerBaseService<BlogEntity> {
       await this.blogRepository.getByFilter({
         title: [dto.title],
       });
+      
+
     if (blogFromDtoTitle.length > 0 && blogFromDtoTitle[0].id !== id) {
       throw new BadRequestException({
         key: 'Already exists',

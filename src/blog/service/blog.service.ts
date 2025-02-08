@@ -109,17 +109,13 @@ export class BlogService extends EntityManagerBaseService<BlogEntity> {
     );
 
     const response: IBlogResponse[] = allBlogs.map((blog) => {
-      // const likes = [];
       const likesAndDislikesEntities = allLikeAndDislikeEntities.filter(
         (entity) => entity.blogId === blog.id,
       );
-      // likes.push(likesAndDislikesEntities);
 
-      // const comments = [];
       const commentEntities = allCommentEntities.filter(
         (entity) => entity.blogId === blog.id,
       );
-      // comments.push(commentEntities);
 
       if (likesAndDislikesEntities) {
         return {

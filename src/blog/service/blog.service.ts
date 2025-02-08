@@ -91,7 +91,7 @@ export class BlogService extends EntityManagerBaseService<BlogEntity> {
       {},
       entityManager,
     );
-    console.log('this are all the blogs', allBlogs);
+    // console.log('this are all the blogs', allBlogs);
 
     const allLikeAndDislikeEntities =
       await this.likesCounterBlogsService.getByFilter(
@@ -126,7 +126,7 @@ export class BlogService extends EntityManagerBaseService<BlogEntity> {
       }
     });
 
-    console.log('this is the response', response);
+    // console.log('this is the response', response);
 
     return response;
   }

@@ -73,7 +73,7 @@ export class BlogService extends EntityManagerBaseService<BlogEntity> {
   async getAllBlogs(
     currentUser: IUserEntity,
     entityManager?: EntityManager,
-  ): Promise<IBlogEntityArray> {
+  ): Promise<IBlogResponse[]> {
     if (!currentUser) {
       throw new BadRequestException({
         key: 'currentUser',
@@ -86,11 +86,53 @@ export class BlogService extends EntityManagerBaseService<BlogEntity> {
         message: 'Current user does not have permission to access all blogs',
       });
     }
+
     const allBlogs: IBlogEntityArray = await this.blogRepository.getByFilter(
       {},
       entityManager,
     );
-    return allBlogs;
+    console.log('this are all the blogs', allBlogs);
+
+    const allLikeAndDislikeEntities =
+      await this.likesCounterBlogsService.getByFilter(
+        {
+          blogId: [allBlogs.map((blog) => blog.id)],
+        },
+        entityManager,
+      );
+
+    const allCommentEntities = await this.commentsService.getByFilter(
+      {
+        blogId: [allBlogs.map((blog) => blog.id)],
+      },
+      entityManager,
+    );
+
+    const response: IBlogResponse[] = allBlogs.map((blog) => {
+      // const likes = [];
+      const likesAndDislikesEntities = allLikeAndDislikeEntities.filter(
+        (entity) => entity.blogId === blog.id,
+      );
+      // likes.push(likesAndDislikesEntities);
+
+      // const comments = [];
+      const commentEntities = allCommentEntities.filter(
+        (entity) => entity.blogId === blog.id,
+      );
+      // comments.push(commentEntities);
+
+      if (likesAndDislikesEntities) {
+        return {
+          blog: blog,
+          comments: commentEntities ?? [],
+          likes: likesAndDislikesEntities ?? [],
+        };
+      }
+    });
+
+    console.log('this is the response', response);
+
+    return response;
   }
 
   async getBlogById(
@@ -114,11 +156,15 @@ export class BlogService extends EntityManagerBaseService<BlogEntity> {
     const blogComments: ICommentEntity[] =
       await this.commentsService.findCommentsByBlogId([id]);
 
-    const blogLikesAndDislikes = await this.likesCounterBlogsService.findLikeDislikeEntitiesByBlogId(id, currentUser)  
+    const blogLikesAndDislikes =
+      await this.likesCounterBlogsService.findLikeDislikeEntitiesByBlogId(
+        id,
+        currentUser,
+      );
     return {
       blog: blogById,
       comments: blogComments,
-      likes: blogLikesAndDislikes 
+      likes: blogLikesAndDislikes,
     };
   }
 
@@ -155,7 +201,6 @@ export class BlogService extends EntityManagerBaseService<BlogEntity> {
       await this.blogRepository.getByFilter({
         title: [dto.title],
       });
-      
 
     if (blogFromDtoTitle.length > 0 && blogFromDtoTitle[0].id !== id) {
       throw new BadRequestException({
@@ -169,7 +214,7 @@ export class BlogService extends EntityManagerBaseService<BlogEntity> {
       ...dto,
       updatedBy: currentUser.id,
     };
-    console.log("this is the updated blog", updatedBlog)
+    console.log('this is the updated blog', updatedBlog);
     const [responseUpdatedBlog]: IBlogEntity[] =
       await this.blogRepository.updateById(id, updatedBlog);
     return responseUpdatedBlog;
@@ -270,10 +315,25 @@ export class BlogService extends EntityManagerBaseService<BlogEntity> {
     return blogExists;
   }
 
-  async updateBlogByKey(blogTitle: string, dto: IBlogUpdateDto, currentUser: IUserEntity, entityManager?: EntityManager): Promise<IBlogEntity> {
-    const [blogByTitle] = await this.blogRepository.validatePresence("title", [blogTitle], "blogTitle", entityManager)
+  async updateBlogByKey(
+    blogTitle: string,
+    dto: IBlogUpdateDto,
+    currentUser: IUserEntity,
+    entityManager?: EntityManager,
+  ): Promise<IBlogEntity> {
+    const [blogByTitle] = await this.blogRepository.validatePresence(
+      'title',
+      [blogTitle],
+      'blogTitle',
+      entityManager,
+    );
     // console.log("this is the blog to be updated", blogByTitle);
-    const updatedBlog = await this.updateBlogById(blogByTitle.id, dto, currentUser, entityManager)
+    const updatedBlog = await this.updateBlogById(
+      blogByTitle.id,
+      dto,
+      currentUser,
+      entityManager,
+    );
     // console.log("this is the updated blog", updatedBlog)
     return updatedBlog;
   }

@@ -13,7 +13,6 @@ import {
   ApiBearerAuth,
   ApiOkResponse,
   ApiOperation,
-  ApiParam,
   ApiTags,
 } from '@nestjs/swagger';
 import {
@@ -26,7 +25,6 @@ import { AuthGuard } from 'src/auth/auth.guard';
 import { CurrentUser } from 'src/decorators/current_user.decorator';
 import { CreateBlogDto } from '../dtos/create.blog.dto';
 import { UpdateBlogDto } from '../dtos/update.blog.dto';
-import { UpdateBlogWithTitleDto } from '../dtos/update.blog.with.title.dto';
 import { BlogService } from '../service/blog.service';
 
 @ApiTags('blog')
@@ -50,14 +48,13 @@ export class BlogController {
 
   @ApiOperation({ summary: 'Get all blog' })
   @ApiOkResponse({
-    description: 'All blogs returned with type IBlogEntityArray',
+    description: 'All blogs returned with type IBlogResponse[]',
   })
   @Get('')
   async getAllBlog(
     @CurrentUser() currentUser: IUserEntity,
-  ): Promise<IBlogEntityArray> {
-    const blogEntity = await this.blogService.getAllBlogs(currentUser);
-    return blogEntity;
+  ): Promise<IBlogResponse[]> {
+    return await this.blogService.getAllBlogs(currentUser);
   }
 
   @ApiOperation({ summary: 'Get a blog by id' })
@@ -73,7 +70,6 @@ export class BlogController {
     return blogEntity;
   }
 
-  
   @ApiOperation({ summary: 'Edit a blog by id' })
   @ApiOkResponse({
     description:
@@ -103,7 +99,7 @@ export class BlogController {
     return 'Blog Deleted';
   }
 
-/*
+  /*
   //Patch req based on a key in place of id
   @ApiOperation({ summary: 'Edit a blog by title' })
   @ApiParam({
@@ -123,6 +119,4 @@ export class BlogController {
     return this.blogService.updateBlogByKey(title, dto, currentUser)
   }
 */
-
-
 }

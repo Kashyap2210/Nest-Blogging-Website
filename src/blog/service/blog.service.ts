@@ -80,12 +80,14 @@ export class BlogService extends EntityManagerBaseService<BlogEntity> {
         message: 'current user is not logged in',
       });
     }
-    if (currentUser.role !== 'TOAA') {
-      throw new ForbiddenException({
-        key: 'user.role',
-        message: 'Current user does not have permission to access all blogs',
-      });
-    }
+
+    //Commenting out this as we now want all the users to see the list of the blogs
+    // if (currentUser.role !== 'TOAA') {
+    //   throw new ForbiddenException({
+    //     key: 'user.role',
+    //     message: 'Current user does not have permission to access all blogs',
+    //   });
+    // }
 
     const allBlogs: IBlogEntityArray = await this.blogRepository.getByFilter(
       {},

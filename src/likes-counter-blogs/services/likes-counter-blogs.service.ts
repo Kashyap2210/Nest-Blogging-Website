@@ -11,7 +11,7 @@ import {
 } from 'blog-common-1.0';
 import { BlogService } from 'src/blog/service/blog.service';
 import { EntityManagerBaseService } from 'src/helpers/entity.repository';
-import { EntityManager } from 'typeorm';
+import { EntityManager, Like } from 'typeorm';
 import { CreateLikesCounterBlogDto } from '../dto/create-blog-likes.dto';
 import { BlogLikesCounterEntity } from '../entities/likes-counter-blog.entity';
 import { LikesCounterBlogRepository } from '../repository/likes-counter-blogs.repository';
@@ -45,39 +45,35 @@ export class LikesCounterBlogsService extends EntityManagerBaseService<IBlogLike
     //Check to see if blog exists
     await this.blogService.checkBlogPresence(dto.blogId, entityManager);
 
-    const [existingLikeOrDislikeByUser]: IBlogLikesCounterEntity[] =
-      await this.likesCounterBlogRepository.getByFilter({
-        blogId: dto.blogId,
-        ...(dto.likedStatus === LikeStatus.LIKED
-          ? { likedBy: currentUser.id }
-          : { disLikedBy: currentUser.id }),
+    const existingLikeOrDislikeByUser: IBlogLikesCounterEntity[] =
+      await this.likesCounterBlogRepository.getByFilter(
+        {
+          blogId: dto.blogId,
+          createdBy: currentUser.id,
+        },
+        entityManager,
+      );
+    // console.log('this is the like/dislike entity', existingLikeOrDislikeByUser);
+    if (existingLikeOrDislikeByUser.length > 0) {
+      throw new BadRequestException({
+        key: `${existingLikeOrDislikeByUser[0].likedStatus === LikeStatus.LIKED ? 'liked' : 'disliked'}`,
+        message: `Current user has already ${existingLikeOrDislikeByUser[0].likedStatus === LikeStatus.LIKED ? 'liked' : 'disliked'} this blog`,
       });
-    if (!existingLikeOrDislikeByUser) {
-      const newLikeDislikeEntity: IBlogLikesCounterEntity =
-        await this.likesCounterBlogRepository.getInstance(
-          dto,
-          currentUser,
-          entityManager,
-        );
-      newLikeDislikeEntity.createdBy = newLikeDislikeEntity.updatedBy =
-        currentUser.id;
-      const newLikedOrDisLikedEntity: IBlogLikesCounterEntity =
-        await this.likesCounterBlogRepository.create(
-          newLikeDislikeEntity,
-          entityManager,
-        );
-
-      return newLikedOrDisLikedEntity;
     }
 
-    if (existingLikeOrDislikeByUser) {
-      if (existingLikeOrDislikeByUser.likedStatus === dto.likedStatus) {
-        throw new BadRequestException({
-          key: dto.likedStatus === LikeStatus.LIKED ? 'likedBy' : 'disLikedBy',
-          message: `Current user has already ${dto.likedStatus.toLowerCase()} this blog`,
-        });
-      }
-    }
+    const newLikeDislikeEntityInstance: IBlogLikesCounterEntity =
+      await this.likesCounterBlogRepository.getInstance(
+        dto,
+        currentUser,
+        entityManager,
+      );
+    newLikeDislikeEntityInstance.createdBy =
+      newLikeDislikeEntityInstance.updatedBy = currentUser.id;
+    let newLikedOrDisLikedEntity = await this.likesCounterBlogRepository.create(
+      newLikeDislikeEntityInstance,
+      entityManager,
+    );
+    return newLikedOrDisLikedEntity;
   }
 
   async changeLikeStatusOfBlogById(
@@ -102,10 +98,10 @@ export class LikesCounterBlogsService extends EntityManagerBaseService<IBlogLike
         },
         entityManager,
       );
-    console.log(
-      'this is the like dislike entity of the user ',
-      existingLikeOrDislikeByUser,
-    );
+    // console.log(
+    //   'this is the like dislike entity of the user ',
+    //   existingLikeOrDislikeByUser,
+    // );
     if (existingLikeOrDislikeByUser) {
       this.likesCounterBlogRepository.deleteById(
         existingLikeOrDislikeByUser.id,

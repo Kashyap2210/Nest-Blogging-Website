@@ -11,7 +11,7 @@ import {
 } from 'blog-common-1.0';
 import { BlogService } from 'src/blog/service/blog.service';
 import { EntityManagerBaseService } from 'src/helpers/entity.repository';
-import { EntityManager, Like } from 'typeorm';
+import { EntityManager } from 'typeorm';
 import { CreateLikesCounterBlogDto } from '../dto/create-blog-likes.dto';
 import { BlogLikesCounterEntity } from '../entities/likes-counter-blog.entity';
 import { LikesCounterBlogRepository } from '../repository/likes-counter-blogs.repository';

@@ -113,7 +113,7 @@ export class CommentsService extends EntityManagerBaseService<CommentEntity> {
     id: number,
     currentUser: IUserEntity,
     entityManager?: EntityManager,
-  ): Promise<void> {
+  ): Promise<boolean> {
     if (!currentUser) {
       throw new BadRequestException({
         key: 'currentUser',
@@ -155,7 +155,7 @@ export class CommentsService extends EntityManagerBaseService<CommentEntity> {
     uniqueReplyCommentArray = Array.from(new Set(await allComments(id)));
     uniqueReplyCommentArray.push(id);
 
-    await this.commentRepository.deleteMany(
+    return await this.commentRepository.deleteMany(
       uniqueReplyCommentArray,
       entityManager,
     );

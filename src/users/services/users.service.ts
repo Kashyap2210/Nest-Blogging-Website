@@ -223,7 +223,7 @@ export class UsersService extends EntityManagerBaseService<UserEntity> {
     id: number,
     currentUser: IUserEntity,
     entityManager?: EntityManager,
-  ): Promise<void> {
+  ): Promise<boolean> {
     if (!currentUser) {
       throw new BadRequestException({
         key: 'currentUser',
@@ -301,6 +301,6 @@ export class UsersService extends EntityManagerBaseService<UserEntity> {
     }
 
     //finally delete the user
-    await this.userRepository.deleteById(id);
+    return this.userRepository.deleteById(id);
   }
 }

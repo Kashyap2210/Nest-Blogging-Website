@@ -49,7 +49,8 @@ export class UsersRepository extends EntityManagerBaseService<UserEntity> {
   async deleteById<P>(
     id: number,
     entityManager?: EntityManager,
-  ): Promise<void> {
-    await this.getRepository(entityManager).delete(id);
+  ): Promise<boolean> {
+    const isDeleted = await this.getRepository(entityManager).delete(id);
+    return isDeleted.affected === 1 ? true : false;
   }
 }

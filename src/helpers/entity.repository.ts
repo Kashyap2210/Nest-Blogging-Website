@@ -17,7 +17,7 @@ export abstract class EntityManagerBaseService<T> {
   }
 
   getQueryBuilder(entityManager: EntityManager): SelectQueryBuilder<T> {
-    const repository : Repository<T> = this.getRepository(entityManager);
+    const repository: Repository<T> = this.getRepository(entityManager);
     return repository.createQueryBuilder(repository.metadata.tableName);
   }
 
@@ -62,7 +62,7 @@ export abstract class EntityManagerBaseService<T> {
   async deleteById<P>(
     id: number,
     entityManager?: EntityManager,
-  ): Promise<void> {
+  ): Promise<boolean> {
     const repository = this.getRepository(entityManager);
     const tableName = repository.metadata.tableName;
     const entity = await repository.delete(id);
@@ -72,6 +72,7 @@ export abstract class EntityManagerBaseService<T> {
         message: `${tableName.charAt(0).toUpperCase() + tableName.slice(1)} entity with ${id} not found`,
       });
     }
+    return true;
     // return entity;
   }
 
@@ -101,7 +102,7 @@ export abstract class EntityManagerBaseService<T> {
   async deleteMany<P>(
     ids: number[],
     entityManager?: EntityManager,
-  ): Promise<void> {
+  ): Promise<boolean> {
     const repository = this.getRepository(entityManager);
     const tableName = repository.metadata.tableName;
 
@@ -112,5 +113,6 @@ export abstract class EntityManagerBaseService<T> {
         message: `${tableName.charAt(0).toUpperCase() + tableName.slice(1)} entities with ${ids.join(',')} not found`,
       });
     }
+    return entities.affected === 1 ? true : false;
   }
 }

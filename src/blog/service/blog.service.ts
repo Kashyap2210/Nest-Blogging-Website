@@ -222,7 +222,7 @@ export class BlogService extends EntityManagerBaseService<BlogEntity> {
     id: number,
     currentUser: IUserEntity,
     entityManager?: EntityManager,
-  ): Promise<void> {
+  ): Promise<boolean> {
     if (!currentUser) {
       throw new BadRequestException({
         key: 'currentUser',
@@ -277,7 +277,7 @@ export class BlogService extends EntityManagerBaseService<BlogEntity> {
         entityManager,
       );
     }
-    await this.blogRepository.deleteById(id);
+    return this.blogRepository.deleteById(id);
   }
 
   async getBlogUserIdFilter(

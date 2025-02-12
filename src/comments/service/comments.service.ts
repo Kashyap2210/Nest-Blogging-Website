@@ -42,6 +42,12 @@ export class CommentsService extends EntityManagerBaseService<CommentEntity> {
       });
     }
 
+    if (createCommentDto.text.trim().length === 0) {
+      throw new BadRequestException({
+        key: 'text',
+        message: 'Comment cannot be empty',
+      });
+    }
     // check to if blog exists, if yes then code proceeds
     await this.blogService.checkBlogPresence(
       createCommentDto.blogId,

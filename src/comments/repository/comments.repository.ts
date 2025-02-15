@@ -41,11 +41,19 @@ export class CommentsRepository extends EntityManagerBaseService<CommentEntity> 
     return this.getByFilter({ id: [id] });
   }
 
-  async deleteById(id: number, entityManager?: EntityManager): Promise<void> {
-    await this.getRepository(entityManager).delete(id);
+  async deleteById(
+    id: number,
+    entityManager?: EntityManager,
+  ): Promise<boolean> {
+    const isDeleted = await this.getRepository(entityManager).delete(id);
+    return isDeleted.affected === 1 ? true : false;
   }
 
-  async deleteMany(id: number[], entityManager?: EntityManager): Promise<void> {
-    await this.getRepository(entityManager).delete(id);
+  async deleteMany(
+    id: number[],
+    entityManager?: EntityManager,
+  ): Promise<boolean> {
+    const isDeleted = await this.getRepository(entityManager).delete(id);
+    return isDeleted.affected === 1 ? true : false;
   }
 }

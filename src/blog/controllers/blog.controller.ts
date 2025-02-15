@@ -94,9 +94,8 @@ export class BlogController {
   async deleteBlog(
     @Param('id', ParseIntPipe) id: number,
     @CurrentUser() currentUser: IUserEntity,
-  ): Promise<string> {
-    await this.blogService.deleteBlogById(id, currentUser);
-    return 'Blog Deleted';
+  ): Promise<boolean> {
+    return this.blogService.deleteBlogById(id, currentUser);
   }
 
   /*

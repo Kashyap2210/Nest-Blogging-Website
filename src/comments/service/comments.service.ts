@@ -42,6 +42,12 @@ export class CommentsService extends EntityManagerBaseService<CommentEntity> {
       });
     }
 
+    if (createCommentDto.text.trim().length === 0) {
+      throw new BadRequestException({
+        key: 'text',
+        message: 'Comment cannot be empty',
+      });
+    }
     // check to if blog exists, if yes then code proceeds
     await this.blogService.checkBlogPresence(
       createCommentDto.blogId,
@@ -113,7 +119,7 @@ export class CommentsService extends EntityManagerBaseService<CommentEntity> {
     id: number,
     currentUser: IUserEntity,
     entityManager?: EntityManager,
-  ): Promise<void> {
+  ): Promise<boolean> {
     if (!currentUser) {
       throw new BadRequestException({
         key: 'currentUser',
@@ -155,7 +161,7 @@ export class CommentsService extends EntityManagerBaseService<CommentEntity> {
     uniqueReplyCommentArray = Array.from(new Set(await allComments(id)));
     uniqueReplyCommentArray.push(id);
 
-    await this.commentRepository.deleteMany(
+    return await this.commentRepository.deleteMany(
       uniqueReplyCommentArray,
       entityManager,
     );

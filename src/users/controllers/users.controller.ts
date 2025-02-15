@@ -197,7 +197,7 @@ export class UsersController {
   async deleteUser(
     @Param('id', ParseIntPipe) id: number,
     @CurrentUser() currentUser: IUserEntity,
-  ): Promise<void> {
-    await this.usersService.deleteUserById(id, currentUser);
+  ): Promise<boolean> {
+    return await this.usersService.deleteUserById(id, currentUser);
   }
 }

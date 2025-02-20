@@ -1,10 +1,10 @@
 import {
   BadRequestException,
-  ForbiddenException,
   forwardRef,
   Inject,
   Injectable,
 } from '@nestjs/common';
+import { UsersService } from '@src/users/services/users.service';
 import {
   IBlogCreateDto,
   IBlogEntity,
@@ -27,6 +27,8 @@ export class BlogService extends EntityManagerBaseService<BlogEntity> {
     private readonly blogRepository: BlogRepository,
     @Inject(forwardRef(() => CommentsService))
     private readonly commentsService: CommentsService,
+    @Inject(forwardRef(() => UsersService))
+    private readonly userService: UsersService,
     private readonly likesCounterBlogsService: LikesCounterBlogsService,
   ) {
     super();
@@ -110,6 +112,22 @@ export class BlogService extends EntityManagerBaseService<BlogEntity> {
       entityManager,
     );
 
+    let allUsersForResponse: IUserEntity[] = [];
+    const allUserIdsFromComments: number[] = allCommentEntities.map(
+      (comment) => comment.authorId,
+    );
+    allUserIdsFromComments.push(
+      ...new Set(allBlogs.map((blog) => blog.createdBy)),
+    );
+    if (allCommentEntities.length > 0) {
+      allUsersForResponse = await this.userService.getByFilter(
+        {
+          id: allUserIdsFromComments,
+        },
+        entityManager,
+      );
+    }
+
     const response: IBlogResponse[] = allBlogs.map((blog) => {
       const likesAndDislikesEntities = allLikeAndDislikeEntities.filter(
         (entity) => entity.blogId === blog.id,
@@ -124,11 +142,10 @@ export class BlogService extends EntityManagerBaseService<BlogEntity> {
           blog: blog,
           comments: commentEntities ?? [],
           likes: likesAndDislikesEntities ?? [],
+          users: allUsersForResponse ?? [],
         };
       }
     });
-
-    // console.log('this is the response', response);
 
     return response;
   }
@@ -159,10 +176,27 @@ export class BlogService extends EntityManagerBaseService<BlogEntity> {
         id,
         currentUser,
       );
+
+    const authorIdsFromCOmments = blogComments.map(
+      (comment) => comment.authorId,
+    );
+    authorIdsFromCOmments.push(blogById.createdBy);
+
+    let usersForResponse: IUserEntity[] = [];
+    if (authorIdsFromCOmments.length > 0) {
+      usersForResponse = await this.userService.getUserByFilter(
+        {
+          id: authorIdsFromCOmments,
+        },
+        entityManager,
+      );
+    }
+
     return {
       blog: blogById,
       comments: blogComments,
       likes: blogLikesAndDislikes,
+      users: usersForResponse,
     };
   }
 

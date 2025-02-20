@@ -14,6 +14,7 @@ import { EntityManager } from 'typeorm';
 import { UserEntity } from '../entities/user.entity';
 import { UsersRepository } from '../repository/users.repository';
 import {
+  IBlogEntitySearchDto,
   IUserCreateDto,
   IUserEntity,
   IUserEntityArray,
@@ -163,6 +164,13 @@ export class UsersService extends EntityManagerBaseService<UserEntity> {
     });
     delete userById['password'];
     return userById;
+  }
+
+  async getUserByFilter(
+    filter: IBlogEntitySearchDto,
+    entityManager?: EntityManager,
+  ): Promise<IUserEntity[]> {
+    return this.userRepository.getByFilter(filter, entityManager);
   }
 
   async updateUserById(

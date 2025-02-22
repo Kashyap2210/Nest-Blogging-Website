@@ -17,9 +17,8 @@ import {
 } from '@nestjs/swagger';
 import {
   IBlogEntity,
-  IBlogEntityArray,
   IBlogResponse,
-  IUserEntity,
+  IUserEntity
 } from 'blog-common-1.0';
 import { AuthGuard } from 'src/auth/auth.guard';
 import { CurrentUser } from 'src/decorators/current_user.decorator';

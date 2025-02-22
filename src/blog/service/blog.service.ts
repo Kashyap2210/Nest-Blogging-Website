@@ -1,14 +1,15 @@
 import {
   BadRequestException,
-  ForbiddenException,
   forwardRef,
   Inject,
   Injectable,
 } from '@nestjs/common';
+import { UsersService } from '@src/users/services/users.service';
 import {
   IBlogCreateDto,
   IBlogEntity,
   IBlogEntityArray,
+  IBlogLikesCounterEntity,
   IBlogResponse,
   IBlogUpdateDto,
   ICommentEntity,
@@ -27,6 +28,8 @@ export class BlogService extends EntityManagerBaseService<BlogEntity> {
     private readonly blogRepository: BlogRepository,
     @Inject(forwardRef(() => CommentsService))
     private readonly commentsService: CommentsService,
+    @Inject(forwardRef(() => UsersService))
+    private readonly userService: UsersService,
     private readonly likesCounterBlogsService: LikesCounterBlogsService,
   ) {
     super();
@@ -110,6 +113,22 @@ export class BlogService extends EntityManagerBaseService<BlogEntity> {
       entityManager,
     );
 
+    let allUsersForResponse: IUserEntity[] = [];
+    const allUserIdsFromComments: number[] = allCommentEntities.map(
+      (comment) => comment.authorId,
+    );
+    allUserIdsFromComments.push(
+      ...new Set(allBlogs.map((blog) => blog.createdBy)),
+    );
+    if (allCommentEntities.length > 0) {
+      allUsersForResponse = await this.userService.getByFilter(
+        {
+          id: allUserIdsFromComments,
+        },
+        entityManager,
+      );
+    }
+
     const response: IBlogResponse[] = allBlogs.map((blog) => {
       const likesAndDislikesEntities = allLikeAndDislikeEntities.filter(
         (entity) => entity.blogId === blog.id,
@@ -124,11 +143,10 @@ export class BlogService extends EntityManagerBaseService<BlogEntity> {
           blog: blog,
           comments: commentEntities ?? [],
           likes: likesAndDislikesEntities ?? [],
+          users: allUsersForResponse ?? [],
         };
       }
     });
-
-    // console.log('this is the response', response);
 
     return response;
   }
@@ -151,6 +169,31 @@ export class BlogService extends EntityManagerBaseService<BlogEntity> {
         'id',
         entityManager,
       );
+    let blogResponseEntities: {
+      blogComments: ICommentEntity[];
+      blogLikesAndDislikes: IBlogLikesCounterEntity[];
+      usersForResponse: IUserEntity[];
+    } = await this.getBlogResponseEntities(
+      id,
+      currentUser,
+      blogById,
+      entityManager,
+    );
+
+    return {
+      blog: blogById,
+      comments: blogResponseEntities.blogComments,
+      likes: blogResponseEntities.blogLikesAndDislikes,
+      users: blogResponseEntities.usersForResponse,
+    };
+  }
+
+  private async getBlogResponseEntities(
+    id: number,
+    currentUser: IUserEntity,
+    blogById: IBlogEntity,
+    entityManager: EntityManager,
+  ) {
     const blogComments: ICommentEntity[] =
       await this.commentsService.findCommentsByBlogId([id]);
 
@@ -159,11 +202,22 @@ export class BlogService extends EntityManagerBaseService<BlogEntity> {
         id,
         currentUser,
       );
-    return {
-      blog: blogById,
-      comments: blogComments,
-      likes: blogLikesAndDislikes,
-    };
+
+    const authorIdsFromCOmments = blogComments.map(
+      (comment) => comment.authorId,
+    );
+    authorIdsFromCOmments.push(blogById.createdBy);
+
+    let usersForResponse: IUserEntity[] = [];
+    if (authorIdsFromCOmments.length > 0) {
+      usersForResponse = await this.userService.getUserByFilter(
+        {
+          id: authorIdsFromCOmments,
+        },
+        entityManager,
+      );
+    }
+    return { blogComments, blogLikesAndDislikes, usersForResponse };
   }
 
   async updateBlogById(

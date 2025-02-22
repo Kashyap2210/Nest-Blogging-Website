@@ -33,7 +33,7 @@
     "@types/validator": "^13.12.2",
     "bcrypt": "^5.1.1",
     "blog-common": "^1.0.0",
-    "blog-common-1.0": "github:Kashyap2210/NestJS_BLog_Common",
+    "blog-common-1.0": "^1.6.0",
     "busboy": "^1.6.0",
     "class-transformer": "^0.5.1",
     "class-validator": "^0.14.1",

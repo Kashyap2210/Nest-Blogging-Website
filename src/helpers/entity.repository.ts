@@ -83,6 +83,8 @@ export abstract class EntityManagerBaseService<T> {
     const repository = this.getRepository(entityManager);
     const tableName = repository.metadata.tableName;
 
+    console.log('this is the filter for getByFilter', filter);
+
     // Initialize the query builder
     let query = repository.createQueryBuilder(tableName);
 

@@ -9,6 +9,7 @@ import {
   IBlogCreateDto,
   IBlogEntity,
   IBlogEntityArray,
+  IBlogLikesCounterEntity,
   IBlogResponse,
   IBlogUpdateDto,
   ICommentEntity,
@@ -168,6 +169,31 @@ export class BlogService extends EntityManagerBaseService<BlogEntity> {
         'id',
         entityManager,
       );
+    let blogResponseEntities: {
+      blogComments: ICommentEntity[];
+      blogLikesAndDislikes: IBlogLikesCounterEntity[];
+      usersForResponse: IUserEntity[];
+    } = await this.getBlogResponseEntities(
+      id,
+      currentUser,
+      blogById,
+      entityManager,
+    );
+
+    return {
+      blog: blogById,
+      comments: blogResponseEntities.blogComments,
+      likes: blogResponseEntities.blogLikesAndDislikes,
+      users: blogResponseEntities.usersForResponse,
+    };
+  }
+
+  private async getBlogResponseEntities(
+    id: number,
+    currentUser: IUserEntity,
+    blogById: IBlogEntity,
+    entityManager: EntityManager,
+  ) {
     const blogComments: ICommentEntity[] =
       await this.commentsService.findCommentsByBlogId([id]);
 
@@ -191,13 +217,7 @@ export class BlogService extends EntityManagerBaseService<BlogEntity> {
         entityManager,
       );
     }
-
-    return {
-      blog: blogById,
-      comments: blogComments,
-      likes: blogLikesAndDislikes,
-      users: usersForResponse,
-    };
+    return { blogComments, blogLikesAndDislikes, usersForResponse };
   }
 
   async updateBlogById(

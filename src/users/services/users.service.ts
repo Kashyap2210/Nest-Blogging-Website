@@ -5,22 +5,23 @@ import {
   Inject,
   Injectable,
 } from '@nestjs/common';
+import { UserDeleteTransaction } from '@src/users/transactions/user_delete.transaction';
 import * as bcrypt from 'bcrypt';
-import { BlogService } from 'src/blog/service/blog.service';
-import { CommentsService } from 'src/comments/service/comments.service';
-import { EntityManagerBaseService } from 'src/helpers/entity.repository';
-import { LikesCounterBlogsService } from 'src/likes-counter-blogs/services/likes-counter-blogs.service';
-import { DataSource, EntityManager } from 'typeorm';
-import { UserEntity } from '../entities/user.entity';
-import { UsersRepository } from '../repository/users.repository';
 import {
-  IBlogEntity,
   IBlogEntitySearchDto,
   IUserCreateDto,
   IUserEntity,
   IUserEntityArray,
   IUserUpdateDto,
 } from 'blog-common-1.0';
+import { BlogService } from 'src/blog/service/blog.service';
+import { CommentsService } from 'src/comments/service/comments.service';
+import { EntityManagerBaseService } from 'src/helpers/entity.repository';
+import { LikesCounterBlogsService } from 'src/likes-counter-blogs/services/likes-counter-blogs.service';
+import { EntityManager } from 'typeorm';
+import { UserEntity } from '../entities/user.entity';
+import { UsersRepository } from '../repository/users.repository';
+import { IUserDeleteData } from '../transactions/interfaces/user_delete_transaction_data.interface';
 
 @Injectable()
 export class UsersService extends EntityManagerBaseService<UserEntity> {
@@ -30,7 +31,7 @@ export class UsersService extends EntityManagerBaseService<UserEntity> {
     private blogService: BlogService,
     private commentsService: CommentsService,
     private likesCounterService: LikesCounterBlogsService,
-    private dataSource: DataSource,
+    private userDeleteTransaction: UserDeleteTransaction,
   ) {
     super();
   }
@@ -241,84 +242,41 @@ export class UsersService extends EntityManagerBaseService<UserEntity> {
       });
     }
 
-    // console.log('this is the current user', currentUser);
-
-    const queryRunner = this.dataSource.createQueryRunner();
-    await queryRunner.connect();
-    await queryRunner.startTransaction();
-
-    try {
-      const [userToBeDeleted]: IUserEntity[] =
-        await this.userRepository.validatePresence(
-          'id',
-          [id],
-          'id',
-          queryRunner.manager,
-        );
-
-      if (currentUser.role !== 'TOAA') {
-        // console.log('code is reaching here', 4);
-        throw new ForbiddenException({
-          key: 'user.role',
-          message: 'Current user does not have permission to delete any user',
-        });
-      }
-
-      const currentUserBlogsIds: number[] = (
-        await this.blogService.getByFilter(
-          { createdBy: [id] },
-          queryRunner.manager,
-        )
-      ).map((blog) => blog.id);
-
-      // console.log('These are all the current user blogs', currentUserBlogsIds);
-
-      const commentsOfMultipleBlogsByCurrentUser =
-        await this.commentsService.getCommentsByFilter(
-          { createdBy: [id] },
-          queryRunner.manager,
-        );
-
-      const likeDislikeEntitiesByCurrentuser =
-        await this.likesCounterService.getLikeDislikeEntitiesByFilter(
-          { createdBy: [id] },
-          queryRunner.manager,
-        );
-
-      // Delete related entities inside the transaction
-      if (currentUserBlogsIds.length > 0) {
-        await this.blogService.deleteManyBlogs(
-          currentUserBlogsIds,
-          queryRunner.manager,
-        );
-      }
-
-      if (commentsOfMultipleBlogsByCurrentUser.length > 0) {
-        await this.commentsService.deleteMany(
-          commentsOfMultipleBlogsByCurrentUser.map((comment) => comment.id),
-          queryRunner.manager,
-        );
-      }
-
-      if (likeDislikeEntitiesByCurrentuser.length > 0) {
-        await this.likesCounterService.deleteMany(
-          likeDislikeEntitiesByCurrentuser.map((entity) => entity.id),
-          queryRunner.manager,
-        );
-      }
-
-      await this.userRepository.deleteById(id, queryRunner.manager);
-
-      // Commit transaction
-      await queryRunner.commitTransaction();
-
-      return true;
-    } catch (error) {
-      // console.error('Rolling back transaction due to error:', error);
-      await queryRunner.rollbackTransaction();
-      throw error;
-    } finally {
-      await queryRunner.release();
+    if (currentUser.role !== 'TOAA') {
+      // console.log('code is reaching here', 4);
+      throw new ForbiddenException({
+        key: 'user.role',
+        message: 'Current user does not have permission to delete any user',
+      });
     }
+
+    const currentUserBlogsIds: number[] = (
+      await this.blogService.getByFilter({ createdBy: [id] }, entityManager)
+    ).map((blog) => blog.id);
+
+    // console.log('These are all the current user blogs', currentUserBlogsIds);
+
+    const commentIdsOfMultipleBlogsByCurrentUser = (
+      await this.commentsService.getCommentsByFilter(
+        { createdBy: [id] },
+        entityManager,
+      )
+    ).map((entity) => entity.id);
+
+    const likeDislikeEntityIdsByCurrentuser = (
+      await this.likesCounterService.getLikeDislikeEntitiesByFilter(
+        { createdBy: [id] },
+        entityManager,
+      )
+    ).map((entity) => entity.id);
+
+    const data: IUserDeleteData = {
+      userId: id,
+      blogIds: currentUserBlogsIds,
+      commentIds: commentIdsOfMultipleBlogsByCurrentUser,
+      likeAndDislikesEntitiesIds: likeDislikeEntityIdsByCurrentuser,
+    };
+
+    return this.userDeleteTransaction.executeDeleteTransaction(data);
   }
 }

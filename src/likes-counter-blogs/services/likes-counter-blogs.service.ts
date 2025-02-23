@@ -15,6 +15,7 @@ import { EntityManager } from 'typeorm';
 import { CreateLikesCounterBlogDto } from '../dto/create-blog-likes.dto';
 import { BlogLikesCounterEntity } from '../entities/likes-counter-blog.entity';
 import { LikesCounterBlogRepository } from '../repository/likes-counter-blogs.repository';
+import { IEntityFilterData } from 'blog-common-1.0/dist/generi.types';
 
 @Injectable()
 export class LikesCounterBlogsService extends EntityManagerBaseService<IBlogLikesCounterEntity> {
@@ -123,5 +124,19 @@ export class LikesCounterBlogsService extends EntityManagerBaseService<IBlogLike
     const likeDislikeEntitiesForBlog: IBlogLikesCounterEntity[] =
       await this.likesCounterBlogRepository.getByFilter({ blogId: id });
     return likeDislikeEntitiesForBlog;
+  }
+
+  async getLikeDislikeEntitiesByFilter(
+    filter: IEntityFilterData<IBlogLikesCounterEntity>,
+    entityManager?: EntityManager,
+  ) {
+    return this.likesCounterBlogRepository.getByFilter(filter, entityManager);
+  }
+
+  async deleteManyLikeDislikeEntitiesByFilter(
+    ids: number[],
+    entityManager?: EntityManager,
+  ) {
+    return this.likesCounterBlogRepository.deleteMany(ids, entityManager);
   }
 }

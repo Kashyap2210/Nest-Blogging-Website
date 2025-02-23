@@ -5,14 +5,8 @@ import {
   Inject,
   Injectable,
 } from '@nestjs/common';
+import { UserDeleteTransaction } from '@src/users/transactions/user_delete.transaction';
 import * as bcrypt from 'bcrypt';
-import { BlogService } from 'src/blog/service/blog.service';
-import { CommentsService } from 'src/comments/service/comments.service';
-import { EntityManagerBaseService } from 'src/helpers/entity.repository';
-import { LikesCounterBlogsService } from 'src/likes-counter-blogs/services/likes-counter-blogs.service';
-import { EntityManager } from 'typeorm';
-import { UserEntity } from '../entities/user.entity';
-import { UsersRepository } from '../repository/users.repository';
 import {
   IBlogEntitySearchDto,
   IUserCreateDto,
@@ -20,6 +14,14 @@ import {
   IUserEntityArray,
   IUserUpdateDto,
 } from 'blog-common-1.0';
+import { BlogService } from 'src/blog/service/blog.service';
+import { CommentsService } from 'src/comments/service/comments.service';
+import { EntityManagerBaseService } from 'src/helpers/entity.repository';
+import { LikesCounterBlogsService } from 'src/likes-counter-blogs/services/likes-counter-blogs.service';
+import { EntityManager } from 'typeorm';
+import { UserEntity } from '../entities/user.entity';
+import { UsersRepository } from '../repository/users.repository';
+import { IUserDeleteData } from '../transactions/interfaces/user_delete_transaction_data.interface';
 
 @Injectable()
 export class UsersService extends EntityManagerBaseService<UserEntity> {
@@ -29,6 +31,7 @@ export class UsersService extends EntityManagerBaseService<UserEntity> {
     private blogService: BlogService,
     private commentsService: CommentsService,
     private likesCounterService: LikesCounterBlogsService,
+    private userDeleteTransaction: UserDeleteTransaction,
   ) {
     super();
   }
@@ -231,84 +234,49 @@ export class UsersService extends EntityManagerBaseService<UserEntity> {
     id: number,
     currentUser: IUserEntity,
     entityManager?: EntityManager,
-  ): Promise<boolean> {
+  ): Promise<any> {
     if (!currentUser) {
       throw new BadRequestException({
         key: 'currentUser',
         message: 'current user is not logged in',
       });
     }
-    const [userToBeDeleted]: IUserEntity[] =
-      await this.userRepository.validatePresence(
-        'id',
-        [id],
-        'id',
-        entityManager,
-      );
-    // console.log('this is the current users role', [currentUser.role]);
-    if (userToBeDeleted.id !== currentUser.id && currentUser.role !== 'TOAA') {
+
+    if (currentUser.role !== 'TOAA') {
+      // console.log('code is reaching here', 4);
       throw new ForbiddenException({
         key: 'user.role',
         message: 'Current user does not have permission to delete any user',
       });
     }
 
-    // finding all the blogs related to the user
     const currentUserBlogsIds: number[] = (
-      await this.blogService.getByFilter(
-        {
-          createdBy: [currentUser.id],
-        },
+      await this.blogService.getByFilter({ createdBy: [id] }, entityManager)
+    ).map((blog) => blog.id);
+
+    // console.log('These are all the current user blogs', currentUserBlogsIds);
+
+    const commentIdsOfMultipleBlogsByCurrentUser = (
+      await this.commentsService.getCommentsByFilter(
+        { createdBy: [id] },
         entityManager,
       )
-    ).map((blog) => blog.id);
-    // console.log('this are all the current users blogs', currentUserBlogsIds);
+    ).map((entity) => entity.id);
 
-    // if blogs exists only then we check for further comments and like dislike entities
-    if (currentUserBlogsIds.length > 0) {
-      //finding all the comments related to the users' blogs
-      let commentIdsOnUsersBlogs: number[] = (
-        await this.commentsService.findCommentsByBlogId(
-          currentUserBlogsIds,
-          entityManager,
-        )
-      ).map((comment) => comment.id);
-      /*
-        console.log(
-          'this are all the comments on the blog',
-          commentIdsOnUsersBlogs,
-        );
-      */
-      //finding all the like and dislike entity
-      let likeAndDislikeIds: number[] = (
-        await this.likesCounterService.getByFilter(
-          {
-            blogId: currentUserBlogsIds,
-          },
-          entityManager,
-        )
-      ).map((likesCounterEntity) => likesCounterEntity.id);
-      // console.log('this are the like and dislike entities', likeAndDislikeIds);
+    const likeDislikeEntityIdsByCurrentuser = (
+      await this.likesCounterService.getLikeDislikeEntitiesByFilter(
+        { createdBy: [id] },
+        entityManager,
+      )
+    ).map((entity) => entity.id);
 
-      //check if the values actually exists only then proced to delete
-      if (currentUserBlogsIds.length > 0) {
-        await this.blogService.deleteMany(currentUserBlogsIds, entityManager);
-      }
-      if (commentIdsOnUsersBlogs.length > 0) {
-        await this.commentsService.deleteMany(
-          commentIdsOnUsersBlogs,
-          entityManager,
-        );
-      }
-      if (likeAndDislikeIds.length > 0) {
-        await this.likesCounterService.deleteMany(
-          likeAndDislikeIds,
-          entityManager,
-        );
-      }
-    }
+    const data: IUserDeleteData = {
+      userId: id,
+      blogIds: currentUserBlogsIds,
+      commentIds: commentIdsOfMultipleBlogsByCurrentUser,
+      likeAndDislikesEntitiesIds: likeDislikeEntityIdsByCurrentuser,
+    };
 
-    //finally delete the user
-    return this.userRepository.deleteById(id);
+    return this.userDeleteTransaction.executeDeleteTransaction(data);
   }
 }

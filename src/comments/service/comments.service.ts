@@ -15,6 +15,7 @@ import { EntityManager } from 'typeorm';
 import { CreateCommentDto } from '../dto/create-comment.dto';
 import { CommentEntity } from '../entities/comment.entity';
 import { CommentsRepository } from '../repository/comments.repository';
+import { IEntityFilterData } from 'blog-common-1.0/dist/generi.types';
 
 @Injectable()
 export class CommentsService extends EntityManagerBaseService<CommentEntity> {
@@ -177,6 +178,13 @@ export class CommentsService extends EntityManagerBaseService<CommentEntity> {
     );
   }
 
+  async getCommentsByFilter(
+    filter: IEntityFilterData<ICommentEntity>,
+    entityManager?: EntityManager,
+  ) {
+    return this.commentRepository.getByFilter(filter, entityManager);
+  }
+
   async validateCommentPresence(params: {
     id?: number;
     blogId?: number;
@@ -212,5 +220,9 @@ export class CommentsService extends EntityManagerBaseService<CommentEntity> {
       });
     }
     return commentToFind;
+  }
+
+  async deleteManyComments(ids: number[], entityManager?: EntityManager) {
+    return this.commentRepository.deleteMany(ids, entityManager);
   }
 }

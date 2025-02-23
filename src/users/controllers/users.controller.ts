@@ -198,6 +198,10 @@ export class UsersController {
     @Param('id', ParseIntPipe) id: number,
     @CurrentUser() currentUser: IUserEntity,
   ): Promise<boolean> {
-    return await this.usersService.deleteUserById(id, currentUser);
+    try {
+      return await this.usersService.deleteUserById(id, currentUser);
+    } catch (error) {
+      throw error;
+    }
   }
 }

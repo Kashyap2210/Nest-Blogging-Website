@@ -130,11 +130,13 @@ export class LikesCounterBlogsService extends EntityManagerBaseService<IBlogLike
     filter: IEntityFilterData<IBlogLikesCounterEntity>,
     entityManager?: EntityManager,
   ) {
-    const allLikeDislikeEntitiesByFilter =
-      await this.likesCounterBlogRepository.getByFilter(filter, entityManager);
-    console.log(
-      'this are all the like/dislike entities of user',
-      allLikeDislikeEntitiesByFilter.length,
-    );
+    return this.likesCounterBlogRepository.getByFilter(filter, entityManager);
+  }
+
+  async deleteManyLikeDislikeEntitiesByFilter(
+    ids: number[],
+    entityManager?: EntityManager,
+  ) {
+    return this.likesCounterBlogRepository.deleteMany(ids, entityManager);
   }
 }

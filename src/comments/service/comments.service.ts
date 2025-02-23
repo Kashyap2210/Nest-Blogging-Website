@@ -182,15 +182,7 @@ export class CommentsService extends EntityManagerBaseService<CommentEntity> {
     filter: IEntityFilterData<ICommentEntity>,
     entityManager?: EntityManager,
   ) {
-    console.log('this is the filter', filter);
-    const allCommentsByFilter = await this.commentRepository.getByFilter(
-      filter,
-      entityManager,
-    );
-    console.log(
-      'this are all the comments of user',
-      allCommentsByFilter.length,
-    );
+    return this.commentRepository.getByFilter(filter, entityManager);
   }
 
   async validateCommentPresence(params: {
@@ -228,5 +220,9 @@ export class CommentsService extends EntityManagerBaseService<CommentEntity> {
       });
     }
     return commentToFind;
+  }
+
+  async deleteManyComments(ids: number[], entityManager?: EntityManager) {
+    return this.commentRepository.deleteMany(ids, entityManager);
   }
 }

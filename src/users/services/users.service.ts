@@ -10,7 +10,7 @@ import { BlogService } from 'src/blog/service/blog.service';
 import { CommentsService } from 'src/comments/service/comments.service';
 import { EntityManagerBaseService } from 'src/helpers/entity.repository';
 import { LikesCounterBlogsService } from 'src/likes-counter-blogs/services/likes-counter-blogs.service';
-import { EntityManager } from 'typeorm';
+import { DataSource, EntityManager } from 'typeorm';
 import { UserEntity } from '../entities/user.entity';
 import { UsersRepository } from '../repository/users.repository';
 import {
@@ -29,6 +29,7 @@ export class UsersService extends EntityManagerBaseService<UserEntity> {
     private blogService: BlogService,
     private commentsService: CommentsService,
     private likesCounterService: LikesCounterBlogsService,
+    private dataSource: DataSource,
   ) {
     super();
   }
@@ -238,77 +239,97 @@ export class UsersService extends EntityManagerBaseService<UserEntity> {
         message: 'current user is not logged in',
       });
     }
-    const [userToBeDeleted]: IUserEntity[] =
-      await this.userRepository.validatePresence(
-        'id',
-        [id],
-        'id',
-        entityManager,
-      );
-    // console.log('this is the current users role', [currentUser.role]);
-    if (userToBeDeleted.id !== currentUser.id && currentUser.role !== 'TOAA') {
-      throw new ForbiddenException({
-        key: 'user.role',
-        message: 'Current user does not have permission to delete any user',
-      });
-    }
 
-    // finding all the blogs related to the user
-    const currentUserBlogsIds: number[] = (
-      await this.blogService.getByFilter(
-        {
-          createdBy: [currentUser.id],
-        },
-        entityManager,
-      )
-    ).map((blog) => blog.id);
-    // console.log('this are all the current users blogs', currentUserBlogsIds);
-
-    // if blogs exists only then we check for further comments and like dislike entities
-    if (currentUserBlogsIds.length > 0) {
-      //finding all the comments related to the users' blogs
-      let commentIdsOnUsersBlogs: number[] = (
-        await this.commentsService.findCommentsByBlogId(
-          currentUserBlogsIds,
+    const queryRunner = this.dataSource.createQueryRunner();
+    await queryRunner.connect();
+    await queryRunner.startTransaction();
+    try {
+      const [userToBeDeleted]: IUserEntity[] =
+        await this.userRepository.validatePresence(
+          'id',
+          [id],
+          'id',
           entityManager,
-        )
-      ).map((comment) => comment.id);
-      /*
-        console.log(
-          'this are all the comments on the blog',
-          commentIdsOnUsersBlogs,
         );
-      */
-      //finding all the like and dislike entity
-      let likeAndDislikeIds: number[] = (
-        await this.likesCounterService.getByFilter(
+      // console.log('this is the current users role', [currentUser.role]);
+      if (
+        userToBeDeleted.id !== currentUser.id &&
+        currentUser.role !== 'TOAA'
+      ) {
+        throw new ForbiddenException({
+          key: 'user.role',
+          message: 'Current user does not have permission to delete any user',
+        });
+      }
+
+      // finding all the blogs related to the user
+      const currentUserBlogsIds: number[] = (
+        await this.blogService.getByFilter(
           {
-            blogId: currentUserBlogsIds,
+            createdBy: [currentUser.id],
           },
           entityManager,
         )
-      ).map((likesCounterEntity) => likesCounterEntity.id);
-      // console.log('this are the like and dislike entities', likeAndDislikeIds);
+      ).map((blog) => blog.id);
+      console.log('this are all the current users blogs', currentUserBlogsIds);
 
-      //check if the values actually exists only then proced to delete
-      if (currentUserBlogsIds.length > 0) {
-        await this.blogService.deleteMany(currentUserBlogsIds, entityManager);
-      }
-      if (commentIdsOnUsersBlogs.length > 0) {
-        await this.commentsService.deleteMany(
-          commentIdsOnUsersBlogs,
+      const deletedBlogs = await this.blogService.getBlogsByFilter(
+        { id: currentUserBlogsIds },
+        entityManager,
+      );
+      const commentsOfMultipleBlogsByCurrentUser =
+        await this.commentsService.getCommentsByFilter(
+          { createdBy: [id] },
           entityManager,
         );
-      }
-      if (likeAndDislikeIds.length > 0) {
-        await this.likesCounterService.deleteMany(
-          likeAndDislikeIds,
+
+      const likeDislikeEntitiesByCurrentuser =
+        await this.likesCounterService.getLikeDislikeEntitiesByFilter(
+          { createdBy: [id] },
           entityManager,
         );
-      }
+
+        
+      // for (const id of currentUserBlogsIds) {
+      //   await this.blogService.deleteBlogById(id, currentUser, entityManager);
+      // }
+      // const blogs = await this.blogService.getByFilter(
+      //   {
+      //     createdBy: [7],
+      //   },
+      //   entityManager,
+      // );
+      // console.log('this are all the blogs', blogs);
+      // const allCommentys = await this.commentsService.getByFilter(
+      //   {
+      //     authorId: [7],
+      //   },
+      //   entityManager,
+      // );
+      // console.log('this are all the commets', allCommentys);
+      // const allLikeEntities = await this.likesCounterService.getByFilter(
+      //   {
+      //     createdBy: [7],
+      //   },
+      //   entityManager,
+      // );
+      // console.log('this are all the likes/dislikes', allLikeEntities);
+      // const x = 1;
+      // if (x > 0) {
+      //   throw new BadRequestException({
+      //     key: 'transaction',
+      //     message: 'Error to check transaction is working or not',
+      //   });
+      // }
+      // await this.userRepository.deleteById(id, entityManager);
+      await queryRunner.commitTransaction();
+
+      //finally delete the user
+    } catch (error) {
+      await queryRunner.rollbackTransaction();
+    } finally {
+      await queryRunner.release();
     }
-
-    //finally delete the user
-    return this.userRepository.deleteById(id);
+    return true;
   }
 }

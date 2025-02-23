@@ -22,6 +22,8 @@ import { EntityManager } from 'typeorm';
 import { BlogEntity } from '../entities/blog.entity';
 import { BlogRepository } from '../repository/blogs.repository';
 import { IEntityFilterData } from 'blog-common-1.0/dist/generi.types';
+import { IBlogDeleteData } from '../transactions/interfaces/blog_entity_delete_transaction.interface';
+import { BlogDeleteTransaction } from '../transactions/blog_delete_transaction';
 
 @Injectable()
 export class BlogService extends EntityManagerBaseService<BlogEntity> {
@@ -32,6 +34,7 @@ export class BlogService extends EntityManagerBaseService<BlogEntity> {
     @Inject(forwardRef(() => UsersService))
     private readonly userService: UsersService,
     private readonly likesCounterBlogsService: LikesCounterBlogsService,
+    private readonly blogDeleteTransaction: BlogDeleteTransaction,
   ) {
     super();
   }
@@ -311,10 +314,6 @@ export class BlogService extends EntityManagerBaseService<BlogEntity> {
         entityManager,
       )
     ).map((comments) => comments.id);
-    // console.log('this are the comments on the blog', commentIdsOnBlog);
-    if (commentIdsOnBlog.length > 0) {
-      await this.commentsService.deleteMany(commentIdsOnBlog, entityManager);
-    }
 
     //finding likesAndDislikesEntities on the blog with id:id
     let likeAndDislikeIds: number[] = (
@@ -326,13 +325,15 @@ export class BlogService extends EntityManagerBaseService<BlogEntity> {
       )
     ).map((likesCounterEntity) => likesCounterEntity.id);
     // console.log('this are the like and dislike entities', likeAndDislikeIds);
-    if (likeAndDislikeIds.length > 0) {
-      await this.likesCounterBlogsService.deleteMany(
-        likeAndDislikeIds,
-        entityManager,
-      );
-    }
-    return this.blogRepository.deleteById(id);
+
+    const data: IBlogDeleteData = {
+      blogId: id,
+      commentIds: commentIdsOnBlog,
+      likeDislikeEntityIds: likeAndDislikeIds,
+    };
+    return this.blogDeleteTransaction.executeDeleteTransaction(data);
+
+    // return this.blogRepository.deleteById(id);
   }
 
   async deleteManyBlogs(ids: number[], entityManager?: EntityManager) {

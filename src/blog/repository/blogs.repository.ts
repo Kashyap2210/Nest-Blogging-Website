@@ -45,7 +45,7 @@ export class BlogRepository extends EntityManagerBaseService<BlogEntity> {
     entityManager?: EntityManager,
   ): Promise<boolean> {
     const isDeleted = await this.getRepository(entityManager).delete(id);
-    console.log('this is the value of isDeleted', isDeleted);
+    // console.log('this is the value of isDeleted', isDeleted);
     return isDeleted.affected === 1 ? true : false;
   }
 }

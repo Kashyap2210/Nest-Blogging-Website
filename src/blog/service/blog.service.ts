@@ -267,7 +267,7 @@ export class BlogService extends EntityManagerBaseService<BlogEntity> {
       ...dto,
       updatedBy: currentUser.id,
     };
-    console.log('this is the updated blog', updatedBlog);
+    // console.log('this is the updated blog', updatedBlog);
     const [responseUpdatedBlog]: IBlogEntity[] =
       await this.blogRepository.updateById(id, updatedBlog);
     return responseUpdatedBlog;
@@ -335,15 +335,15 @@ export class BlogService extends EntityManagerBaseService<BlogEntity> {
     return this.blogRepository.deleteById(id);
   }
 
+  async deleteManyBlogs(ids: number[], entityManager?: EntityManager) {
+    return this.blogRepository.deleteMany(ids, entityManager);
+  }
+
   async getBlogsByFilter(
     filter: IEntityFilterData<IBlogEntity>,
     entityManager?: EntityManager,
   ): Promise<any> {
-    const allBlogsExists = await this.blogRepository.getByFilter(
-      filter,
-      entityManager,
-    );
-    console.log('this are all the blogs of user', allBlogsExists.length);
+    return this.blogRepository.getByFilter(filter, entityManager);
   }
 
   async getBlogUserIdFilter(

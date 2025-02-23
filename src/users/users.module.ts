@@ -11,6 +11,8 @@ import { UsersController } from './controllers/users.controller';
 import { UserEntity } from './entities/user.entity';
 import { UsersRepository } from './repository/users.repository';
 import { UsersService } from './services/users.service';
+import { UserDeleteTransaction } from '@src/users/transactions/user_delete.transaction';
+import { BlogDeleteTransaction } from '@src/blog/transactions/blog_delete_transaction';
 
 @Module({
   imports: [
@@ -27,7 +29,9 @@ import { UsersService } from './services/users.service';
     CommentsRepository,
     LikesCounterBlogsService,
     LikesCounterBlogRepository,
+    UserDeleteTransaction,
+    BlogDeleteTransaction,
   ],
-  exports: [UsersService],
+  exports: [UsersService, UsersRepository],
 })
 export class UsersModule {}

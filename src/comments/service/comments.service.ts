@@ -15,6 +15,7 @@ import { EntityManager } from 'typeorm';
 import { CreateCommentDto } from '../dto/create-comment.dto';
 import { CommentEntity } from '../entities/comment.entity';
 import { CommentsRepository } from '../repository/comments.repository';
+import { IEntityFilterData } from 'blog-common-1.0/dist/generi.types';
 
 @Injectable()
 export class CommentsService extends EntityManagerBaseService<CommentEntity> {
@@ -174,6 +175,21 @@ export class CommentsService extends EntityManagerBaseService<CommentEntity> {
     return await this.commentRepository.getByFilter(
       { blogId: blogId },
       entityManager,
+    );
+  }
+
+  async getCommentsByFilter(
+    filter: IEntityFilterData<ICommentEntity>,
+    entityManager?: EntityManager,
+  ) {
+    console.log('this is the filter', filter);
+    const allCommentsByFilter = await this.commentRepository.getByFilter(
+      filter,
+      entityManager,
+    );
+    console.log(
+      'this are all the comments of user',
+      allCommentsByFilter.length,
     );
   }
 

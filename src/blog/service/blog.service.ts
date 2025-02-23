@@ -21,6 +21,7 @@ import { LikesCounterBlogsService } from 'src/likes-counter-blogs/services/likes
 import { EntityManager } from 'typeorm';
 import { BlogEntity } from '../entities/blog.entity';
 import { BlogRepository } from '../repository/blogs.repository';
+import { IEntityFilterData } from 'blog-common-1.0/dist/generi.types';
 
 @Injectable()
 export class BlogService extends EntityManagerBaseService<BlogEntity> {
@@ -332,6 +333,17 @@ export class BlogService extends EntityManagerBaseService<BlogEntity> {
       );
     }
     return this.blogRepository.deleteById(id);
+  }
+
+  async getBlogsByFilter(
+    filter: IEntityFilterData<IBlogEntity>,
+    entityManager?: EntityManager,
+  ): Promise<any> {
+    const allBlogsExists = await this.blogRepository.getByFilter(
+      filter,
+      entityManager,
+    );
+    console.log('this are all the blogs of user', allBlogsExists.length);
   }
 
   async getBlogUserIdFilter(

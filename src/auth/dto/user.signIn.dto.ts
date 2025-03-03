@@ -1,7 +1,8 @@
 import { IsString } from '@nestjs/class-validator';
 import { ApiProperty } from '@nestjs/swagger';
+import { IUserSignDto } from 'blog-common-1.0';
 
-export class UserSignInDto {
+export class UserSignInDto implements IUserSignDto {
   @IsString()
   @ApiProperty({
     description: 'Username',

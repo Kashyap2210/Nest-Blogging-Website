@@ -59,7 +59,6 @@ export class BlogController {
   @ApiBody({ type: BlogSearchDto })
   async getByFilter(
     @Body() dto: IEntityFilterData<IBlogEntity>,
-    // @CurrentUser() currentUser: IUserEntity,
   ): Promise<IBlogEntity[]> {
     return this.blogService.getBlogsByFilter(dto);
   }

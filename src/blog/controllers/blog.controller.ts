@@ -11,18 +11,17 @@ import {
 } from '@nestjs/common';
 import {
   ApiBearerAuth,
+  ApiBody,
   ApiOkResponse,
   ApiOperation,
   ApiTags,
 } from '@nestjs/swagger';
-import {
-  IBlogEntity,
-  IBlogResponse,
-  IUserEntity
-} from 'blog-common-1.0';
+import { IBlogEntity, IBlogResponse, IUserEntity } from 'blog-common-1.0';
+import { IEntityFilterData } from 'blog-common-1.0/dist/generi.types';
 import { AuthGuard } from 'src/auth/auth.guard';
 import { CurrentUser } from 'src/decorators/current_user.decorator';
 import { CreateBlogDto } from '../dtos/create.blog.dto';
+import { BlogSearchDto } from '../dtos/search.blog.dto';
 import { UpdateBlogDto } from '../dtos/update.blog.dto';
 import { BlogService } from '../service/blog.service';
 
@@ -54,6 +53,15 @@ export class BlogController {
     @CurrentUser() currentUser: IUserEntity,
   ): Promise<IBlogResponse[]> {
     return await this.blogService.getAllBlogs(currentUser);
+  }
+
+  @Post('search')
+  @ApiBody({ type: BlogSearchDto })
+  async getByFilter(
+    @Body() dto: IEntityFilterData<IBlogEntity>,
+    // @CurrentUser() currentUser: IUserEntity,
+  ): Promise<IBlogEntity[]> {
+    return this.blogService.getBlogsByFilter(dto);
   }
 
   @ApiOperation({ summary: 'Get a blog by id' })

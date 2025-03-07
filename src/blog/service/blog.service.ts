@@ -344,6 +344,7 @@ export class BlogService extends EntityManagerBaseService<BlogEntity> {
     filter: IEntityFilterData<IBlogEntity>,
     entityManager?: EntityManager,
   ): Promise<any> {
+    console.log('this is the filter', filter);
     return this.blogRepository.getByFilter(filter, entityManager);
   }
 

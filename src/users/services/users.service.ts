@@ -5,7 +5,7 @@ import {
   Inject,
   Injectable,
 } from '@nestjs/common';
-import { UserDeleteTransaction } from '@src/users/transactions/user_delete.transaction';
+// import { UserDeleteTransaction } from '@src/users/transactions/user_delete.transaction';
 import * as bcrypt from 'bcrypt';
 import {
   IBlogEntitySearchDto,
@@ -22,6 +22,7 @@ import { EntityManager } from 'typeorm';
 import { UserEntity } from '../entities/user.entity';
 import { UsersRepository } from '../repository/users.repository';
 import { IUserDeleteData } from '../transactions/interfaces/user_delete_transaction_data.interface';
+import { DeleteUserWithinTransaction } from '../transactions/user_delete.transaction';
 
 @Injectable()
 export class UsersService extends EntityManagerBaseService<UserEntity> {
@@ -31,7 +32,8 @@ export class UsersService extends EntityManagerBaseService<UserEntity> {
     private blogService: BlogService,
     private commentsService: CommentsService,
     private likesCounterService: LikesCounterBlogsService,
-    private userDeleteTransaction: UserDeleteTransaction,
+    // private userDeleteTransaction: UserDeleteTransaction,
+    private userDeleteTransaction: DeleteUserWithinTransaction,
   ) {
     super();
   }
@@ -234,7 +236,7 @@ export class UsersService extends EntityManagerBaseService<UserEntity> {
     id: number,
     currentUser: IUserEntity,
     entityManager?: EntityManager,
-  ): Promise<any> {
+  ): Promise<boolean> {
     if (!currentUser) {
       throw new BadRequestException({
         key: 'currentUser',
@@ -262,6 +264,14 @@ export class UsersService extends EntityManagerBaseService<UserEntity> {
         entityManager,
       )
     ).map((entity) => entity.id);
+    commentIdsOfMultipleBlogsByCurrentUser.push(
+      ...(
+        await this.commentsService.getCommentsByFilter(
+          { blogId: currentUserBlogsIds },
+          entityManager,
+        )
+      ).map((comment) => comment.id),
+    );
 
     const likeDislikeEntityIdsByCurrentuser = (
       await this.likesCounterService.getLikeDislikeEntitiesByFilter(
@@ -277,6 +287,7 @@ export class UsersService extends EntityManagerBaseService<UserEntity> {
       likeAndDislikesEntitiesIds: likeDislikeEntityIdsByCurrentuser,
     };
 
-    return this.userDeleteTransaction.executeDeleteTransaction(data);
+    return this.userDeleteTransaction.run(data);
+    // return this.userDeleteTransaction.executeDeleteTransaction(data);
   }
 }

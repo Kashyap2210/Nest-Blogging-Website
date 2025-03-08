@@ -11,6 +11,7 @@ import {
   IBlogEntityArray,
   IBlogLikesCounterEntity,
   IBlogResponse,
+  IBlogSearchDto,
   IBlogUpdateDto,
   ICommentEntity,
   IUserEntity,
@@ -343,7 +344,7 @@ export class BlogService extends EntityManagerBaseService<BlogEntity> {
   }
 
   async getBlogsByFilter(
-    filter: IEntityFilterData<IBlogEntity>,
+    filter: IBlogSearchDto,
     entityManager?: EntityManager,
   ): Promise<IBlogEntity[]> {
     console.log('this is the filter', filter);

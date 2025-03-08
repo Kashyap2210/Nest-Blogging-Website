@@ -1,10 +1,9 @@
 import { IsArray, IsOptional } from '@nestjs/class-validator';
 import { ApiProperty } from '@nestjs/swagger';
-import { IBlogEntity } from 'blog-common-1.0';
-import { IEntityFilterData } from 'blog-common-1.0/dist/generi.types';
+import { IBlogSearchDto } from 'blog-common-1.0';
 import { IsPositive } from 'class-validator';
 
-export class BlogSearchDto implements IEntityFilterData<IBlogEntity> {
+export class BlogSearchDto implements IBlogSearchDto {
   @IsOptional()
   @IsArray()
   @IsPositive({ each: true })

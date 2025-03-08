@@ -1,5 +1,5 @@
 import { forwardRef, Module } from '@nestjs/common';
-import { BlogDeleteTransaction } from '@src/blog/transactions/blog_delete_transaction';
+import { DeleteBlogWithinTransaction } from '@src/blog/transactions/blog_delete_transaction';
 import { DeleteUserWithinTransaction } from '@src/users/transactions/user_delete.transaction';
 import { BlogModule } from 'src/blog/blog.module';
 import { CommentsModule } from 'src/comments/comments.module';
@@ -22,7 +22,7 @@ import { LikesCounterBlogsService } from './services/likes-counter-blogs.service
     LikesCounterBlogRepository,
     CommentsService,
     CommentsRepository,
-    BlogDeleteTransaction,
+    DeleteBlogWithinTransaction,
     DeleteUserWithinTransaction,
   ],
   exports: [LikesCounterBlogsService, LikesCounterBlogRepository],

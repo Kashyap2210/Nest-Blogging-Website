@@ -12,7 +12,7 @@ import { BlogController } from './controllers/blog.controller';
 import { BlogEntity } from './entities/blog.entity';
 import { BlogRepository } from './repository/blogs.repository';
 import { BlogService } from './service/blog.service';
-import { BlogDeleteTransaction } from './transactions/blog_delete_transaction';
+import { DeleteBlogWithinTransaction } from './transactions/blog_delete_transaction';
 import { DeleteUserWithinTransaction } from '@src/users/transactions/user_delete.transaction';
 
 @Module({
@@ -31,7 +31,7 @@ import { DeleteUserWithinTransaction } from '@src/users/transactions/user_delete
     CommentsService,
     BlogRepository,
     DeleteUserWithinTransaction,
-    BlogDeleteTransaction,
+    DeleteBlogWithinTransaction,
   ],
   controllers: [BlogController],
   exports: [BlogService, BlogRepository],

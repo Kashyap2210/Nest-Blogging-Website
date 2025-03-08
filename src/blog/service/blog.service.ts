@@ -34,6 +34,7 @@ export class BlogService extends EntityManagerBaseService<BlogEntity> {
     @Inject(forwardRef(() => UsersService))
     private readonly userService: UsersService,
     private readonly likesCounterBlogsService: LikesCounterBlogsService,
+    @Inject(forwardRef(() => BlogDeleteTransaction))
     private readonly blogDeleteTransaction: BlogDeleteTransaction,
   ) {
     super();

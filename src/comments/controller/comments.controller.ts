@@ -10,6 +10,7 @@ import {
 } from '@nestjs/common';
 import {
   ApiBearerAuth,
+  ApiBody,
   ApiOkResponse,
   ApiOperation,
   ApiTags,
@@ -20,6 +21,8 @@ import { CurrentUser } from 'src/decorators/current_user.decorator';
 import { CreateCommentDto } from '../dto/create-comment.dto';
 import { UpdateCommentDto } from '../dto/update-comment.dto';
 import { CommentsService } from '../service/comments.service';
+import { IEntityFilterData } from 'blog-common-1.0/dist/generi.types';
+import { SearchCommentDto } from '../dto/search-comments.dto';
 
 @ApiTags('comments')
 @ApiBearerAuth('access-token')
@@ -55,6 +58,21 @@ export class CommentsController {
       updateCommentDto,
       currentUser,
     );
+  }
+
+  @ApiOperation({ summary: 'Get comments based on filter' })
+  @ApiOkResponse({
+    description: 'Get all searched comments',
+  })
+  @ApiBody({
+    type: SearchCommentDto,
+    description: 'Search comments using ISearchCommentDto',
+  })
+  @Post('search')
+  async searchByFilter(
+    @Body() filter: IEntityFilterData<ICommentEntity>,
+  ): Promise<ICommentEntity[]> {
+    return this.commentsService.getCommentsByFilter(filter);
   }
 
   @ApiOperation({ summary: 'Delete a comment' })

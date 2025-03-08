@@ -1,7 +1,7 @@
 import { forwardRef, Module } from '@nestjs/common';
 import { TypeOrmModule } from '@nestjs/typeorm';
-import { BlogDeleteTransaction } from '@src/blog/transactions/blog_delete_transaction';
-import { UserDeleteTransaction } from '@src/users/transactions/user_delete.transaction';
+import { DeleteBlogWithinTransaction } from '@src/blog/transactions/blog_delete_transaction';
+import { DeleteUserWithinTransaction } from '@src/users/transactions/user_delete.transaction';
 import { BlogModule } from 'src/blog/blog.module';
 import { BlogService } from 'src/blog/service/blog.service';
 import { LikesCounterBlogRepository } from 'src/likes-counter-blogs/repository/likes-counter-blogs.repository';
@@ -29,8 +29,8 @@ import { CommentsService } from './service/comments.service';
     CommentsRepository,
     LikesCounterBlogsService,
     LikesCounterBlogRepository,
-    UserDeleteTransaction,
-    BlogDeleteTransaction,
+    DeleteBlogWithinTransaction,
+    DeleteUserWithinTransaction,
   ],
   exports: [CommentsService, CommentsRepository],
 })

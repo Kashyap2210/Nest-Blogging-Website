@@ -181,7 +181,7 @@ export class CommentsService extends EntityManagerBaseService<CommentEntity> {
   async getCommentsByFilter(
     filter: IEntityFilterData<ICommentEntity>,
     entityManager?: EntityManager,
-  ) {
+  ): Promise<ICommentEntity[]> {
     return this.commentRepository.getByFilter(filter, entityManager);
   }
 

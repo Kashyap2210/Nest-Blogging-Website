@@ -12,8 +12,8 @@ import { BlogController } from './controllers/blog.controller';
 import { BlogEntity } from './entities/blog.entity';
 import { BlogRepository } from './repository/blogs.repository';
 import { BlogService } from './service/blog.service';
-import { UserDeleteTransaction } from '@src/users/transactions/user_delete.transaction';
 import { BlogDeleteTransaction } from './transactions/blog_delete_transaction';
+import { DeleteUserWithinTransaction } from '@src/users/transactions/user_delete.transaction';
 
 @Module({
   imports: [
@@ -30,7 +30,7 @@ import { BlogDeleteTransaction } from './transactions/blog_delete_transaction';
     LikesCounterBlogRepository,
     CommentsService,
     BlogRepository,
-    UserDeleteTransaction,
+    DeleteUserWithinTransaction,
     BlogDeleteTransaction,
   ],
   controllers: [BlogController],

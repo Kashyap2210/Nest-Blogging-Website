@@ -15,15 +15,15 @@ import {
   ICommentEntity,
   IUserEntity,
 } from 'blog-common-1.0';
+import { IEntityFilterData } from 'blog-common-1.0/dist/generi.types';
 import { CommentsService } from 'src/comments/service/comments.service';
 import { EntityManagerBaseService } from 'src/helpers/entity.repository';
 import { LikesCounterBlogsService } from 'src/likes-counter-blogs/services/likes-counter-blogs.service';
 import { EntityManager } from 'typeorm';
 import { BlogEntity } from '../entities/blog.entity';
 import { BlogRepository } from '../repository/blogs.repository';
-import { IEntityFilterData } from 'blog-common-1.0/dist/generi.types';
+import { DeleteBlogWithinTransaction } from '../transactions/blog_delete_transaction';
 import { IBlogDeleteData } from '../transactions/interfaces/blog_entity_delete_transaction.interface';
-import { BlogDeleteTransaction } from '../transactions/blog_delete_transaction';
 
 @Injectable()
 export class BlogService extends EntityManagerBaseService<BlogEntity> {
@@ -34,8 +34,7 @@ export class BlogService extends EntityManagerBaseService<BlogEntity> {
     @Inject(forwardRef(() => UsersService))
     private readonly userService: UsersService,
     private readonly likesCounterBlogsService: LikesCounterBlogsService,
-    @Inject(forwardRef(() => BlogDeleteTransaction))
-    private readonly blogDeleteTransaction: BlogDeleteTransaction,
+    private readonly DeleteBlogWithinTransaction: DeleteBlogWithinTransaction,
   ) {
     super();
   }
@@ -332,7 +331,9 @@ export class BlogService extends EntityManagerBaseService<BlogEntity> {
       commentIds: commentIdsOnBlog,
       likeDislikeEntityIds: likeAndDislikeIds,
     };
-    return this.blogDeleteTransaction.executeDeleteTransaction(data);
+
+    // return this.
+    return this.DeleteBlogWithinTransaction.run(data);
 
     // return this.blogRepository.deleteById(id);
   }

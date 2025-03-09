@@ -16,7 +16,6 @@ import {
   ICommentEntity,
   IUserEntity,
 } from 'blog-common-1.0';
-import { IEntityFilterData } from 'blog-common-1.0/dist/generi.types';
 import { CommentsService } from 'src/comments/service/comments.service';
 import { EntityManagerBaseService } from 'src/helpers/entity.repository';
 import { LikesCounterBlogsService } from 'src/likes-counter-blogs/services/likes-counter-blogs.service';
@@ -48,26 +47,7 @@ export class BlogService extends EntityManagerBaseService<BlogEntity> {
     currentUser: IUserEntity,
     entityManager?: EntityManager,
   ): Promise<IBlogEntity> {
-    if (!currentUser) {
-      throw new BadRequestException({
-        key: 'currentUser',
-        message: 'current user is not logged in',
-      });
-    }
-
-    //Check if blog with same title exists
-    const existingBlogs: IBlogEntity[] = await this.blogRepository.getByFilter(
-      {
-        title: [dto.title],
-      },
-      entityManager,
-    );
-    if (existingBlogs.length > 0) {
-      throw new BadRequestException({
-        key: 'title',
-        message: 'Blog with this title already exists',
-      });
-    }
+    await this.validateCreateDtoDetails(currentUser, dto, entityManager);
 
     const blog: IBlogEntity = await this.blogRepository.getInstance(
       dto,
@@ -161,19 +141,12 @@ export class BlogService extends EntityManagerBaseService<BlogEntity> {
     currentUser: IUserEntity,
     entityManager?: EntityManager,
   ): Promise<IBlogResponse> {
-    if (!currentUser) {
-      throw new BadRequestException({
-        key: 'currentUser',
-        message: 'current user is not logged in',
-      });
-    }
-    const [blogById]: IBlogEntity[] =
-      await this.blogRepository.validatePresence(
-        'id',
-        [id],
-        'id',
-        entityManager,
-      );
+    const blogById: IBlogEntity = await this.getBlogByIdValidations(
+      id,
+      currentUser,
+      entityManager,
+    );
+
     let blogResponseEntities: {
       blogComments: ICommentEntity[];
       blogLikesAndDislikes: IBlogLikesCounterEntity[];
@@ -231,41 +204,12 @@ export class BlogService extends EntityManagerBaseService<BlogEntity> {
     currentUser: IUserEntity,
     entityManager?: EntityManager,
   ): Promise<IBlogEntity> {
-    if (!currentUser) {
-      throw new BadRequestException({
-        key: 'currentUser',
-        message: 'current user is not logged in',
-      });
-    }
-    const [blogEntityById]: IBlogEntity[] =
-      await this.blogRepository.validatePresence(
-        'id',
-        [id],
-        'id',
-        entityManager,
-      );
-    if (
-      currentUser.id !== blogEntityById.createdBy &&
-      currentUser.role !== 'TOAA'
-    ) {
-      throw new BadRequestException({
-        key: 'id | role',
-        message:
-          'current user did not create this blog or does not have permission to update this blog',
-      });
-    }
-    const blogFromDtoTitle: IBlogEntity[] =
-      await this.blogRepository.getByFilter({
-        title: [dto.title],
-      });
-
-    if (blogFromDtoTitle.length > 0 && blogFromDtoTitle[0].id !== id) {
-      throw new BadRequestException({
-        key: 'Already exists',
-        message: 'Blog with this title already exists',
-      });
-    }
-
+    const blogEntityById: IBlogEntity = await this.validateUpdateDtoDetails(
+      id,
+      currentUser,
+      dto,
+      entityManager,
+    );
     const updatedBlog: IBlogEntity = {
       ...blogEntityById,
       ...dto,
@@ -282,29 +226,7 @@ export class BlogService extends EntityManagerBaseService<BlogEntity> {
     currentUser: IUserEntity,
     entityManager?: EntityManager,
   ): Promise<boolean> {
-    if (!currentUser) {
-      throw new BadRequestException({
-        key: 'currentUser',
-        message: 'current user is not logged in',
-      });
-    }
-
-    const [blogToBeDeleted]: IBlogEntity[] =
-      await this.blogRepository.validatePresence(
-        'id',
-        [id],
-        'id',
-        entityManager,
-      );
-    if (
-      blogToBeDeleted.createdBy !== currentUser.id &&
-      currentUser.role !== 'TOAA'
-    ) {
-      throw new BadRequestException({
-        key: 'user.id',
-        message: 'Current user cannot delete this blog',
-      });
-    }
+    await this.validateBlogDeleteDetails(currentUser, id, entityManager);
 
     //finding comments on the blog with id:id
     const commentIdsOnBlog: number[] = (
@@ -405,5 +327,127 @@ export class BlogService extends EntityManagerBaseService<BlogEntity> {
     );
     // console.log("this is the updated blog", updatedBlog)
     return updatedBlog;
+  }
+
+  private async validateCreateDtoDetails(
+    currentUser: IUserEntity,
+    dto: IBlogCreateDto,
+    entityManager: EntityManager,
+  ) {
+    if (!currentUser) {
+      throw new BadRequestException({
+        key: 'currentUser',
+        message: 'current user is not logged in',
+      });
+    }
+
+    //Check if blog with same title exists
+    const existingBlogs: IBlogEntity[] = await this.blogRepository.getByFilter(
+      {
+        title: [dto.title],
+      },
+      entityManager,
+    );
+    if (existingBlogs.length > 0) {
+      throw new BadRequestException({
+        key: 'title',
+        message: 'Blog with this title already exists',
+      });
+    }
+  }
+
+  private async getBlogByIdValidations(
+    blogId: number,
+    currentUser: IUserEntity,
+    entityManager?: EntityManager,
+  ): Promise<IBlogEntity> {
+    if (!currentUser) {
+      throw new BadRequestException({
+        key: 'currentUser',
+        message: 'current user is not logged in',
+      });
+    }
+    const [blogById]: IBlogEntity[] =
+      await this.blogRepository.validatePresence(
+        'blogId',
+        [blogId],
+        'blogId',
+        entityManager,
+      );
+
+    return blogById;
+  }
+
+  private async validateUpdateDtoDetails(
+    blogId: number,
+    currentUser: IUserEntity,
+    dto: IBlogUpdateDto,
+    entityManager?: EntityManager,
+  ): Promise<IBlogEntity> {
+    if (!currentUser) {
+      throw new BadRequestException({
+        key: 'currentUser',
+        message: 'current user is not logged in',
+      });
+    }
+    const [blogEntityById]: IBlogEntity[] =
+      await this.blogRepository.validatePresence(
+        'blogId',
+        [blogId],
+        'blogId',
+        entityManager,
+      );
+    if (
+      currentUser.id !== blogEntityById.createdBy &&
+      currentUser.role !== 'TOAA'
+    ) {
+      throw new BadRequestException({
+        key: 'id | role',
+        message:
+          'current user did not create this blog or does not have permission to update this blog',
+      });
+    }
+    const blogFromDtoTitle: IBlogEntity[] =
+      await this.blogRepository.getByFilter({
+        title: [dto.title],
+      });
+
+    if (blogFromDtoTitle.length > 0 && blogFromDtoTitle[0].id !== blogId) {
+      throw new BadRequestException({
+        key: 'Already exists',
+        message: 'Blog with this title already exists',
+      });
+    }
+    return blogEntityById;
+  }
+
+  private async validateBlogDeleteDetails(
+    currentUser: IUserEntity,
+    id: number,
+    entityManager: EntityManager,
+  ) {
+    if (!currentUser) {
+      throw new BadRequestException({
+        key: 'currentUser',
+        message: 'current user is not logged in',
+      });
+    }
+
+    const [blogToBeDeleted]: IBlogEntity[] =
+      await this.blogRepository.validatePresence(
+        'id',
+        [id],
+        'id',
+        entityManager,
+      );
+    if (
+      blogToBeDeleted.createdBy !== currentUser.id &&
+      currentUser.role !== 'TOAA'
+    ) {
+      throw new BadRequestException({
+        key: 'user.id',
+        message: 'Current user cannot delete this blog',
+      });
+    }
   }
 }

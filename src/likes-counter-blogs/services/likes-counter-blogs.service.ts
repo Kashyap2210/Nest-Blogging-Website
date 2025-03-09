@@ -9,13 +9,13 @@ import {
   IUserEntity,
   LikeStatus,
 } from 'blog-common-1.0';
+import { IEntityFilterData } from 'blog-common-1.0/dist/generi.types';
 import { BlogService } from 'src/blog/service/blog.service';
 import { EntityManagerBaseService } from 'src/helpers/entity.repository';
 import { EntityManager } from 'typeorm';
 import { CreateLikesCounterBlogDto } from '../dto/create-blog-likes.dto';
 import { BlogLikesCounterEntity } from '../entities/likes-counter-blog.entity';
 import { LikesCounterBlogRepository } from '../repository/likes-counter-blogs.repository';
-import { IEntityFilterData } from 'blog-common-1.0/dist/generi.types';
 
 @Injectable()
 export class LikesCounterBlogsService extends EntityManagerBaseService<IBlogLikesCounterEntity> {
@@ -36,31 +36,7 @@ export class LikesCounterBlogsService extends EntityManagerBaseService<IBlogLike
     currentUser: IUserEntity,
     entityManager?: EntityManager,
   ): Promise<IBlogLikesCounterEntity> {
-    if (!currentUser) {
-      throw new BadRequestException({
-        key: 'currentUser',
-        message: 'current user is not logged in',
-      });
-    }
-
-    //Check to see if blog exists
-    await this.blogService.checkBlogPresence(dto.blogId, entityManager);
-
-    const existingLikeOrDislikeByUser: IBlogLikesCounterEntity[] =
-      await this.likesCounterBlogRepository.getByFilter(
-        {
-          blogId: dto.blogId,
-          createdBy: currentUser.id,
-        },
-        entityManager,
-      );
-    // console.log('this is the like/dislike entity', existingLikeOrDislikeByUser);
-    if (existingLikeOrDislikeByUser.length > 0) {
-      throw new BadRequestException({
-        key: `${existingLikeOrDislikeByUser[0].likedStatus === LikeStatus.LIKED ? 'liked' : 'disliked'}`,
-        message: `Current user has already ${existingLikeOrDislikeByUser[0].likedStatus === LikeStatus.LIKED ? 'liked' : 'disliked'} this blog`,
-      });
-    }
+    await this.validateCreateDtoDetails(currentUser, dto, entityManager);
 
     const newLikeDislikeEntityInstance: IBlogLikesCounterEntity =
       await this.likesCounterBlogRepository.getInstance(
@@ -82,14 +58,7 @@ export class LikesCounterBlogsService extends EntityManagerBaseService<IBlogLike
     currentUser: IUserEntity,
     entityManager?: EntityManager,
   ): Promise<void> {
-    if (!currentUser) {
-      throw new BadRequestException({
-        key: 'currentUser',
-        message: 'current user is not logged in',
-      });
-    }
-    //Check to see if blog exists
-    await this.blogService.checkBlogPresence(blogId, entityManager);
+    await this.validateUpdateDtoDetails(currentUser, blogId, entityManager);
 
     const [existingLikeOrDislikeByUser]: IBlogLikesCounterEntity[] =
       await this.likesCounterBlogRepository.getByFilter(
@@ -138,5 +107,52 @@ export class LikesCounterBlogsService extends EntityManagerBaseService<IBlogLike
     entityManager?: EntityManager,
   ) {
     return this.likesCounterBlogRepository.deleteMany(ids, entityManager);
+  }
+
+  private async validateCreateDtoDetails(
+    currentUser: IUserEntity,
+    dto: CreateLikesCounterBlogDto,
+    entityManager: EntityManager,
+  ) {
+    if (!currentUser) {
+      throw new BadRequestException({
+        key: 'currentUser',
+        message: 'current user is not logged in',
+      });
+    }
+
+    //Check to see if blog exists
+    await this.blogService.checkBlogPresence(dto.blogId, entityManager);
+
+    const existingLikeOrDislikeByUser: IBlogLikesCounterEntity[] =
+      await this.likesCounterBlogRepository.getByFilter(
+        {
+          blogId: dto.blogId,
+          createdBy: currentUser.id,
+        },
+        entityManager,
+      );
+    // console.log('this is the like/dislike entity', existingLikeOrDislikeByUser);
+    if (existingLikeOrDislikeByUser.length > 0) {
+      throw new BadRequestException({
+        key: `${existingLikeOrDislikeByUser[0].likedStatus === LikeStatus.LIKED ? 'liked' : 'disliked'}`,
+        message: `Current user has already ${existingLikeOrDislikeByUser[0].likedStatus === LikeStatus.LIKED ? 'liked' : 'disliked'} this blog`,
+      });
+    }
+  }
+
+  private async validateUpdateDtoDetails(
+    currentUser: IUserEntity,
+    blogId: number,
+    entityManager: EntityManager,
+  ) {
+    if (!currentUser) {
+      throw new BadRequestException({
+        key: 'currentUser',
+        message: 'current user is not logged in',
+      });
+    }
+    //Check to see if blog exists
+    await this.blogService.checkBlogPresence(blogId, entityManager);
   }
 }

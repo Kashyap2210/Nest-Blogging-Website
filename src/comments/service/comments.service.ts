@@ -5,17 +5,18 @@ import {
   Injectable,
 } from '@nestjs/common';
 import {
+  ICommentCreateDto,
   ICommentEntity,
   ICommentUpdateDto,
   IUserEntity,
 } from 'blog-common-1.0';
+import { IEntityFilterData } from 'blog-common-1.0/dist/generi.types';
 import { BlogService } from 'src/blog/service/blog.service';
 import { EntityManagerBaseService } from 'src/helpers/entity.repository';
 import { EntityManager } from 'typeorm';
 import { CreateCommentDto } from '../dto/create-comment.dto';
 import { CommentEntity } from '../entities/comment.entity';
 import { CommentsRepository } from '../repository/comments.repository';
-import { IEntityFilterData } from 'blog-common-1.0/dist/generi.types';
 
 @Injectable()
 export class CommentsService extends EntityManagerBaseService<CommentEntity> {
@@ -36,41 +37,12 @@ export class CommentsService extends EntityManagerBaseService<CommentEntity> {
     currentUser: IUserEntity,
     entityManager?: EntityManager,
   ): Promise<ICommentEntity> {
-    if (!currentUser) {
-      throw new BadRequestException({
-        key: 'currentUser',
-        message: 'current user is not logged in',
-      });
-    }
-
-    if (createCommentDto.text.trim().length === 0) {
-      throw new BadRequestException({
-        key: 'text',
-        message: 'Comment cannot be empty',
-      });
-    }
-    // check to if blog exists, if yes then code proceeds
-    await this.blogService.checkBlogPresence(
-      createCommentDto.blogId,
+    await this.validateCreateCommentDetails(
+      currentUser,
+      createCommentDto,
       entityManager,
     );
 
-    if (createCommentDto.isReplyComment) {
-      if (!createCommentDto.replyCommentId) {
-        throw new BadRequestException({
-          key: 'replyCommentId',
-          message: 'reply comment id must be present',
-        });
-      }
-
-      // Check to see if parent comment exists
-      await this.commentRepository.validatePresence(
-        'id',
-        [createCommentDto.replyCommentId],
-        'id',
-        entityManager,
-      );
-    }
     const comment: ICommentEntity = await this.commentRepository.getInstance(
       createCommentDto,
       entityManager,
@@ -85,30 +57,13 @@ export class CommentsService extends EntityManagerBaseService<CommentEntity> {
     currentUser: IUserEntity,
     entityManager?: EntityManager,
   ): Promise<ICommentEntity> {
-    if (!currentUser) {
-      throw new BadRequestException({
-        key: 'currentUser',
-        message: 'current user is not logged in',
-      });
-    }
-    const [commentToUpdate]: ICommentEntity[] =
-      await this.commentRepository.validatePresence(
-        'id',
-        [id],
-        'id',
-        entityManager,
-      );
-    if (
-      commentToUpdate.createdBy !== currentUser.id &&
-      currentUser.role !== 'TOAA'
-    ) {
-      throw new BadRequestException({
-        key: 'user.id',
-        message: 'Current user cannot update this comment',
-      });
-    }
+    const existingComment = await this.validateUpdateCommentDtoDetails(
+      currentUser,
+      id,
+      entityManager,
+    );
     const updatedComment: ICommentEntity = {
-      ...commentToUpdate,
+      ...existingComment,
       ...dto,
       updatedBy: currentUser.id,
       updatedOn: new Date(),
@@ -121,28 +76,8 @@ export class CommentsService extends EntityManagerBaseService<CommentEntity> {
     currentUser: IUserEntity,
     entityManager?: EntityManager,
   ): Promise<boolean> {
-    if (!currentUser) {
-      throw new BadRequestException({
-        key: 'currentUser',
-        message: 'current user is not logged in',
-      });
-    }
-    const [commentToDelete]: ICommentEntity[] =
-      await this.commentRepository.validatePresence(
-        'id',
-        [id],
-        'id',
-        entityManager,
-      );
-    if (
-      commentToDelete.createdBy !== currentUser.id &&
-      currentUser.role !== 'TOAA'
-    ) {
-      throw new BadRequestException({
-        key: 'user.id',
-        message: 'Current user cannot delete this comment',
-      });
-    }
+    await this.validateRemoveCommentDetails(id, currentUser, entityManager);
+
     const allComments = async (parentCommentId: number): Promise<number[]> => {
       const replies: ICommentEntity[] =
         await this.commentRepository.getByFilter(
@@ -224,5 +159,104 @@ export class CommentsService extends EntityManagerBaseService<CommentEntity> {
 
   async deleteManyComments(ids: number[], entityManager?: EntityManager) {
     return this.commentRepository.deleteMany(ids, entityManager);
+  }
+
+  private async validateCreateCommentDetails(
+    currentUser: IUserEntity,
+    dto: ICommentCreateDto,
+    entityManager?: EntityManager,
+  ): Promise<void> {
+    if (!currentUser) {
+      throw new BadRequestException({
+        key: 'currentUser',
+        message: 'current user is not logged in',
+      });
+    }
+
+    if (dto.text.trim().length === 0) {
+      throw new BadRequestException({
+        key: 'text',
+        message: 'Comment cannot be empty',
+      });
+    }
+    // check to if blog exists, if yes then code proceeds
+    await this.blogService.checkBlogPresence(dto.blogId, entityManager);
+
+    if (dto.isReplyComment) {
+      if (!dto.replyCommentId) {
+        throw new BadRequestException({
+          key: 'replyCommentId',
+          message: 'reply comment id must be present',
+        });
+      }
+
+      // Check to see if parent comment exists
+      await this.commentRepository.validatePresence(
+        'id',
+        [dto.replyCommentId],
+        'id',
+        entityManager,
+      );
+    }
+  }
+
+  private async validateUpdateCommentDtoDetails(
+    currentUser: IUserEntity,
+    commentId: number,
+    entityManager?: EntityManager,
+  ): Promise<ICommentEntity> {
+    if (!currentUser) {
+      throw new BadRequestException({
+        key: 'currentUser',
+        message: 'current user is not logged in',
+      });
+    }
+    const [commentToUpdate]: ICommentEntity[] =
+      await this.commentRepository.validatePresence(
+        'commentId',
+        [commentId],
+        'commentId',
+        entityManager,
+      );
+    if (
+      commentToUpdate.createdBy !== currentUser.id &&
+      currentUser.role !== 'TOAA'
+    ) {
+      throw new BadRequestException({
+        key: 'user.id',
+        message: 'Current user cannot update this comment',
+      });
+    }
+    return commentToUpdate;
+  }
+
+  private async validateRemoveCommentDetails(
+    commentId: number,
+    currentUser: IUserEntity,
+    entityManager?: EntityManager,
+  ): Promise<ICommentEntity> {
+    if (!currentUser) {
+      throw new BadRequestException({
+        key: 'currentUser',
+        message: 'current user is not logged in',
+      });
+    }
+    const [commentToDelete]: ICommentEntity[] =
+      await this.commentRepository.validatePresence(
+        'commentId',
+        [commentId],
+        'commentId',
+        entityManager,
+      );
+    if (
+      commentToDelete.createdBy !== currentUser.id &&
+      currentUser.role !== 'TOAA'
+    ) {
+      throw new BadRequestException({
+        key: 'user.id',
+        message: 'Current user cannot delete this comment',
+      });
+    }
+    return commentToDelete;
   }
 }

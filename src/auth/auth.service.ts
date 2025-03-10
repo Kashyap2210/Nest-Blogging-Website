@@ -1,4 +1,8 @@
-import { Injectable, UnauthorizedException } from '@nestjs/common';
+import {
+  BadRequestException,
+  Injectable,
+  UnauthorizedException,
+} from '@nestjs/common';
 import { JwtService } from '@nestjs/jwt';
 import * as bcrypt from 'bcrypt';
 import { IUserEntity, IUserLoginResponse, IUserSignDto } from 'blog-common-1.0';
@@ -22,23 +26,28 @@ export class AuthService {
       await this.usersService.findUserByUserName(username);
     // console.log('this is the user from auth service', user);
     if (!user) {
-      throw new UnauthorizedException('Invalid username or password');
+      throw new UnauthorizedException('Invalid username');
     }
     const isMatch: boolean = await bcrypt.compare(password, user.password);
-    if (isMatch) {
-      const payload: IJwtPayload = {
-        username: user.username,
-        userId: user.id,
-      };
-
-      delete user['password'];
-      const thisAccessToken: string = this.jwtService.sign(payload);
-      // console.log('this is the access token', thisAccessToken);
-      const response: IUserLoginResponse = {
-        accessToken: thisAccessToken,
-        user: user,
-      };
-      return response;
+    if (!isMatch) {
+      throw new BadRequestException({
+        key: 'Password',
+        message: 'Password does not match for current user',
+      });
     }
+
+    const payload: IJwtPayload = {
+      username: user.username,
+      userId: user.id,
+    };
+
+    delete user['password'];
+    const thisAccessToken: string = this.jwtService.sign(payload);
+    // console.log('this is the access token', thisAccessToken);
+    const response: IUserLoginResponse = {
+      accessToken: thisAccessToken,
+      user: user,
+    };
+    return response;
   }
 }

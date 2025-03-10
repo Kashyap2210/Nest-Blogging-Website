@@ -270,7 +270,7 @@ export class UsersService extends EntityManagerBaseService<UserEntity> {
     }
     const [existingUser]: IUserEntity[] =
       await this.userRepository.validatePresence(
-        'userId',
+        'id',
         [userId],
         'userId',
         entityManager,

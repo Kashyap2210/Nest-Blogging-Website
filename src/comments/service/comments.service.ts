@@ -213,7 +213,7 @@ export class CommentsService extends EntityManagerBaseService<CommentEntity> {
     }
     const [commentToUpdate]: ICommentEntity[] =
       await this.commentRepository.validatePresence(
-        'commentId',
+        'id',
         [commentId],
         'commentId',
         entityManager,
@@ -243,7 +243,7 @@ export class CommentsService extends EntityManagerBaseService<CommentEntity> {
     }
     const [commentToDelete]: ICommentEntity[] =
       await this.commentRepository.validatePresence(
-        'commentId',
+        'id',
         [commentId],
         'commentId',
         entityManager,

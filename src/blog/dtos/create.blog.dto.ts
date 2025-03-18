@@ -1,9 +1,10 @@
-import { IsString } from "@nestjs/class-validator";
-import { ApiProperty } from "@nestjs/swagger";
+import { IsString, MinLength } from '@nestjs/class-validator';
+import { ApiProperty } from '@nestjs/swagger';
 import { IBlogCreateDto } from 'blog-common-1.0';
 
 export class CreateBlogDto implements IBlogCreateDto {
   @IsString()
+  @MinLength(3)
   @ApiProperty({
     description: 'title of blog',
     example: 'How to install Node.js',
@@ -20,6 +21,7 @@ export class CreateBlogDto implements IBlogCreateDto {
   keywords: string;
 
   @IsString()
+  @MinLength(3)
   @ApiProperty({
     description: 'Content of blog',
     example: 'In this blog we will learn how to install node js...',

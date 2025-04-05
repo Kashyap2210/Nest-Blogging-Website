@@ -392,9 +392,9 @@ export class BlogService extends EntityManagerBaseService<BlogEntity> {
     }
     const [blogEntityById]: IBlogEntity[] =
       await this.blogRepository.validatePresence(
-        'blogId',
+        'id',
         [blogId],
-        'blogId',
+        'id',
         entityManager,
       );
     if (

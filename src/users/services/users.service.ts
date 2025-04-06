@@ -122,7 +122,6 @@ export class UsersService extends EntityManagerBaseService<UserEntity> {
       'id',
       entityManager,
     );
-    console.log('this is the user entity', userEntity);
 
     const blogEntitites = await this.blogService.getBlogsByFilter(
       {
@@ -130,7 +129,6 @@ export class UsersService extends EntityManagerBaseService<UserEntity> {
       },
       entityManager,
     );
-    console.log('this is the blog entity', blogEntitites);
 
     const response = {
       ...userEntity,

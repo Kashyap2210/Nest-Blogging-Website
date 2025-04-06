@@ -189,6 +189,21 @@ export class UsersController {
     return this.usersService.getUserById(id, currentUser);
   }
 
+  @ApiOperation({ summary: 'Get a user' })
+  @ApiOkResponse({
+    description:
+      'User returned with specific id & type IUserEntity. Use this API to decorate the profile page.',
+  })
+  @ApiBearerAuth('access-token')
+  @UseGuards(AuthGuard)
+  @Post('/search-user-profile/:id')
+  async getUserProfile(
+    @Param('id', ParseIntPipe) id: number,
+    @CurrentUser() currentUser: IUserEntity,
+  ): Promise<any> {
+    return this.usersService.getUserProfile(id, currentUser);
+  }
+
   @ApiBearerAuth('access-token')
   @UseGuards(AuthGuard)
   @ApiOperation({ summary: 'Delete a user' })

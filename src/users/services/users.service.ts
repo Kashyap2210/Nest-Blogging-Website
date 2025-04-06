@@ -103,6 +103,42 @@ export class UsersService extends EntityManagerBaseService<UserEntity> {
     return userById;
   }
 
+  async getUserProfile(
+    id: number,
+    currentUser: IUserEntity,
+    entityManager?: EntityManager,
+  ): Promise<any> {
+    // Replace this with IUserResponse
+    if (!currentUser) {
+      throw new BadRequestException({
+        key: 'currentUser',
+        message: 'current user is not logged in',
+      });
+    }
+
+    const [userEntity] = await this.validatePresence(
+      'id',
+      [id],
+      'id',
+      entityManager,
+    );
+    console.log('this is the user entity', userEntity);
+
+    const blogEntitites = await this.blogService.getBlogsByFilter(
+      {
+        createdBy: [id],
+      },
+      entityManager,
+    );
+    console.log('this is the blog entity', blogEntitites);
+
+    const response = {
+      ...userEntity,
+      blogs: blogEntitites,
+    };
+    return response;
+  }
+
   async getUserByFilter(
     filter: IBlogEntitySearchDto,
     entityManager?: EntityManager,

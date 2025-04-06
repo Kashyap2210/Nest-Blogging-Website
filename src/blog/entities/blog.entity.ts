@@ -13,7 +13,7 @@ export class BlogEntity extends AuditColumnEntity implements IBlogEntity {
   @Column({ type: 'varchar', length: 500, nullable: true })
   keywords: string;
 
-  @Column({ type: 'varchar', length: 10000 })
+  @Column({ type: 'text' })
   content: string;
 
   @Column({ type: 'varchar', length: 256 })

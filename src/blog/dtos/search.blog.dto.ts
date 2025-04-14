@@ -1,4 +1,4 @@
-import { IsArray, IsOptional } from '@nestjs/class-validator';
+import { IsArray, IsOptional, IsString } from '@nestjs/class-validator';
 import { ApiProperty } from '@nestjs/swagger';
 import { IBlogSearchDto } from 'blog-common-1.0';
 import { IsPositive } from 'class-validator';
@@ -10,7 +10,7 @@ export class BlogSearchDto implements IBlogSearchDto {
   @ApiProperty({
     name: 'createdBy',
     description: 'Id of the user whose blog you want to find',
-    type: [Number],
+    type: Array<Number>,
     example: [4],
   })
   createdBy?: number[];
@@ -21,8 +21,18 @@ export class BlogSearchDto implements IBlogSearchDto {
   @ApiProperty({
     name: 'id',
     description: 'Id of the blog you want to find',
-    type: [Number],
+    type: Array<Number>,
     example: [4],
   })
   id?: number[];
+
+  @IsOptional()
+  @IsArray()
+  @IsString({ each: true })
+  @ApiProperty({
+    type: Array<String>,
+    example: 'Formula 1',
+    required: false,
+  })
+  title?: string[];
 }

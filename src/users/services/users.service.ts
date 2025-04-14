@@ -127,6 +127,7 @@ export class UsersService extends EntityManagerBaseService<UserEntity> {
       {
         createdBy: [id],
       },
+      currentUser,
       entityManager,
     );
 

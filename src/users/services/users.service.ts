@@ -134,7 +134,7 @@ export class UsersService extends EntityManagerBaseService<UserEntity> {
 
     const response: IUserProfileResponse = {
       userDetail: userEntity,
-      blogsOfUsers: blogEntitites,
+      blogsOfUser: blogEntitites,
     };
     return response;
   }

@@ -12,6 +12,7 @@ import {
   IUserCreateDto,
   IUserEntity,
   IUserEntityArray,
+  IUserProfileResponse,
   IUserUpdateDto,
 } from 'blog-common-1.0';
 import { BlogService } from 'src/blog/service/blog.service';
@@ -131,9 +132,9 @@ export class UsersService extends EntityManagerBaseService<UserEntity> {
       entityManager,
     );
 
-    const response = {
-      ...userEntity,
-      blogs: blogEntitites,
+    const response: IUserProfileResponse = {
+      userDetail: userEntity,
+      blogsOfUsers: blogEntitites,
     };
     return response;
   }

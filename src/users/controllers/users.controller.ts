@@ -21,7 +21,12 @@ import {
   ApiOkResponse,
   ApiOperation,
 } from '@nestjs/swagger';
-import { IUserCreateDto, IUserEntity, IUserEntityArray } from 'blog-common-1.0';
+import {
+  IUserCreateDto,
+  IUserEntity,
+  IUserEntityArray,
+  IUserProfileResponse,
+} from 'blog-common-1.0';
 import { diskStorage } from 'multer';
 import { AuthGuard } from 'src/auth/auth.guard';
 import { CurrentUser } from 'src/decorators/current_user.decorator';
@@ -200,7 +205,7 @@ export class UsersController {
   async getUserProfile(
     @Param('id', ParseIntPipe) id: number,
     @CurrentUser() currentUser: IUserEntity,
-  ): Promise<any> {
+  ): Promise<IUserProfileResponse> {
     return this.usersService.getUserProfile(id, currentUser);
   }
 

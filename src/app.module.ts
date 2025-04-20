@@ -7,6 +7,7 @@ import { DatabaseModule } from './database/database.module';
 import { UsersModule } from './users/users.module';
 import { CommentsModule } from './comments/comments.module';
 import { LikesCounterBlogsModule } from './likes-counter-blogs/likes-counter-blogs.module';
+import { CacheModule } from '@nestjs/cache-manager';
 
 @Module({
   imports: [
@@ -26,6 +27,9 @@ import { LikesCounterBlogsModule } from './likes-counter-blogs/likes-counter-blo
     AuthModule,
     CommentsModule,
     LikesCounterBlogsModule,
+    CacheModule.register({
+      isGlobal: true,
+    }),
   ],
 })
 export class AppModule {}

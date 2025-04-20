@@ -13,6 +13,7 @@ import { CommentsController } from './controller/comments.controller';
 import { CommentEntity } from './entities/comment.entity';
 import { CommentsRepository } from './repository/comments.repository';
 import { CommentsService } from './service/comments.service';
+import { BlogCacheService } from '@src/blog/service/blog.cache.service';
 
 @Module({
   imports: [
@@ -26,6 +27,7 @@ import { CommentsService } from './service/comments.service';
     UsersService,
     UsersRepository,
     BlogService,
+    BlogCacheService,
     CommentsRepository,
     LikesCounterBlogsService,
     LikesCounterBlogRepository,

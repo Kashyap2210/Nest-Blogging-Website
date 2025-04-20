@@ -1,3 +1,4 @@
+import { CACHE_MANAGER } from '@nestjs/cache-manager';
 import {
   BadRequestException,
   forwardRef,
@@ -16,6 +17,7 @@ import {
   ICommentEntity,
   IUserEntity,
 } from 'blog-common-1.0';
+import { Cache } from 'cache-manager';
 import { CommentsService } from 'src/comments/service/comments.service';
 import { EntityManagerBaseService } from 'src/helpers/entity.repository';
 import { LikesCounterBlogsService } from 'src/likes-counter-blogs/services/likes-counter-blogs.service';
@@ -24,11 +26,14 @@ import { BlogEntity } from '../entities/blog.entity';
 import { BlogRepository } from '../repository/blogs.repository';
 import { DeleteBlogWithinTransaction } from '../transactions/blog_delete_transaction';
 import { IBlogDeleteData } from '../transactions/interfaces/blog_entity_delete_transaction.interface';
+import { BlogCacheService } from './blog.cache.service';
 
 @Injectable()
 export class BlogService extends EntityManagerBaseService<BlogEntity> {
   constructor(
     private readonly blogRepository: BlogRepository,
+    @Inject(forwardRef(() => BlogCacheService))
+    private readonly blogCacheService: BlogCacheService,
     @Inject(forwardRef(() => CommentsService))
     private readonly commentsService: CommentsService,
     @Inject(forwardRef(() => UsersService))
@@ -76,6 +81,11 @@ export class BlogService extends EntityManagerBaseService<BlogEntity> {
     //     message: 'Current user does not have permission to access all blogs',
     //   });
     // }
+    const cachedBlogs = await this.blogCacheService.getAllBlogsCached();
+    // console.log('this is the cached blogs', cachedBlogs);
+    if (cachedBlogs && cachedBlogs.length > 0) {
+      return cachedBlogs;
+    }
 
     const allBlogs: IBlogEntityArray = await this.blogRepository.getByFilter(
       {},
@@ -93,7 +103,7 @@ export class BlogService extends EntityManagerBaseService<BlogEntity> {
 
     const allCommentEntities = await this.commentsService.getByFilter(
       {
-        blogId: [allBlogs.map((blog) => blog.id)],
+        blogId: allBlogs.map((blog) => blog.id),
       },
       entityManager,
     );
@@ -132,6 +142,9 @@ export class BlogService extends EntityManagerBaseService<BlogEntity> {
         };
       }
     });
+    if (response.length > 0) {
+      await this.blogCacheService.setAllBlogsInCash(response);
+    }
 
     return response;
   }

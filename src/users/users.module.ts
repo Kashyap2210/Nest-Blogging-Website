@@ -13,6 +13,7 @@ import { UsersRepository } from './repository/users.repository';
 import { UsersService } from './services/users.service';
 import { DeleteBlogWithinTransaction } from '@src/blog/transactions/blog_delete_transaction';
 import { DeleteUserWithinTransaction } from './transactions/user_delete.transaction';
+import { BlogCacheService } from '@src/blog/service/blog.cache.service';
 
 @Module({
   imports: [
@@ -25,6 +26,7 @@ import { DeleteUserWithinTransaction } from './transactions/user_delete.transact
     UsersService,
     UsersRepository,
     BlogService,
+    BlogCacheService,
     CommentsService,
     CommentsRepository,
     LikesCounterBlogsService,

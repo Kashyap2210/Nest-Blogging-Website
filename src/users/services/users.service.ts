@@ -108,7 +108,7 @@ export class UsersService extends EntityManagerBaseService<UserEntity> {
     id: number,
     currentUser: IUserEntity,
     entityManager?: EntityManager,
-  ): Promise<any> {
+  ): Promise<IUserProfileResponse> {
     // Replace this with IUserResponse
     if (!currentUser) {
       throw new BadRequestException({

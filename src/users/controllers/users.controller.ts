@@ -201,7 +201,7 @@ export class UsersController {
   })
   @ApiBearerAuth('access-token')
   @UseGuards(AuthGuard)
-  @Post('/search-user-profile/:id')
+  @Get('/search-user-profile/:id')
   async getUserProfile(
     @Param('id', ParseIntPipe) id: number,
     @CurrentUser() currentUser: IUserEntity,

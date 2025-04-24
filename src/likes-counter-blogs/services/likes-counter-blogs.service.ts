@@ -81,8 +81,9 @@ export class LikesCounterBlogsService extends EntityManagerBaseService<IBlogLike
   }
 
   async findLikeDislikeEntitiesByBlogId(
-    id: number,
+    id: number[],
     currentUser: IUserEntity,
+    entityManager?: EntityManager,
   ): Promise<IBlogLikesCounterEntity[]> {
     if (!currentUser) {
       throw new BadRequestException({
@@ -91,7 +92,10 @@ export class LikesCounterBlogsService extends EntityManagerBaseService<IBlogLike
       });
     }
     const likeDislikeEntitiesForBlog: IBlogLikesCounterEntity[] =
-      await this.likesCounterBlogRepository.getByFilter({ blogId: id });
+      await this.likesCounterBlogRepository.getByFilter(
+        { blogId: [id] },
+        entityManager,
+      );
     return likeDislikeEntitiesForBlog;
   }
 

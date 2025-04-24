@@ -21,7 +21,12 @@ import {
   ApiOkResponse,
   ApiOperation,
 } from '@nestjs/swagger';
-import { IUserCreateDto, IUserEntity, IUserEntityArray } from 'blog-common-1.0';
+import {
+  IUserCreateDto,
+  IUserEntity,
+  IUserEntityArray,
+  IUserProfileResponse,
+} from 'blog-common-1.0';
 import { diskStorage } from 'multer';
 import { AuthGuard } from 'src/auth/auth.guard';
 import { CurrentUser } from 'src/decorators/current_user.decorator';
@@ -187,6 +192,21 @@ export class UsersController {
     @CurrentUser() currentUser: IUserEntity,
   ): Promise<IUserEntity> {
     return this.usersService.getUserById(id, currentUser);
+  }
+
+  @ApiOperation({ summary: 'Get a user' })
+  @ApiOkResponse({
+    description:
+      'User returned with specific id & type IUserEntity. Use this API to decorate the profile page.',
+  })
+  @ApiBearerAuth('access-token')
+  @UseGuards(AuthGuard)
+  @Get('/search-user-profile/:id')
+  async getUserProfile(
+    @Param('id', ParseIntPipe) id: number,
+    @CurrentUser() currentUser: IUserEntity,
+  ): Promise<IUserProfileResponse> {
+    return this.usersService.getUserProfile(id, currentUser);
   }
 
   @ApiBearerAuth('access-token')

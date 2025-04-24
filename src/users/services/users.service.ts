@@ -12,6 +12,7 @@ import {
   IUserCreateDto,
   IUserEntity,
   IUserEntityArray,
+  IUserProfileResponse,
   IUserUpdateDto,
 } from 'blog-common-1.0';
 import { BlogService } from 'src/blog/service/blog.service';
@@ -101,6 +102,41 @@ export class UsersService extends EntityManagerBaseService<UserEntity> {
     });
     delete userById['password'];
     return userById;
+  }
+
+  async getUserProfile(
+    id: number,
+    currentUser: IUserEntity,
+    entityManager?: EntityManager,
+  ): Promise<IUserProfileResponse> {
+    // Replace this with IUserResponse
+    if (!currentUser) {
+      throw new BadRequestException({
+        key: 'currentUser',
+        message: 'current user is not logged in',
+      });
+    }
+
+    const [userEntity] = await this.validatePresence(
+      'id',
+      [id],
+      'id',
+      entityManager,
+    );
+
+    const blogEntitites = await this.blogService.getBlogsByFilter(
+      {
+        createdBy: [id],
+      },
+      currentUser,
+      entityManager,
+    );
+
+    const response: IUserProfileResponse = {
+      userDetail: userEntity,
+      blogsOfUser: blogEntitites,
+    };
+    return response;
   }
 
   async getUserByFilter(

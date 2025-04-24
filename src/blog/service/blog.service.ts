@@ -190,7 +190,7 @@ export class BlogService extends EntityManagerBaseService<BlogEntity> {
 
     const blogLikesAndDislikes =
       await this.likesCounterBlogsService.findLikeDislikeEntitiesByBlogId(
-        id,
+        [id],
         currentUser,
       );
 
@@ -280,10 +280,71 @@ export class BlogService extends EntityManagerBaseService<BlogEntity> {
 
   async getBlogsByFilter(
     filter: IBlogSearchDto,
+    currentUser: IUserEntity,
     entityManager?: EntityManager,
-  ): Promise<IBlogEntity[]> {
-    console.log('this is the filter', filter);
-    return this.blogRepository.getByFilter(filter, entityManager);
+  ): Promise<IBlogResponse[]> {
+    const blogs = await this.blogRepository.getByFilter(filter, entityManager);
+    // console.log('blogs', blogs);
+    const allcomments = [];
+    const allLikeAndDislikeEntities = [];
+    const response: IBlogResponse[] = [];
+
+    if (blogs.length > 0) {
+      const comments = await this.commentsService.findCommentsByBlogId(
+        blogs.map((blog) => blog.id),
+        entityManager,
+      );
+      allcomments.push(...comments);
+      // console.log('comments', comments);
+
+      const likeAndDislikeEntities =
+        await this.likesCounterBlogsService.findLikeDislikeEntitiesByBlogId(
+          blogs.map((blog) => blog.id),
+          currentUser,
+          entityManager,
+        );
+      allLikeAndDislikeEntities.push(...likeAndDislikeEntities);
+      // console.log('likeAndDislikeEntities', likeAndDislikeEntities);
+
+      const idsForUsersInResponse: number[] = Array.from(
+        new Set([
+          ...blogs.map((blog) => blog.createdBy),
+          ...allcomments.map((comment) => comment.createdBy),
+          ...allLikeAndDislikeEntities.map((like) => like.createdBy),
+        ]),
+      );
+
+      const userEntities = await this.userService.getUserByFilter(
+        {
+          id: idsForUsersInResponse,
+        },
+        entityManager,
+      );
+      // console.log('this is the user entities', userEntities);
+
+      for (const blog of blogs) {
+        const usersRelatedToThisBlog = Array.from(
+          new Set([
+            blog.createdBy,
+            allcomments.map((comment) => comment.createdBy),
+            allLikeAndDislikeEntities.map((like) => like.createdBy),
+          ]),
+        );
+        const blogResponse = {
+          blog: blog,
+          comments: allcomments.filter((comment) => comment.blogId === blog.id),
+          likes: allLikeAndDislikeEntities.filter(
+            (entity) => entity.blogId === blog.id,
+          ),
+          users: userEntities.filter((users) =>
+            usersRelatedToThisBlog.includes(users.id),
+          ),
+        };
+        response.push(blogResponse);
+      }
+    }
+
+    return response;
   }
 
   async getBlogUserIdFilter(

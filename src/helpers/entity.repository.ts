@@ -91,9 +91,19 @@ export abstract class EntityManagerBaseService<T> {
     // Loop through the filter object to dynamically build the query
     for (const [property, value] of Object.entries(filter)) {
       const normalizedValue = Array.isArray(value) ? value : [value];
-      query = query.andWhere(`${tableName}.${property} IN (:...${property})`, {
-        [property]: normalizedValue,
-      });
+
+      if (property === 'title') {
+        query = query.andWhere(`${tableName}.${property} LIKE :${property}`, {
+          [property]: `%${normalizedValue[0]}%`,
+        });
+      } else {
+        query = query.andWhere(
+          `${tableName}.${property} IN (:...${property})`,
+          {
+            [property]: normalizedValue,
+          },
+        );
+      }
     }
 
     // Execute the query and fetch the results

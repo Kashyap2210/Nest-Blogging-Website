@@ -1,8 +1,9 @@
 import { IBlogEntity } from 'blog-common-1.0';
 import { AuditColumnEntity } from 'src/helpers/audti.column.entity';
-import { Column, Entity, PrimaryGeneratedColumn } from 'typeorm';
+import { Column, Entity, Index, PrimaryGeneratedColumn } from 'typeorm';
 
 @Entity('blogs')
+@Index('title_index', ['title'], { fulltext: true })
 export class BlogEntity extends AuditColumnEntity implements IBlogEntity {
   @PrimaryGeneratedColumn()
   id: number;

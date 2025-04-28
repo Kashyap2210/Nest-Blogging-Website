@@ -1,13 +1,14 @@
+import { CacheModule } from '@nestjs/cache-manager';
 import { Module } from '@nestjs/common';
 import { ConfigModule } from '@nestjs/config';
 import { MulterModule } from '@nestjs/platform-express';
 import { AuthModule } from './auth/auth.module';
 import { BlogModule } from './blog/blog.module';
-import { DatabaseModule } from './database/database.module';
-import { UsersModule } from './users/users.module';
 import { CommentsModule } from './comments/comments.module';
+import { DatabaseModule } from './database/database.module';
+import { FollowersModule } from './followers/followers.module';
 import { LikesCounterBlogsModule } from './likes-counter-blogs/likes-counter-blogs.module';
-import { CacheModule } from '@nestjs/cache-manager';
+import { UsersModule } from './users/users.module';
 
 @Module({
   imports: [
@@ -30,6 +31,7 @@ import { CacheModule } from '@nestjs/cache-manager';
     CacheModule.register({
       isGlobal: true,
     }),
+    FollowersModule,
   ],
 })
 export class AppModule {}

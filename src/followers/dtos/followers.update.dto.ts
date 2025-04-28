@@ -1,8 +1,8 @@
-import { BadRequestException, Injectable } from '@nestjs/common';
+import { Injectable } from '@nestjs/common';
 import { ApiProperty } from '@nestjs/swagger';
 import {
-    IUserFollowerUpdateDto,
-    UserFolloweeStatusEnum,
+  IUserFollowerUpdateDto,
+  UserFolloweeStatusEnum,
 } from 'blog-common-1.0';
 import { IsEnum } from 'class-validator';
 
@@ -18,13 +18,15 @@ export class FollowersUpdateDto implements IUserFollowerUpdateDto {
   status: UserFolloweeStatusEnum;
 
   validate() {
+    const errors = [];
     if (
       this.status &&
       !Object.values(UserFolloweeStatusEnum).includes(this.status)
     )
-      throw new BadRequestException({
+      errors.push({
         key: 'status',
         message: `Enum value must be one of the following ${Object.values(UserFolloweeStatusEnum)}`,
       });
+    return errors;
   }
 }

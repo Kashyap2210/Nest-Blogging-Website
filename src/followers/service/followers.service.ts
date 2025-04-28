@@ -7,10 +7,11 @@ import {
   IUserEntity,
   IUserFolloweeEntity,
   IUserFollowerCreateDto,
-  IUserFollowerSearchDto,
-  IUserFollowerUpdateDto,
+  IUserFollowerSearchDto
 } from 'blog-common-1.0';
 import { EntityManager } from 'typeorm';
+import { FollowersCreateDto } from '../dtos/followers.create.dto';
+import { FollowersUpdateDto } from '../dtos/followers.update.dto';
 import { FollowersEntity } from '../entities/followers.entity';
 import { FollowersEntityRepository } from '../repository/followers.repository';
 
@@ -32,16 +33,91 @@ export class FollowersService {
   }
 
   async create(
-    dto: IUserFollowerCreateDto,
+    dto: FollowersCreateDto,
     currentUser: IUserEntity,
     entityManager?: EntityManager,
   ): Promise<IUserFolloweeEntity> {
+    await this.validateCreateDtoDetails(currentUser, dto, entityManager);
+
+    const followerEntityInstance = this.followersRepository.getInstance(
+      dto,
+      entityManager,
+    );
+    followerEntityInstance.createdBy = followerEntityInstance.updatedBy =
+      currentUser.id;
+    return this.followersRepository.create(
+      followerEntityInstance,
+      entityManager,
+    );
+  }
+
+  async updateById(
+    id: number,
+    dto: FollowersUpdateDto,
+    currentUser: IUserEntity,
+    entityManager?: EntityManager,
+  ): Promise<IUserFolloweeEntity> {
+    this.validateUpdateDtoDetails(currentUser, dto);
+
+    const [existingEntity] = await this.validatePresence(id, entityManager);
+
+    const updatedEntity: IUserFolloweeEntity = {
+      ...existingEntity,
+      ...dto,
+      updatedOn: new Date(),
+      updatedBy: currentUser.id,
+    };
+
+    return this.followersRepository.update(id, updatedEntity, entityManager);
+  }
+
+  async deleteById(
+    id: number,
+    currentUser: IUserEntity,
+    entityManager?: EntityManager,
+  ): Promise<boolean> {
+    this.validateDeleteDetails(id, currentUser, entityManager);
+    return this.followersRepository.deleteById(id, entityManager);
+  }
+
+  async getFollowersByFilter(
+    filters: IUserFollowerSearchDto,
+    entityManager?: EntityManager,
+  ): Promise<IUserFolloweeEntity[]> {
+    return this.followersRepository.getByFilter(filters, entityManager);
+  }
+
+  async validatePresence(
+    id: number,
+    entityManager?: EntityManager,
+  ): Promise<IUserFolloweeEntity[]> {
+    return this.followersRepository.validatePresence(
+      'id',
+      [id],
+      'id',
+      entityManager,
+    );
+  }
+
+  private async validateCreateDtoDetails(
+    currentUser: IUserEntity,
+    dto: FollowersCreateDto,
+    entityManager: EntityManager,
+  ) {
     if (!currentUser) {
       throw new BadRequestException({
         key: 'currentUser',
         message: 'current user is not logged in',
       });
     }
+    const dtoErrors = dto.validate();
+    if (dtoErrors && dtoErrors.length > 0) {
+      throw new BadRequestException({
+        key: dtoErrors[0].key,
+        message: dtoErrors[0].message,
+      });
+    }
+
     // validate users. need DI for user service
     await this.userService.validatePresence(
       'id',
@@ -64,48 +140,32 @@ export class FollowersService {
         message: `You already follow this account `,
       });
     }
-
-    const followerEntityInstance = this.followersRepository.getInstance(
-      dto,
-      entityManager,
-    );
-    followerEntityInstance.createdBy = followerEntityInstance.updatedBy =
-      currentUser.id;
-    return this.followersRepository.create(
-      followerEntityInstance,
-      entityManager,
-    );
   }
 
-  async updateById(
-    id: number,
-    dto: IUserFollowerUpdateDto,
+  private validateUpdateDtoDetails(
     currentUser: IUserEntity,
-    entityManager?: EntityManager,
-  ): Promise<IUserFolloweeEntity> {
+    dto: FollowersUpdateDto,
+  ) {
     if (!currentUser) {
       throw new BadRequestException({
         key: 'currentUser',
         message: 'current user is not logged in',
       });
     }
-    const [existingEntity] = await this.validatePresence(id, entityManager);
-
-    const updatedEntity: IUserFolloweeEntity = {
-      ...existingEntity,
-      ...dto,
-      updatedOn: new Date(),
-      updatedBy: currentUser.id,
-    };
-
-    return this.followersRepository.update(id, updatedEntity, entityManager);
+    const dtoErrors = dto.validate();
+    if (dtoErrors && dtoErrors.length > 0) {
+      throw new BadRequestException({
+        key: dtoErrors[0].key,
+        message: dtoErrors[0].message,
+      });
+    }
   }
 
-  async deleteById(
+  private async validateDeleteDetails(
     id: number,
     currentUser: IUserEntity,
     entityManager?: EntityManager,
-  ): Promise<boolean> {
+  ) {
     if (!currentUser) {
       throw new BadRequestException({
         key: 'currentUser',
@@ -113,25 +173,5 @@ export class FollowersService {
       });
     }
     await this.validatePresence(id, entityManager);
-    return this.followersRepository.deleteById(id, entityManager);
-  }
-
-  async getFollowersByFilter(
-    filters: IUserFollowerSearchDto,
-    entityManager?: EntityManager,
-  ): Promise<IUserFolloweeEntity[]> {
-    return this.followersRepository.getByFilter(filters, entityManager);
-  }
-
-  async validatePresence(
-    id: number,
-    entityManager?: EntityManager,
-  ): Promise<IUserFolloweeEntity[]> {
-    return this.followersRepository.validatePresence(
-      'id',
-      [id],
-      'id',
-      entityManager,
-    );
   }
 }

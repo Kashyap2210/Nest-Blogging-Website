@@ -12,6 +12,7 @@ async function bootstrap() {
     new ValidationPipe({
       whitelist: true,
       forbidNonWhitelisted: true,
+      transform: true,
       stopAtFirstError: true, // Ensures validation errors are returned immediately
     }),
   );

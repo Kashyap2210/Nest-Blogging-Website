@@ -6,8 +6,16 @@ import {
   ParseIntPipe,
   Patch,
   Post,
+  UseGuards,
 } from '@nestjs/common';
-import { ApiBody, ApiOkResponse, ApiOperation, ApiTags } from '@nestjs/swagger';
+import {
+  ApiBearerAuth,
+  ApiBody,
+  ApiOkResponse,
+  ApiOperation,
+  ApiTags,
+} from '@nestjs/swagger';
+import { AuthGuard } from '@src/auth/auth.guard';
 import { CurrentUser } from '@src/decorators/current_user.decorator';
 import { IUserEntity, IUserFolloweeEntity } from 'blog-common-1.0';
 import { FollowersCreateDto } from '../dtos/followers.create.dto';
@@ -18,6 +26,8 @@ import { FollowersService } from '../service/followers.service';
 
 @Controller('followers')
 @ApiTags('followers')
+@ApiBearerAuth('access-token')
+@UseGuards(AuthGuard)
 export class FollowersController {
   constructor(private readonly followersService: FollowersService) {}
 

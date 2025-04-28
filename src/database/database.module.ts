@@ -5,6 +5,7 @@ import { BlogEntity } from 'src/blog/entities/blog.entity';
 import { UserEntity } from 'src/users/entities/user.entity';
 import { CommentEntity } from 'src/comments/entities/comment.entity';
 import { BlogLikesCounterEntity } from 'src/likes-counter-blogs/entities/likes-counter-blog.entity';
+import { FollowersEntity } from '@src/followers/entities/followers.entity';
 
 @Global()
 @Module({
@@ -17,13 +18,25 @@ import { BlogLikesCounterEntity } from 'src/likes-counter-blogs/entities/likes-c
         username: configService.get<string>('DBUSERNAME'),
         password: configService.get<string>('DBPASSWORD'),
         database: configService.get<string>('DBNAME'),
-        entities: [BlogEntity, UserEntity, CommentEntity, BlogLikesCounterEntity],
+        entities: [
+          BlogEntity,
+          UserEntity,
+          CommentEntity,
+          BlogLikesCounterEntity,
+          FollowersEntity,
+        ],
         synchronize: true,
         // logging: true,
       }),
       inject: [ConfigService],
     }),
-    TypeOrmModule.forFeature([BlogEntity, UserEntity, CommentEntity, BlogLikesCounterEntity]),
+    TypeOrmModule.forFeature([
+      BlogEntity,
+      UserEntity,
+      CommentEntity,
+      BlogLikesCounterEntity,
+      FollowersEntity,
+    ]),
   ],
   exports: [TypeOrmModule],
 })

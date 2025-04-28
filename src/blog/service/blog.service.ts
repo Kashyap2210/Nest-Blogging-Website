@@ -1,4 +1,3 @@
-import { CACHE_MANAGER } from '@nestjs/cache-manager';
 import {
   BadRequestException,
   forwardRef,
@@ -17,7 +16,6 @@ import {
   ICommentEntity,
   IUserEntity,
 } from 'blog-common-1.0';
-import { Cache } from 'cache-manager';
 import { CommentsService } from 'src/comments/service/comments.service';
 import { EntityManagerBaseService } from 'src/helpers/entity.repository';
 import { LikesCounterBlogsService } from 'src/likes-counter-blogs/services/likes-counter-blogs.service';

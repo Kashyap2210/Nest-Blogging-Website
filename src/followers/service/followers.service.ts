@@ -1,13 +1,10 @@
 import { BadRequestException, Injectable } from '@nestjs/common';
-import { BlogService } from '@src/blog/service/blog.service';
-import { CommentsService } from '@src/comments/service/comments.service';
-import { LikesCounterBlogsService } from '@src/likes-counter-blogs/services/likes-counter-blogs.service';
 import { UsersService } from '@src/users/services/users.service';
 import {
   IUserEntity,
   IUserFolloweeEntity,
   IUserFollowerCreateDto,
-  IUserFollowerSearchDto
+  IUserFollowerSearchDto,
 } from 'blog-common-1.0';
 import { EntityManager } from 'typeorm';
 import { FollowersCreateDto } from '../dtos/followers.create.dto';
@@ -20,9 +17,6 @@ export class FollowersService {
   constructor(
     private readonly followersRepository: FollowersEntityRepository,
     private readonly userService: UsersService,
-    private blogService: BlogService,
-    private commentsService: CommentsService,
-    private likesCounterService: LikesCounterBlogsService,
   ) {}
 
   getInstance(

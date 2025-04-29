@@ -45,7 +45,7 @@ export class FollowersController {
   @ApiBody({ type: FollowersUpdateDto })
   @ApiOperation({ summary: 'Update a follower entity' })
   @ApiOkResponse({ type: FollowersEntity })
-  @Patch()
+  @Patch(':id')
   async updateFollowerEntity(
     @Param('id', ParseIntPipe) id: number,
     @Body() dto: FollowersUpdateDto,

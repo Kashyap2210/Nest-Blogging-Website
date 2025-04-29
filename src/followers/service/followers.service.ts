@@ -1,15 +1,18 @@
 import { BadRequestException, Injectable } from '@nestjs/common';
 import { UsersService } from '@src/users/services/users.service';
 import {
+  IFollowersStatusFlowConfig,
   IUserEntity,
   IUserFolloweeEntity,
   IUserFollowerCreateDto,
   IUserFollowerSearchDto,
+  IUserFollowerUpdateDto,
 } from 'blog-common-1.0';
 import { EntityManager } from 'typeorm';
 import { FollowersCreateDto } from '../dtos/followers.create.dto';
 import { FollowersUpdateDto } from '../dtos/followers.update.dto';
 import { FollowersEntity } from '../entities/followers.entity';
+import { FollowersStatusFlowConfig } from '../followers.flow.config';
 import { FollowersEntityRepository } from '../repository/followers.repository';
 
 @Injectable()
@@ -54,14 +57,17 @@ export class FollowersService {
     this.validateUpdateDtoDetails(currentUser, dto);
 
     const [existingEntity] = await this.validatePresence(id, entityManager);
-
+    dto.status = this.getNextStatusForFollowerEntity(
+      FollowersStatusFlowConfig,
+      dto,
+    );
+    delete dto.action;
     const updatedEntity: IUserFolloweeEntity = {
       ...existingEntity,
       ...dto,
       updatedOn: new Date(),
       updatedBy: currentUser.id,
     };
-
     return this.followersRepository.update(id, updatedEntity, entityManager);
   }
 
@@ -79,6 +85,13 @@ export class FollowersService {
     entityManager?: EntityManager,
   ): Promise<IUserFolloweeEntity[]> {
     return this.followersRepository.getByFilter(filters, entityManager);
+  }
+
+  getNextStatusForFollowerEntity(
+    flowConfig: IFollowersStatusFlowConfig,
+    dto: IUserFollowerUpdateDto,
+  ) {
+    return flowConfig[dto.action].next();
   }
 
   async validatePresence(

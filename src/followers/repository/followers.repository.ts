@@ -2,8 +2,7 @@ import { Injectable } from '@nestjs/common';
 import { EntityManagerBaseService } from '@src/helpers/entity.repository';
 import {
   IUserFolloweeEntity,
-  IUserFollowerCreateDto,
-  IUserFollowerUpdateDto,
+  IUserFollowerCreateDto
 } from 'blog-common-1.0';
 import { EntityManager } from 'typeorm';
 import { FollowersEntity } from '../entities/followers.entity';
@@ -30,7 +29,7 @@ export class FollowersEntityRepository extends EntityManagerBaseService<Follower
 
   async update(
     id: number,
-    dto: IUserFollowerUpdateDto,
+    dto: IUserFolloweeEntity,
     entityManager?: EntityManager,
   ): Promise<IUserFolloweeEntity> {
     await this.getRepository(entityManager).update(id, dto);

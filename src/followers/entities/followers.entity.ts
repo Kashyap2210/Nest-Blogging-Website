@@ -19,6 +19,7 @@ export class FollowersEntity
   @Column({
     type: 'enum',
     enum: UserFolloweeStatusEnum,
+    nullable: true,
   })
   status: UserFolloweeStatusEnum;
 }

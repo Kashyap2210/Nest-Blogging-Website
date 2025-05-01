@@ -22,6 +22,9 @@ import {
   ApiOperation,
 } from '@nestjs/swagger';
 import {
+  SanitizeResponse
+} from '@src/interceptors/password.filter.interceptor';
+import {
   IUserCreateDto,
   IUserEntity,
   IUserEntityArray,
@@ -84,6 +87,7 @@ export class UsersController {
       },
     }),
   )
+  @SanitizeResponse(['password'])
   async createUser(
     @Req() request,
     @UploadedFile() file: Express.Multer.File,
@@ -157,6 +161,7 @@ export class UsersController {
       },
     }),
   )
+  @SanitizeResponse(['password'])
   async updateUser(
     @Body() dto: UserUpdateDto,
     @Param('id', ParseIntPipe) id: number,
@@ -172,6 +177,7 @@ export class UsersController {
   })
   @ApiBearerAuth('access-token')
   @UseGuards(AuthGuard)
+  @SanitizeResponse(['password'])
   @Get()
   async getAllUsers(
     @CurrentUser() currentUser: IUserEntity,
@@ -186,6 +192,7 @@ export class UsersController {
   })
   @ApiBearerAuth('access-token')
   @UseGuards(AuthGuard)
+  @SanitizeResponse(['password'])
   @Get(':id')
   async getUser(
     @Param('id', ParseIntPipe) id: number,
@@ -200,6 +207,7 @@ export class UsersController {
       'User returned with specific id & type IUserEntity. Use this API to decorate the profile page.',
   })
   @ApiBearerAuth('access-token')
+  @SanitizeResponse(['password'])
   @UseGuards(AuthGuard)
   @Get('/search-user-profile/:id')
   async getUserProfile(

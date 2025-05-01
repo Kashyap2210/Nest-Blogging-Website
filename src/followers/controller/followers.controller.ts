@@ -17,6 +17,7 @@ import {
 } from '@nestjs/swagger';
 import { AuthGuard } from '@src/auth/auth.guard';
 import { CurrentUser } from '@src/decorators/current_user.decorator';
+import { SanitizeResponse } from '@src/interceptors/password.filter.interceptor';
 import { UserEntity } from '@src/users/entities/user.entity';
 import {
   IUserEntity,
@@ -63,6 +64,7 @@ export class FollowersController {
   @ApiOperation({ summary: 'Search a follower entity' })
   @ApiOkResponse({ type: UserEntity })
   @Post('search')
+  @SanitizeResponse(['password'])
   async searchFollowers(
     @Body() searchDto: FollowersSearchDto,
   ): Promise<IUserFolloweeResponse[]> {

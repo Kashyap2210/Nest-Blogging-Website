@@ -17,7 +17,12 @@ import {
 } from '@nestjs/swagger';
 import { AuthGuard } from '@src/auth/auth.guard';
 import { CurrentUser } from '@src/decorators/current_user.decorator';
-import { IUserEntity, IUserFolloweeEntity } from 'blog-common-1.0';
+import { UserEntity } from '@src/users/entities/user.entity';
+import {
+  IUserEntity,
+  IUserFolloweeEntity,
+  IUserFolloweeResponse,
+} from 'blog-common-1.0';
 import { FollowersCreateDto } from '../dtos/followers.create.dto';
 import { FollowersSearchDto } from '../dtos/followers.search.dto';
 import { FollowersUpdateDto } from '../dtos/followers.update.dto';
@@ -56,11 +61,11 @@ export class FollowersController {
 
   @ApiBody({ type: FollowersSearchDto })
   @ApiOperation({ summary: 'Search a follower entity' })
-  @ApiOkResponse({ type: FollowersEntity })
+  @ApiOkResponse({ type: UserEntity })
   @Post('search')
   async searchFollowers(
     @Body() searchDto: FollowersSearchDto,
-  ): Promise<IUserFolloweeEntity[]> {
+  ): Promise<IUserFolloweeResponse[]> {
     return this.followersService.getFollowersByFilter(searchDto);
   }
 

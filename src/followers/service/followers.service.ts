@@ -1,9 +1,15 @@
-import { BadRequestException, Injectable } from '@nestjs/common';
+import {
+  BadRequestException,
+  forwardRef,
+  Inject,
+  Injectable,
+} from '@nestjs/common';
 import { UsersService } from '@src/users/services/users.service';
 import {
   IFollowersStatusFlowConfig,
   IUserEntity,
   IUserFolloweeEntity,
+  IUserFolloweeResponse,
   IUserFollowerCreateDto,
   IUserFollowerSearchDto,
   IUserFollowerUpdateDto,
@@ -19,6 +25,7 @@ import { FollowersEntityRepository } from '../repository/followers.repository';
 export class FollowersService {
   constructor(
     private readonly followersRepository: FollowersEntityRepository,
+    @Inject(forwardRef(() => UsersService))
     private readonly userService: UsersService,
   ) {}
 
@@ -83,8 +90,28 @@ export class FollowersService {
   async getFollowersByFilter(
     filters: IUserFollowerSearchDto,
     entityManager?: EntityManager,
-  ): Promise<IUserFolloweeEntity[]> {
-    return this.followersRepository.getByFilter(filters, entityManager);
+  ): Promise<IUserFolloweeResponse[]> {
+    const followersAndFollowingOfUser =
+      await this.followersRepository.getByFilter(filters, entityManager);
+    // console.log('followersAndFollowingOfUser', followersAndFollowingOfUser);
+
+    if (filters.userId) {
+      const followers = await this.userService.getUserByFilter(
+        {
+          id: followersAndFollowingOfUser.map((user) => user.followeeUserId),
+        },
+        entityManager,
+      );
+      return followers;
+    } else {
+      const following = await this.userService.getUserByFilter(
+        {
+          id: followersAndFollowingOfUser.map((user) => user.userId),
+        },
+        entityManager,
+      );
+      return following;
+    }
   }
 
   getNextStatusForFollowerEntity(

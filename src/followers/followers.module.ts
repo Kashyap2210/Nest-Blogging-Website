@@ -1,4 +1,4 @@
-import { Module } from '@nestjs/common';
+import { forwardRef, Module } from '@nestjs/common';
 import { FollowersController } from './controller/followers.controller';
 import { FollowersService } from './service/followers.service';
 import { FollowersEntityRepository } from './repository/followers.repository';
@@ -19,7 +19,7 @@ import { DeleteBlogWithinTransaction } from '@src/blog/transactions/blog_delete_
 @Module({
   imports: [
     TypeOrmModule.forFeature([FollowersEntity]),
-    UsersModule,
+    forwardRef(() => UsersModule),
     BlogModule,
     CommentsModule,
     LikesCounterBlogsModule,

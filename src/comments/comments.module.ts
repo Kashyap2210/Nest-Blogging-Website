@@ -14,12 +14,16 @@ import { CommentEntity } from './entities/comment.entity';
 import { CommentsRepository } from './repository/comments.repository';
 import { CommentsService } from './service/comments.service';
 import { BlogCacheService } from '@src/blog/service/blog.cache.service';
+import { FollowersModule } from '@src/followers/followers.module';
+import { FollowersService } from '@src/followers/service/followers.service';
+import { FollowersEntityRepository } from '@src/followers/repository/followers.repository';
 
 @Module({
   imports: [
     TypeOrmModule.forFeature([CommentEntity]),
     forwardRef(() => UsersModule),
     forwardRef(() => BlogModule),
+    forwardRef(() => FollowersModule),
   ],
   controllers: [CommentsController],
   providers: [
@@ -33,6 +37,7 @@ import { BlogCacheService } from '@src/blog/service/blog.cache.service';
     LikesCounterBlogRepository,
     DeleteBlogWithinTransaction,
     DeleteUserWithinTransaction,
+    FollowersService, FollowersEntityRepository 
   ],
   exports: [CommentsService, CommentsRepository],
 })

@@ -15,6 +15,9 @@ import { BlogService } from './service/blog.service';
 import { DeleteBlogWithinTransaction } from './transactions/blog_delete_transaction';
 import { DeleteUserWithinTransaction } from '@src/users/transactions/user_delete.transaction';
 import { BlogCacheService } from './service/blog.cache.service';
+import { FollowersService } from '@src/followers/service/followers.service';
+import { FollowersModule } from '@src/followers/followers.module';
+import { FollowersEntityRepository } from '@src/followers/repository/followers.repository';
 
 @Module({
   imports: [
@@ -22,6 +25,7 @@ import { BlogCacheService } from './service/blog.cache.service';
     forwardRef(() => UsersModule),
     forwardRef(() => CommentsModule),
     LikesCounterBlogsModule,
+    forwardRef(()=> FollowersModule)
   ],
   providers: [
     BlogService,
@@ -34,6 +38,7 @@ import { BlogCacheService } from './service/blog.cache.service';
     BlogRepository,
     DeleteUserWithinTransaction,
     DeleteBlogWithinTransaction,
+    FollowersService, FollowersEntityRepository
   ],
   controllers: [BlogController],
   exports: [BlogService, BlogRepository],

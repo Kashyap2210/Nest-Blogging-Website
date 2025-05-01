@@ -1,5 +1,9 @@
 import { forwardRef, Module } from '@nestjs/common';
 import { TypeOrmModule } from '@nestjs/typeorm';
+import { BlogCacheService } from '@src/blog/service/blog.cache.service';
+import { DeleteBlogWithinTransaction } from '@src/blog/transactions/blog_delete_transaction';
+import { FollowersModule } from '@src/followers/followers.module';
+import { FollowersService } from '@src/followers/service/followers.service';
 import { BlogModule } from 'src/blog/blog.module';
 import { BlogService } from 'src/blog/service/blog.service';
 import { CommentsModule } from 'src/comments/comments.module';
@@ -11,15 +15,15 @@ import { UsersController } from './controllers/users.controller';
 import { UserEntity } from './entities/user.entity';
 import { UsersRepository } from './repository/users.repository';
 import { UsersService } from './services/users.service';
-import { DeleteBlogWithinTransaction } from '@src/blog/transactions/blog_delete_transaction';
 import { DeleteUserWithinTransaction } from './transactions/user_delete.transaction';
-import { BlogCacheService } from '@src/blog/service/blog.cache.service';
+import { FollowersEntityRepository } from '@src/followers/repository/followers.repository';
 
 @Module({
   imports: [
     TypeOrmModule.forFeature([UserEntity]),
     forwardRef(() => BlogModule),
     forwardRef(() => CommentsModule),
+    forwardRef(() => FollowersModule),
   ],
   controllers: [UsersController],
   providers: [
@@ -33,6 +37,8 @@ import { BlogCacheService } from '@src/blog/service/blog.cache.service';
     LikesCounterBlogRepository,
     DeleteUserWithinTransaction,
     DeleteBlogWithinTransaction,
+    FollowersService,
+    FollowersEntityRepository,
   ],
   exports: [UsersService, UsersRepository],
 })

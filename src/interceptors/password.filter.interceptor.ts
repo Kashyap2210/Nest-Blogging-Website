@@ -1,14 +1,14 @@
 import {
-    CallHandler,
-    ExecutionContext,
-    Injectable,
-    NestInterceptor,
-    Type,
-    UseInterceptors,
+  CallHandler,
+  ExecutionContext,
+  Injectable,
+  NestInterceptor,
+  Type,
+  UseInterceptors,
 } from '@nestjs/common';
 import { map, Observable } from 'rxjs';
 
-export function SanitizeResponse(fieldsToRemove: string[]) {
+export function SanitizeResponse(fieldsToRemove: string[]): MethodDecorator {
   return UseInterceptors(SanitizeResponseInterceptor(fieldsToRemove));
 }
 

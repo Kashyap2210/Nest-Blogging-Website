@@ -6,6 +6,7 @@ import {
   Injectable,
 } from '@nestjs/common';
 // import { UserDeleteTransaction } from '@src/users/transactions/user_delete.transaction';
+import { FollowersService } from '@src/followers/service/followers.service';
 import * as bcrypt from 'bcrypt';
 import {
   IBlogEntitySearchDto,
@@ -33,8 +34,9 @@ export class UsersService extends EntityManagerBaseService<UserEntity> {
     private blogService: BlogService,
     private commentsService: CommentsService,
     private likesCounterService: LikesCounterBlogsService,
-    // private userDeleteTransaction: UserDeleteTransaction,
     private userDeleteTransaction: DeleteUserWithinTransaction,
+    @Inject(forwardRef(() => FollowersService))
+    private followersService: FollowersService,
   ) {
     super();
   }
@@ -132,8 +134,26 @@ export class UsersService extends EntityManagerBaseService<UserEntity> {
       entityManager,
     );
 
+    const followersOfCurrentUser =
+      await this.followersService.getFollowersByFilter(
+        {
+          followeeUserId: [currentUser.id],
+        },
+        entityManager,
+      );
+
+    const usersFollowingTheCurrentUser =
+      await this.followersService.getFollowersByFilter(
+        {
+          userId: [currentUser.id],
+        },
+        entityManager,
+      );
+
     const response: IUserProfileResponse = {
       userDetail: userEntity,
+      followersCount: followersOfCurrentUser.length,
+      followingCount: usersFollowingTheCurrentUser.length,
       blogsOfUser: blogEntitites,
     };
     return response;

@@ -9,9 +9,15 @@ import { DatabaseModule } from './database/database.module';
 import { FollowersModule } from './followers/followers.module';
 import { LikesCounterBlogsModule } from './likes-counter-blogs/likes-counter-blogs.module';
 import { UsersModule } from './users/users.module';
+import { ServeStaticModule } from '@nestjs/serve-static';
+import { join } from 'path';
 
 @Module({
   imports: [
+    ServeStaticModule.forRoot({
+      rootPath: join(__dirname, '..', 'uploads'),
+      serveRoot: '/uploads',
+    }),
     MulterModule.register({
       dest: './uploads', //upload folder for files
       limits: {

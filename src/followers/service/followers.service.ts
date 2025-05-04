@@ -115,58 +115,42 @@ export class FollowersService {
     filters: IUserFollowerSearchDto,
     entityManager?: EntityManager,
   ): Promise<IUserFolloweeResponse[]> {
-    const followersAndFollowingOfUser: IUserFolloweeEntity[] =
+    const relations: IUserFolloweeEntity[] =
       await this.followersRepository.getByFilter(filters, entityManager);
-    // console.log('followersAndFollowingOfUser', followersAndFollowingOfUser);
 
-    if (followersAndFollowingOfUser.length > 0) {
-      if (filters.userId) {
-        const currentUserFollowingUsers =
-          await this.userService.getUserByFilter(
-            {
-              id: followersAndFollowingOfUser.map(
-                (relation) => relation.followeeUserId,
-              ),
-            },
-            entityManager,
-          );
-        // console.log('currentUserFollowingUsers', currentUserFollowingUsers);
-        const responsecurrentUserFollowingUsers: IUserFolloweeResponse[] = [];
-        for (const following of currentUserFollowingUsers) {
-          for (const relation of followersAndFollowingOfUser) {
-            if (following.id === relation.followeeUserId) {
-              const followerForResponse: IUserFolloweeResponse = {
-                ...following,
-                relationId: relation.id,
-              };
-              responsecurrentUserFollowingUsers.push(followerForResponse);
-            }
-          }
-        }
-        return responsecurrentUserFollowingUsers;
-      } else {
-        const currentUserFollowerUsers = await this.userService.getUserByFilter(
-          {
-            id: followersAndFollowingOfUser.map((user) => user.userId),
-          },
-          entityManager,
-        );
-        // console.log('currentUserFollowerUsers', currentUserFollowerUsers);
-        const responsecurrentUserFollowerUsers: IUserFolloweeResponse[] = [];
-        for (const follower of currentUserFollowerUsers) {
-          for (const relation of followersAndFollowingOfUser) {
-            if (follower.id === relation.userId) {
-              const followerForResponse: IUserFolloweeResponse = {
-                ...follower,
-                relationId: relation.id,
-              };
-              responsecurrentUserFollowerUsers.push(followerForResponse);
-            }
-          }
-        }
-        return responsecurrentUserFollowerUsers;
-      }
+    if (!relations.length) return [];
+
+    let userIds: number[] = [];
+
+    if (filters.userId) {
+      userIds = relations.map((relation) => relation.followeeUserId);
+    } else {
+      userIds = relations.map((relation) => relation.userId);
     }
+
+    const users = await this.userService.getUserByFilter(
+      { id: userIds },
+      entityManager,
+    );
+
+    // 🔁 Step 1: Create a Map for quick relation lookup
+    const relationMap = new Map<number, IUserFolloweeEntity>();
+
+    for (const relation of relations) {
+      const key = filters.userId ? relation.followeeUserId : relation.userId;
+      relationMap.set(key, relation);
+    }
+
+    // 🔁 Step 2: Match users with their relations using Map (O(1) lookup)
+    const response: IUserFolloweeResponse[] = users.map((user) => {
+      const relation = relationMap.get(user.id);
+      return {
+        ...user,
+        relationId: relation?.id ?? null,
+      };
+    });
+
+    return response;
   }
 
   getNextStatusForFollowerEntity(

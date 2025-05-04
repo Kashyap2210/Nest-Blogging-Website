@@ -53,7 +53,7 @@ export class BlogController {
   @ApiOkResponse({
     description: 'All blogs returned with type IBlogResponse[]',
   })
-  @Get('')
+  @Get()
   async getAllBlog(
     @CurrentUser() currentUser: IUserEntity,
   ): Promise<IBlogResponse[]> {

@@ -13,6 +13,7 @@ import {
   IUserCreateDto,
   IUserEntity,
   IUserEntityArray,
+  IUserProfileFollowersFollowingCount,
   IUserProfileResponse,
   IUserUpdateDto,
 } from 'blog-common-1.0';
@@ -134,26 +135,16 @@ export class UsersService extends EntityManagerBaseService<UserEntity> {
       entityManager,
     );
 
-    const followersOfCurrentUser =
-      await this.followersService.getFollowersByFilter(
-        {
-          followeeUserId: [currentUser.id],
-        },
-        entityManager,
-      );
-
-    const usersFollowingTheCurrentUser =
-      await this.followersService.getFollowersByFilter(
-        {
-          userId: [currentUser.id],
-        },
+    const relations: IUserProfileFollowersFollowingCount =
+      await this.followersService.getRelationDetailsForProfile(
+        currentUser,
         entityManager,
       );
 
     const response: IUserProfileResponse = {
       userDetail: userEntity,
-      followersCount: followersOfCurrentUser.length,
-      followingCount: usersFollowingTheCurrentUser.length,
+      followersCount: relations.followersOfCurrentUser,
+      followingCount: relations.usersFollowingTheCurrentUser,
       blogsOfUser: blogEntitites,
     };
     return response;

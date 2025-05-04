@@ -13,6 +13,7 @@ import {
   IUserFollowerCreateDto,
   IUserFollowerSearchDto,
   IUserFollowerUpdateDto,
+  IUserProfileFollowersFollowingCount,
 } from 'blog-common-1.0';
 import { EntityManager } from 'typeorm';
 import { FollowersCreateDto } from '../dtos/followers.create.dto';
@@ -87,30 +88,84 @@ export class FollowersService {
     return this.followersRepository.deleteById(id, entityManager);
   }
 
+  async getRelationDetailsForProfile(
+    currentUser: IUserEntity,
+    entityManager?: EntityManager,
+  ): Promise<IUserProfileFollowersFollowingCount> {
+    const followers = await this.followersRepository.getByFilter(
+      {
+        followeeUserId: [currentUser.id],
+      },
+      entityManager,
+    );
+
+    const following = await this.followersRepository.getByFilter(
+      {
+        userId: [currentUser.id],
+      },
+      entityManager,
+    );
+    return {
+      followersOfCurrentUser: followers.length > 0 ? followers.length : 0,
+      usersFollowingTheCurrentUser: following.length > 0 ? following.length : 0,
+    };
+  }
+
   async getFollowersByFilter(
     filters: IUserFollowerSearchDto,
     entityManager?: EntityManager,
   ): Promise<IUserFolloweeResponse[]> {
-    const followersAndFollowingOfUser =
+    const followersAndFollowingOfUser: IUserFolloweeEntity[] =
       await this.followersRepository.getByFilter(filters, entityManager);
     // console.log('followersAndFollowingOfUser', followersAndFollowingOfUser);
 
-    if (filters.userId) {
-      const followers = await this.userService.getUserByFilter(
-        {
-          id: followersAndFollowingOfUser.map((user) => user.followeeUserId),
-        },
-        entityManager,
-      );
-      return followers;
-    } else {
-      const following = await this.userService.getUserByFilter(
-        {
-          id: followersAndFollowingOfUser.map((user) => user.userId),
-        },
-        entityManager,
-      );
-      return following;
+    if (followersAndFollowingOfUser.length > 0) {
+      if (filters.userId) {
+        const currentUserFollowingUsers =
+          await this.userService.getUserByFilter(
+            {
+              id: followersAndFollowingOfUser.map(
+                (relation) => relation.followeeUserId,
+              ),
+            },
+            entityManager,
+          );
+        // console.log('currentUserFollowingUsers', currentUserFollowingUsers);
+        const responsecurrentUserFollowingUsers: IUserFolloweeResponse[] = [];
+        for (const following of currentUserFollowingUsers) {
+          for (const relation of followersAndFollowingOfUser) {
+            if (following.id === relation.followeeUserId) {
+              const followerForResponse: IUserFolloweeResponse = {
+                ...following,
+                relationId: relation.id,
+              };
+              responsecurrentUserFollowingUsers.push(followerForResponse);
+            }
+          }
+        }
+        return responsecurrentUserFollowingUsers;
+      } else {
+        const currentUserFollowerUsers = await this.userService.getUserByFilter(
+          {
+            id: followersAndFollowingOfUser.map((user) => user.userId),
+          },
+          entityManager,
+        );
+        // console.log('currentUserFollowerUsers', currentUserFollowerUsers);
+        const responsecurrentUserFollowerUsers: IUserFolloweeResponse[] = [];
+        for (const follower of currentUserFollowerUsers) {
+          for (const relation of followersAndFollowingOfUser) {
+            if (follower.id === relation.userId) {
+              const followerForResponse: IUserFolloweeResponse = {
+                ...follower,
+                relationId: relation.id,
+              };
+              responsecurrentUserFollowerUsers.push(followerForResponse);
+            }
+          }
+        }
+        return responsecurrentUserFollowerUsers;
+      }
     }
   }
 
@@ -155,13 +210,19 @@ export class FollowersService {
     // validate users. need DI for user service
     await this.userService.validatePresence(
       'id',
-      [dto.userId, dto.followeeUserId],
+      [dto.userId],
+      'id',
+      entityManager,
+    );
+    await this.userService.validatePresence(
+      'id',
+      [dto.followeeUserId],
       'id',
       entityManager,
     );
 
     // validate if the follower entity does already exists
-    const followerEntity = await this.getFollowersByFilter(
+    const followerEntity = await this.followersRepository.getByFilter(
       {
         userId: [dto.userId],
         followeeUserId: [dto.followeeUserId],

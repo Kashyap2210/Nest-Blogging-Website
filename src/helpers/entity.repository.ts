@@ -1,4 +1,5 @@
 import { BadRequestException, Inject } from '@nestjs/common';
+import { FullTextIndexFields } from '@src/auth/constants';
 import { EntityManager, Repository, SelectQueryBuilder } from 'typeorm';
 
 export abstract class EntityManagerBaseService<T> {
@@ -92,7 +93,7 @@ export abstract class EntityManagerBaseService<T> {
     for (const [property, value] of Object.entries(filter)) {
       const normalizedValue = Array.isArray(value) ? value : [value];
 
-      if (property === 'title') {
+      if ((Object.values(FullTextIndexFields) as string[]).includes(property)) {
         query = query.andWhere(`${tableName}.${property} LIKE :${property}`, {
           [property]: `%${normalizedValue[0]}%`,
         });

@@ -1,8 +1,10 @@
 import { IUserEntity, UserGender } from 'blog-common-1.0';
 import { AuditColumnEntity } from 'src/helpers/audti.column.entity';
-import { Column, Entity, PrimaryGeneratedColumn } from 'typeorm';
+import { Column, Entity, Index, PrimaryGeneratedColumn } from 'typeorm';
 
 @Entity('users')
+@Index('name_index', ['name', 'username'], { fulltext: true })
+@Index('username_index', ['username'], { fulltext: true })
 export class UserEntity extends AuditColumnEntity implements IUserEntity {
   @PrimaryGeneratedColumn({
     type: 'int',
@@ -13,7 +15,7 @@ export class UserEntity extends AuditColumnEntity implements IUserEntity {
   @Column({
     type: 'varchar',
     name: 'name',
-    length: '64',
+    length: '128',
   })
   name: string;
 

@@ -138,7 +138,7 @@ export class UsersService extends EntityManagerBaseService<UserEntity> {
 
     const relations: IUserProfileFollowersFollowingCount =
       await this.followersService.getRelationDetailsForProfile(
-        currentUser,
+        id,
         entityManager,
       );
 

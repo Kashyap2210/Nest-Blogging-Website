@@ -21,9 +21,7 @@ import {
   ApiOkResponse,
   ApiOperation,
 } from '@nestjs/swagger';
-import {
-  SanitizeResponse
-} from '@src/interceptors/password.filter.interceptor';
+import { SanitizeResponse } from '@src/interceptors/password.filter.interceptor';
 import {
   IUserCreateDto,
   IUserEntity,
@@ -36,6 +34,7 @@ import { CurrentUser } from 'src/decorators/current_user.decorator';
 import { imageFileFilter, profilePictureEditor } from 'src/file.utils';
 import { UserUpdateDto } from '../dtos/user.update.dto';
 import { UsersService } from '../services/users.service';
+import { UserSearchDto } from '../dtos/user.search.dto';
 
 @Controller('users')
 export class UsersController {
@@ -183,6 +182,21 @@ export class UsersController {
     @CurrentUser() currentUser: IUserEntity,
   ): Promise<IUserEntityArray> {
     return this.usersService.getAllUsers(currentUser);
+  }
+
+  @ApiOperation({ summary: 'Get a user' })
+  @ApiBody({ type: UserSearchDto })
+  @ApiOkResponse({
+    description: 'User returned with type IUserEntity.',
+  })
+  @ApiBearerAuth('access-token')
+  @UseGuards(AuthGuard)
+  @SanitizeResponse(['password'])
+  @Post('search')
+  async searchUserByFilter(
+    @Body() body: UserSearchDto,
+  ): Promise<IUserEntity[]> {
+    return this.usersService.getUserByFilter(body);
   }
 
   @ApiOperation({ summary: 'Get a user' })

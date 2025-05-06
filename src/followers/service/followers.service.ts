@@ -89,19 +89,20 @@ export class FollowersService {
   }
 
   async getRelationDetailsForProfile(
-    currentUser: IUserEntity,
+    userId: number,
     entityManager?: EntityManager,
   ): Promise<IUserProfileFollowersFollowingCount> {
+    console.log(userId);
     const followers = await this.followersRepository.getByFilter(
       {
-        followeeUserId: [currentUser.id],
+        followeeUserId: [userId],
       },
       entityManager,
     );
 
     const following = await this.followersRepository.getByFilter(
       {
-        userId: [currentUser.id],
+        userId: [userId],
       },
       entityManager,
     );

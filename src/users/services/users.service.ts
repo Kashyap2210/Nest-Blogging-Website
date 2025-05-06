@@ -13,6 +13,7 @@ import {
   IUserCreateDto,
   IUserEntity,
   IUserEntityArray,
+  IUserEntityFilterData,
   IUserProfileFollowersFollowingCount,
   IUserProfileResponse,
   IUserUpdateDto,
@@ -151,7 +152,7 @@ export class UsersService extends EntityManagerBaseService<UserEntity> {
   }
 
   async getUserByFilter(
-    filter: IBlogEntitySearchDto,
+    filter: IUserEntityFilterData,
     entityManager?: EntityManager,
   ): Promise<IUserEntity[]> {
     return this.userRepository.getByFilter(filter, entityManager);

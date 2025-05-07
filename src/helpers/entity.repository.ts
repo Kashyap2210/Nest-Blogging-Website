@@ -1,6 +1,11 @@
 import { BadRequestException, Inject } from '@nestjs/common';
 import { FullTextIndexFields } from '@src/auth/constants';
-import { EntityManager, Repository, SelectQueryBuilder } from 'typeorm';
+import {
+  DeleteResult,
+  EntityManager,
+  Repository,
+  SelectQueryBuilder,
+} from 'typeorm';
 
 export abstract class EntityManagerBaseService<T> {
   @Inject(EntityManager)
@@ -110,6 +115,39 @@ export abstract class EntityManagerBaseService<T> {
     // Execute the query and fetch the results
     const entities = await query.getMany();
     return entities;
+  }
+  async deleteByFilter(
+    filter: Record<string, any>,
+    entityManager?: EntityManager,
+  ): Promise<DeleteResult> {
+    const repository = this.getRepository(entityManager);
+
+    console.log('this is the filter for deleteByFilter', filter);
+
+    // Initialize DELETE query builder
+    let query = repository
+      .createQueryBuilder()
+      .delete()
+      .from(repository.metadata.tableName);
+
+    for (const [property, value] of Object.entries(filter)) {
+      const normalizedValue = Array.isArray(value) ? value : [value];
+
+      const columnMeta =
+        repository.metadata.findColumnWithPropertyName(property);
+      if (!columnMeta) {
+        throw new Error(`Property '${property}' does not exist on entity.`);
+      }
+
+      const columnName = columnMeta.databaseName;
+
+      query = query.andWhere(`${columnName} IN (:...${property})`, {
+        [property]: normalizedValue,
+      });
+    }
+
+    console.log('SQL:', query.getSql());
+    return query.execute();
   }
 
   async deleteMany<P>(

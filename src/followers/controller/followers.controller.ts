@@ -1,12 +1,11 @@
 import {
   Body,
   Controller,
-  Delete,
   Param,
   ParseIntPipe,
   Patch,
   Post,
-  UseGuards,
+  UseGuards
 } from '@nestjs/common';
 import {
   ApiBearerAuth,
@@ -24,6 +23,7 @@ import {
   IUserFolloweeEntity,
   IUserFolloweeResponse,
 } from 'blog-common-1.0';
+import { FollowersDeleteDto } from '../dtos/follower.delete.dto';
 import { FollowersCreateDto } from '../dtos/followers.create.dto';
 import { FollowersSearchDto } from '../dtos/followers.search.dto';
 import { FollowersUpdateDto } from '../dtos/followers.update.dto';
@@ -62,7 +62,11 @@ export class FollowersController {
 
   @ApiBody({ type: FollowersSearchDto })
   @ApiOperation({ summary: 'Search a follower entity' })
-  @ApiOkResponse({ type: UserEntity })
+  @ApiOkResponse({
+    type: UserEntity,
+    description:
+      'Get followers/following entities with type IUserFolloweeResponse',
+  })
   @Post('search')
   @SanitizeResponse(['password'])
   async searchFollowers(
@@ -71,15 +75,27 @@ export class FollowersController {
     return this.followersService.getFollowersByFilter(searchDto);
   }
 
+  // @ApiOperation({ summary: 'Delete a follower entity' })
+  // @ApiOkResponse({
+  //   description: 'Delete a follower with id & return a boolean',
+  // })
+  // @Delete(':id')
+  // async deleteFollowerEntity(
+  //   @Param('id', ParseIntPipe) id: number,
+  //   @CurrentUser() currentUser: IUserEntity,
+  // ): Promise<boolean> {
+  //   return this.followersService.deleteById(id, currentUser);
+  // }
+
   @ApiOperation({ summary: 'Delete a follower entity' })
   @ApiOkResponse({
-    description: 'Delete a follower with id & return a boolean',
+    description: 'Delete a follower with body of type IDeleteFollowerDto & return a boolean',
   })
-  @Delete(':id')
-  async deleteFollowerEntity(
-    @Param('id', ParseIntPipe) id: number,
+  @Post('delete')
+  async deleteByBody(
+    @Body() deleteBody: FollowersDeleteDto,
     @CurrentUser() currentUser: IUserEntity,
   ): Promise<boolean> {
-    return this.followersService.deleteById(id, currentUser);
+    return this.followersService.deleteFolowersByBody(deleteBody, currentUser);
   }
 }

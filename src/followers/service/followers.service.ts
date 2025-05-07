@@ -21,6 +21,7 @@ import { FollowersUpdateDto } from '../dtos/followers.update.dto';
 import { FollowersEntity } from '../entities/followers.entity';
 import { FollowersStatusFlowConfig } from '../followers.flow.config';
 import { FollowersEntityRepository } from '../repository/followers.repository';
+import { FollowersDeleteDto } from '../dtos/follower.delete.dto';
 
 @Injectable()
 export class FollowersService {
@@ -110,6 +111,35 @@ export class FollowersService {
       followersOfCurrentUser: followers.length > 0 ? followers.length : 0,
       usersFollowingTheCurrentUser: following.length > 0 ? following.length : 0,
     };
+  }
+
+  async deleteFolowersByBody(
+    deleteBody: FollowersDeleteDto,
+    currentUser: IUserEntity,
+    entityManager?: EntityManager,
+  ): Promise<boolean> {
+    console.log('Delete request recieved', deleteBody);
+    if (!currentUser) {
+      throw new BadRequestException({
+        key: 'currentUser',
+        message: 'current user is not logged in',
+      });
+    }
+    console.log(1);
+    await this.getFollowersByFilter(
+      {
+        userId: deleteBody.userId,
+        followeeUserId: deleteBody.followeeUserId,
+      },
+      entityManager,
+    );
+    console.log(2);
+    const deleted = await this.followersRepository.deleteByFilter(
+      deleteBody,
+      entityManager,
+    );
+    console.log(3);
+    return deleted.affected > 0;
   }
 
   async getFollowersByFilter(

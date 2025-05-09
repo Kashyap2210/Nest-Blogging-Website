@@ -79,11 +79,11 @@ export class BlogService extends EntityManagerBaseService<BlogEntity> {
     //     message: 'Current user does not have permission to access all blogs',
     //   });
     // }
-    const cachedBlogs = await this.blogCacheService.getAllBlogsCached();
-    // console.log('this is the cached blogs', cachedBlogs);
-    if (cachedBlogs && cachedBlogs.length > 0) {
-      return cachedBlogs;
-    }
+    // const cachedBlogs = await this.blogCacheService.getAllBlogsCached();
+    // // console.log('this is the cached blogs', cachedBlogs);
+    // if (cachedBlogs && cachedBlogs.length > 0) {
+    //   return cachedBlogs;
+    // }
 
     const allBlogs: IBlogEntityArray = await this.blogRepository.getByFilter(
       {},
